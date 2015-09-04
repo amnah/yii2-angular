@@ -8,11 +8,13 @@
  * @license http://www.yiiframework.com/license/
  */
 
-defined('YII_DEBUG') or define('YII_DEBUG', true);
-
 require(__DIR__ . '/vendor/autoload.php');
-require(__DIR__ . '/vendor/yiisoft/yii2/Yii.php');
+(new josegonzalez\Dotenv\Loader(__DIR__ . "/.env"))->parse()->putenv();
 
+defined("YII_ENV") or define("YII_ENV", getenv("YII_ENV"));
+defined("YII_DEBUG") or define("YII_DEBUG", true);
+
+require(__DIR__ . '/vendor/yiisoft/yii2/Yii.php');
 $config = require(__DIR__ . '/config/console.php');
 
 $application = new yii\console\Application($config);

@@ -1,18 +1,24 @@
 <?php
 
-$params = require(__DIR__ . '/params.php');
-
+// ------------------------------------------------------------------------
+// Main config
+// ------------------------------------------------------------------------
 $config = [
     'id' => 'basic',
     'basePath' => dirname(__DIR__),
+    'timeZone' => 'UTC',
+    'language' => 'en-US',
+    'params' => require __DIR__ . '/params.php',
     'bootstrap' => ['log'],
     'components' => [
         'request' => [
-            // !!! insert a secret key in the following (if it is empty) - this is required by cookie validation
-            'cookieValidationKey' => '',
+            'cookieValidationKey' => getenv('YII_KEY'),
+        ],
+        'redis' => [
+            'class' => 'yii\redis\Connection',
         ],
         'cache' => [
-            'class' => 'yii\caching\FileCache',
+            'class' => 'yii\redis\Cache',
         ],
         'user' => [
             'identityClass' => 'app\models\User',
@@ -23,10 +29,15 @@ $config = [
         ],
         'mailer' => [
             'class' => 'yii\swiftmailer\Mailer',
-            // send all mails to a file by default. You have to set
-            // 'useFileTransport' to false and configure a transport
-            // for the mailer to send real emails.
-            'useFileTransport' => true,
+            'useFileTransport' => getenv('MAIL_FILE_TRANSPORT'),
+            'transport' => [
+                'class' => 'Swift_SmtpTransport',
+                'host' => getenv('MAIL_HOST'),
+                'port' => getenv('MAIL_PORT'),
+                'username' => getenv('MAIL_USER'),
+                'password' => getenv('MAIL_PASS'),
+                'encryption' => getenv('MAIL_ENCRYPTION'),
+            ],
         ],
         'log' => [
             'traceLevel' => YII_DEBUG ? 3 : 0,
@@ -37,22 +48,71 @@ $config = [
                 ],
             ],
         ],
-        'db' => require(__DIR__ . '/db.php'),
+        'db' => [
+            'class' => 'yii\db\Connection',
+            'dsn' => getenv('DB_DSN'),
+            'username' => getenv('DB_USER'),
+            'password' => getenv('DB_PASS'),
+            'charset' => 'utf8',
+        ],
+        'urlManager' => [
+            'enablePrettyUrl' => true,
+            'showScriptName' => false,
+            'rules'          => [],
+        ],
+        'security' => [
+            'passwordHashStrategy' => 'password_hash',
+        ],
     ],
-    'params' => $params,
 ];
 
+// ------------------------------------------------------------------------
+// Dev
+// ------------------------------------------------------------------------
 if (YII_ENV_DEV) {
-    // configuration adjustments for 'dev' environment
     $config['bootstrap'][] = 'debug';
     $config['modules']['debug'] = [
         'class' => 'yii\debug\Module',
+        'allowedIPs' => ['*'],
     ];
 
     $config['bootstrap'][] = 'gii';
     $config['modules']['gii'] = [
         'class' => 'yii\gii\Module',
+        'allowedIPs' => ['*'],
     ];
 }
+
+// ------------------------------------------------------------------------
+// Prod
+// ------------------------------------------------------------------------
+if (YII_ENV_PROD) {
+
+    // force debug module using $_GET param
+    // enable this by manually entering the url "http://example.com?qwe"
+    $debugPassword = getenv('DEBUG_PASSWORD');
+    $cookieName    = '_forceDebug';
+    $cookieExpire  = 60*5; // 5 minutes
+
+    // check $_GET and $_COOKIE
+    $isGetSet = isset($_GET[$debugPassword]);
+    $isCookieSet = (isset($_COOKIE[$cookieName]) && $_COOKIE[$cookieName] === $debugPassword);
+    if ($isGetSet || $isCookieSet) {
+
+        // set/refresh cookie
+        setcookie($cookieName, $debugPassword, time() + $cookieExpire);
+
+        // enable debug for current ip
+        $userIp = isset($_SERVER['REMOTE_ADDR']) ? $_SERVER['REMOTE_ADDR'] : '127.0.0.1';
+        $config['bootstrap'][] = 'debug';
+        $config['modules']['debug'] = [
+            'class' => 'yii\debug\Module',
+            'allowedIPs' => [$userIp],
+        ];
+    }
+}
+
+
+
 
 return $config;
