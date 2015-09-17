@@ -4,7 +4,8 @@
         "Read more about it at https://getcomposer.org/doc/01-basic-usage.md#composer-lock-the-lock-file",
         "This file is @generated automatically"
     ],
-    "hash": "f602e4b6b1d0f088aeb5d9e78b07f64c",
+    "hash": "d7fbf765288b77a4a23672e729f0b89e",
+    "content-hash": "4ecfea61b1df702d49c62b22334a114f",
     "packages": [
         {
             "name": "bower-asset/bootstrap",
@@ -320,6 +321,49 @@
             "time": "2013-11-30 08:25:19"
         },
         {
+            "name": "himiklab/yii2-recaptcha-widget",
+            "version": "dev-master",
+            "source": {
+                "type": "git",
+                "url": "https://github.com/himiklab/yii2-recaptcha-widget.git",
+                "reference": "018bb75d948a5b02eee4379a19591a037e1892d2"
+            },
+            "dist": {
+                "type": "zip",
+                "url": "https://api.github.com/repos/himiklab/yii2-recaptcha-widget/zipball/018bb75d948a5b02eee4379a19591a037e1892d2",
+                "reference": "018bb75d948a5b02eee4379a19591a037e1892d2",
+                "shasum": ""
+            },
+            "require": {
+                "yiisoft/yii2": "*"
+            },
+            "type": "yii2-extension",
+            "autoload": {
+                "psr-4": {
+                    "himiklab\\yii2\\recaptcha\\": ""
+                }
+            },
+            "notification-url": "https://packagist.org/downloads/",
+            "license": [
+                "MIT"
+            ],
+            "authors": [
+                {
+                    "name": "HimikLab",
+                    "homepage": "https://github.com/himiklab/"
+                }
+            ],
+            "description": "Yii2 Google reCAPTCHA widget",
+            "keywords": [
+                "captcha",
+                "google",
+                "recaptcha",
+                "widget",
+                "yii2"
+            ],
+            "time": "2015-08-29 17:25:55"
+        },
+        {
             "name": "josegonzalez/dotenv",
             "version": "dev-master",
             "source": {
@@ -425,12 +469,12 @@
             "source": {
                 "type": "git",
                 "url": "https://github.com/yiisoft/yii2-framework.git",
-                "reference": "140505acd532961ba94c67ccde583454103a943d"
+                "reference": "b4b13a0b901d16f37cb9a9bc4453c3f7c70da3f6"
             },
             "dist": {
                 "type": "zip",
-                "url": "https://api.github.com/repos/yiisoft/yii2-framework/zipball/140505acd532961ba94c67ccde583454103a943d",
-                "reference": "140505acd532961ba94c67ccde583454103a943d",
+                "url": "https://api.github.com/repos/yiisoft/yii2-framework/zipball/b4b13a0b901d16f37cb9a9bc4453c3f7c70da3f6",
+                "reference": "b4b13a0b901d16f37cb9a9bc4453c3f7c70da3f6",
                 "shasum": ""
             },
             "require": {
@@ -439,6 +483,7 @@
                 "bower-asset/punycode": "1.3.*",
                 "bower-asset/yii2-pjax": ">=2.0.1",
                 "cebe/markdown": "~1.0.0 | ~1.1.0",
+                "ext-ctype": "*",
                 "ext-mbstring": "*",
                 "ezyang/htmlpurifier": "4.6.*",
                 "lib-pcre": "*",
@@ -505,7 +550,7 @@
                 "framework",
                 "yii2"
             ],
-            "time": "2015-08-28 13:36:29"
+            "time": "2015-09-16 14:38:02"
         },
         {
             "name": "yiisoft/yii2-bootstrap",
@@ -737,12 +782,12 @@
             "source": {
                 "type": "git",
                 "url": "https://github.com/fzaninotto/Faker.git",
-                "reference": "7f842c2dbcbb9d7395a656ad68039a654047f907"
+                "reference": "46a25cb87fe630550e99b2a26d6fa7cce3b4143d"
             },
             "dist": {
                 "type": "zip",
-                "url": "https://api.github.com/repos/fzaninotto/Faker/zipball/7f842c2dbcbb9d7395a656ad68039a654047f907",
-                "reference": "7f842c2dbcbb9d7395a656ad68039a654047f907",
+                "url": "https://api.github.com/repos/fzaninotto/Faker/zipball/46a25cb87fe630550e99b2a26d6fa7cce3b4143d",
+                "reference": "46a25cb87fe630550e99b2a26d6fa7cce3b4143d",
                 "shasum": ""
             },
             "require": {
@@ -779,7 +824,7 @@
                 "faker",
                 "fixtures"
             ],
-            "time": "2015-09-02 08:31:45"
+            "time": "2015-09-16 06:57:55"
         },
         {
             "name": "phpspec/php-diff",
@@ -866,12 +911,12 @@
             "source": {
                 "type": "git",
                 "url": "https://github.com/yiisoft/yii2-debug.git",
-                "reference": "848fb19e123aaf2ea2e535282eed6c6cc781bd9a"
+                "reference": "daf79cf6f6e32c474c9a476293d199cae64254fb"
             },
             "dist": {
                 "type": "zip",
-                "url": "https://api.github.com/repos/yiisoft/yii2-debug/zipball/848fb19e123aaf2ea2e535282eed6c6cc781bd9a",
-                "reference": "848fb19e123aaf2ea2e535282eed6c6cc781bd9a",
+                "url": "https://api.github.com/repos/yiisoft/yii2-debug/zipball/daf79cf6f6e32c474c9a476293d199cae64254fb",
+                "reference": "daf79cf6f6e32c474c9a476293d199cae64254fb",
                 "shasum": ""
             },
             "require": {
@@ -905,7 +950,7 @@
                 "debugger",
                 "yii2"
             ],
-            "time": "2015-08-23 10:25:10"
+            "time": "2015-09-06 19:58:00"
         },
         {
             "name": "yiisoft/yii2-faker",

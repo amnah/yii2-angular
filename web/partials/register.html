@@ -1,0 +1,41 @@
+
+<div class="site-register ng-cloak" ng-controller="RegisterController">
+    <h1>Register</h1>
+
+    <p>Please fill out the following fields to register:</p>
+
+    <form id="register-form" class="form-horizontal" role="form" ng-submit="submit()">
+
+        <div class="form-group" ng-class="{'has-error': errors.email}">
+            <label class="col-lg-1 control-label" for="registerform-email">Email</label>
+            <div class="col-lg-3">
+                <input type="text" id="registerform-email" class="form-control" ng-model="RegisterForm.email">
+            </div>
+            <div class="col-lg-8">
+                <p class="help-block help-block-error">{{ errors.email[0] }}</p>
+            </div>
+        </div>
+        <div class="form-group" ng-class="{'has-error': errors.newPassword}">
+            <label class="col-lg-1 control-label" for="registerform-newPassword">Password</label>
+            <div class="col-lg-3">
+                <input type="password" id="registerform-newPassword" class="form-control" ng-model="RegisterForm.newPassword">
+            </div>
+            <div class="col-lg-8">
+                <p class="help-block help-block-error">{{ errors.newPassword[0] }}</p>
+            </div>
+        </div>
+        <div class="form-group" ng-class="{'has-error': errors.captcha}" ng-show="RECAPTCHA_SITEKEY">
+            <label class="col-lg-1 control-label">Captcha</label>
+            <div class="col-lg-3">
+                <div id="register-captcha"></div>
+            </div>
+            <p class="help-block help-block-error">{{ errors.captcha[0] }}</p>
+        </div>
+        <div class="form-group">
+            <div class="col-lg-offset-1 col-lg-11">
+                <button type="submit" class="btn btn-primary" ng-disabled="submitting">Register</button>
+            </div>
+        </div>
+
+    </form>
+</div>

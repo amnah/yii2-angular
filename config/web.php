@@ -13,6 +13,9 @@ $config = [
     'components' => [
         'request' => [
             'cookieValidationKey' => getenv('YII_KEY'),
+            'parsers' => [
+                'application/json' => 'yii\web\JsonParser', // required for POST input via `php://input`
+            ]
         ],
         'redis' => [
             'class' => 'yii\redis\Connection',
@@ -60,8 +63,16 @@ $config = [
             'showScriptName' => false,
             'rules'          => [],
         ],
+        'assetManager' => [
+            'bundles' => false,
+        ],
         'security' => [
             'passwordHashStrategy' => 'password_hash',
+        ],
+    ],
+    'modules' => [
+        'v1' => [
+            'class' => 'app\modules\v1\Module',
         ],
     ],
 ];

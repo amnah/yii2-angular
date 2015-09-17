@@ -1,9 +1,10 @@
 <?php
 
-namespace app\models;
+namespace app\models\forms;
 
 use Yii;
 use yii\base\Model;
+use himiklab\yii2\recaptcha\ReCaptchaValidator;
 
 /**
  * ContactForm is the model behind the contact form.
@@ -14,21 +15,30 @@ class ContactForm extends Model
     public $email;
     public $subject;
     public $body;
-    public $verifyCode;
+    public $captcha;
 
     /**
      * @return array the validation rules.
      */
     public function rules()
     {
-        return [
-            // name, email, subject and body are required
+        $rules = [
+            // required fields
             [['name', 'email', 'subject', 'body'], 'required'],
-            // email has to be a valid email address
             ['email', 'email'],
-            // verifyCode needs to be entered correctly
-            ['verifyCode', 'captcha'],
         ];
+
+        // captcha
+        $recaptchaSecret = getenv("RECAPTCHA_SECRET");
+        if ($recaptchaSecret) {
+            $rules[] = [
+                'captcha', ReCaptchaValidator::className(),
+                'secret' => $recaptchaSecret, 'message' => Yii::t('app', 'Invalid captcha'),
+                'when' => function($model) { return !$model->hasErrors(); }
+            ];
+        }
+
+        return $rules;
     }
 
     /**
@@ -37,7 +47,7 @@ class ContactForm extends Model
     public function attributeLabels()
     {
         return [
-            'verifyCode' => 'Verification Code',
+            'captcha' => 'Captcha',
         ];
     }
 

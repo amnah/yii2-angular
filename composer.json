@@ -19,7 +19,8 @@
         "yiisoft/yii2-bootstrap": "*",
         "yiisoft/yii2-swiftmailer": "*",
         "yiisoft/yii2-redis": "*",
-        "josegonzalez/dotenv": "*"
+        "josegonzalez/dotenv": "*",
+        "himiklab/yii2-recaptcha-widget" : "*"
     },
     "require-dev": {
         "yiisoft/yii2-codeception": "*",

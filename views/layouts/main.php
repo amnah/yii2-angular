@@ -3,13 +3,12 @@
 /* @var $this \yii\web\View */
 /* @var $content string */
 
-use yii\helpers\Html;
 use yii\bootstrap\Nav;
 use yii\bootstrap\NavBar;
-use yii\widgets\Breadcrumbs;
-use app\assets\AppAsset;
+use yii\helpers\Url;
 
-AppAsset::register($this);
+$min = YII_ENV_PROD ? ".min" : "";
+
 ?>
 <?php $this->beginPage() ?>
 <!DOCTYPE html>
@@ -17,44 +16,47 @@ AppAsset::register($this);
 <head>
     <meta charset="<?= Yii::$app->charset ?>">
     <meta name="viewport" content="width=device-width, initial-scale=1">
-    <?= Html::csrfMetaTags() ?>
-    <title><?= Html::encode($this->title) ?></title>
+    <title><?= Yii::$app->name ?></title>
     <?php $this->head() ?>
+    <link rel="stylesheet" type="text/css" href="/vendor/bootstrap/3.3.5/bootstrap<?= $min ?>.css" />
+    <link rel="stylesheet" type="text/css" href="/css/site.css" />
+
+    <script src="https://www.google.com/recaptcha/api.js?onload=recaptchaLoaded&render=explicit" async defer></script>
 </head>
-<body>
+<body ng-app="App">
 <?php $this->beginBody() ?>
 
 <div class="wrap">
     <?php
     NavBar::begin([
         'brandLabel' => 'My Company',
-        'brandUrl' => Yii::$app->homeUrl,
+        'brandUrl' => '/#',
         'options' => [
             'class' => 'navbar-inverse navbar-fixed-top',
         ],
     ]);
     echo Nav::widget([
-        'options' => ['class' => 'navbar-nav navbar-right'],
+        'options' => ['class' => 'navbar-nav navbar-right ng-cloak', 'ng-controller' => 'NavController'],
         'items' => [
-            ['label' => 'Home', 'url' => ['/site/index']],
-            ['label' => 'About', 'url' => ['/site/about']],
-            ['label' => 'Contact', 'url' => ['/site/contact']],
-            Yii::$app->user->isGuest ?
-                ['label' => 'Login', 'url' => ['/site/login']] :
-                [
-                    'label' => 'Logout (' . Yii::$app->user->identity->username . ')',
-                    'url' => ['/site/logout'],
-                    'linkOptions' => ['data-method' => 'post']
-                ],
+            ['label' => 'About', 'url' => '/#/about'],
+            ['label' => 'Contact', 'url' => '/#/contact'],
+            [
+                'label' => 'Login',
+                'url' => '/#login',
+                'options' => ['ng-if' => '!User.isLoggedIn()']
+            ],
+            [
+                'label' => 'Logout ({{ User.getAttribute("username") }})',
+                'logout' => '/#logout',
+                'options' => ['ng-if' => 'User.isLoggedIn()'],
+                'linkOptions' => ['ng-click' => 'logout()'],
+            ],
         ],
     ]);
     NavBar::end();
     ?>
 
     <div class="container">
-        <?= Breadcrumbs::widget([
-            'links' => isset($this->params['breadcrumbs']) ? $this->params['breadcrumbs'] : [],
-        ]) ?>
         <?= $content ?>
     </div>
 </div>
@@ -66,6 +68,25 @@ AppAsset::register($this);
         <p class="pull-right"><?= Yii::powered() ?></p>
     </div>
 </footer>
+
+<script type="text/javascript">
+    <?php 
+        // set api url 
+        $apiUrl = "/v1";  
+        if (YII_ENV_PROD) {
+            // get absolute url and add "api" subdomain
+            $apiUrl = Url::to($apiUrl, true);
+            $apiUrl = str_replace("://", "://api.", $apiUrl);
+        }
+        $apiUrl .= "/";
+    ?>
+    var API_URL = '<?= $apiUrl ?>';
+    var RECAPTCHA_SITEKEY= '<?= getenv("RECAPTCHA_SITEKEY") ?>';
+</script>
+
+<script src="/vendor/angular/1.4.5/angular<?= $min ?>.js"></script>
+<script src="/vendor/angular/1.4.5/angular-route<?= $min ?>.js"></script>
+<script src="/js/app.js"></script>
 
 <?php $this->endBody() ?>
 </body>
