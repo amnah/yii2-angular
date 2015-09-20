@@ -22,11 +22,6 @@ class JwtAuth extends HttpBearerAuth
     public $algorithm = 'HS256';
 
     /**
-     * @var int jwt expiration (from current time)
-     */
-    public $expire = 600; // 10 minutes
-
-    /**
      * @var int jwt expiration leeway
      * @link https://github.com/firebase/php-jwt#example
      */
@@ -50,10 +45,10 @@ class JwtAuth extends HttpBearerAuth
     /**
      * Encode data into jwt string
      * @param mixed $data
-     * @param int $exp
+     * @param int $expire seconds
      * @return string
      */
-    public function encode($data, $exp = null)
+    public function encode($data, $expire = 0)
     {
         // http://websec.io/2014/08/04/Securing-Requests-with-JWT.html
         $time = time();
@@ -61,9 +56,11 @@ class JwtAuth extends HttpBearerAuth
             "iss" => Yii::$app->id,
             "iat" => $time,
             "nbf" => $time,
-            "exp" => $time + $exp ?: ($this->expire),
             "data" => $data,
         ];
+        if ($expire) {
+            $tokenArray["exp"] = $time + $expire;
+        }
         return JWT::encode($tokenArray, $this->key, $this->algorithm);
     }
 
@@ -92,6 +89,8 @@ class JwtAuth extends HttpBearerAuth
 
     /**
      * Decode jwt string without verify signature
+     * NOTE: BE VERY CAREFUL WITH THIS. IT IS EXTREMELY DANGEROUS TO
+     *       DECODE WITHOUT VERIFICATION
      * @param string $jwt
      * @return object
      */
