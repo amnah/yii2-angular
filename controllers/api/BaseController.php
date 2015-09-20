@@ -28,6 +28,9 @@ class BaseController extends Controller
         return true;
     }
 
+    /**
+     * @inheritdoc
+     */
     public function behaviors()
     {
         $behaviors = parent::behaviors();

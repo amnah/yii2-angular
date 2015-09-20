@@ -6,19 +6,10 @@ var app = angular.module('App', [
     'ngRoute'
 ]);
 
-// set up ajax requests
-// http://www.yiiframework.com/forum/index.php/topic/62721-yii2-and-angularjs-post/
-app.config(['$httpProvider', function($httpProvider) {
-    $httpProvider.defaults.headers.common["X-Requested-With"] = 'XMLHttpRequest';
-}]);
-
 // -------------------------------------------------------------
 // Routes
 // -------------------------------------------------------------
-app.config(['$routeProvider', '$httpProvider', function($routeProvider, $httpProvider) {
-
-    // push authInterceptor for jwt httpBearerAuth
-    $httpProvider.interceptors.push('authInterceptor');
+app.config(['$routeProvider', function($routeProvider) {
 
     $routeProvider.
         when('/about', {
@@ -39,33 +30,74 @@ app.config(['$routeProvider', '$httpProvider', function($routeProvider, $httpPro
 }]);
 
 // -----------------------------------------------------------------
-// Auth interceptor for jwt factory
+// Set up ajax requests and jwt processing
 // -----------------------------------------------------------------
-app.factory('authInterceptor', ['$q', '$window', function ($q, $window) {
-    return {
-        request: function (config) {
-            // add jwt into httpBearerAuth
-            if ($window.localStorage.jwt) {
-                config.headers.Authorization = 'Bearer ' + $window.localStorage.jwt;
+app.config(['$httpProvider', function($httpProvider) {
+
+    // set up ajax requests
+    // http://www.yiiframework.com/forum/index.php/topic/62721-yii2-and-angularjs-post/
+    $httpProvider.defaults.headers.common["X-Requested-With"] = 'XMLHttpRequest';
+
+    // add jwt into http headers
+    $httpProvider.interceptors.push(['$window', function($window) {
+        return {
+            request: function(config) {
+                if ($window.localStorage.jwt) {
+                    config.headers.Authorization = 'Bearer ' + $window.localStorage.jwt;
+                }
+                return config;
             }
-            return config;
+        };
+    }]);
+}]);
+
+app.run(['jwtRefresher', function(jwtRefresher) {
+    jwtRefresher.start();
+    jwtRefresher.refresh();
+}]);
+
+app.factory('jwtRefresher', ['$window', '$interval', 'Api', function($window, $interval, Api) {
+
+    var factory = {};
+    var refreshInterval;
+    var refreshTime = 1000*60*4; // check every 4 minutes, as the jwt lasts for 5 minutes
+
+    factory.refresh = function() {
+        var jwtRefresh = $window.localStorage.jwtRefresh;
+        if (jwtRefresh) {
+            Api.post('public/jwt-refresh', {jwtRefresh: jwtRefresh}).then(function (data) {
+                if (data.success) {
+                    $window.localStorage.jwt = data.success.jwt;
+                    $window.localStorage.jwtRefresh = data.success.jwtRefresh;
+                }
+            });
         }
     };
+
+    factory.start = function() {
+        refreshInterval = $interval(factory.refresh, refreshTime);
+    };
+
+    factory.stop = function() {
+        $interval.cancel(refreshInterval);
+    };
+
+    return factory;
 }]);
 
 // -----------------------------------------------------------------
 // Api factory
 // -----------------------------------------------------------------
-app.factory('Api', ['$http', '$q', '$window', '$location', function ($http, $q, $window, $location) {
+app.factory('Api', ['$http', '$q', '$window', '$location', function($http, $q, $window, $location) {
 
     var factory = {};
     var apiUrl = API_URL;
 
     // process ajax success/error calls
-    var processAjaxSuccess = function (res) {
+    var processAjaxSuccess = function(res) {
         return res.data;
     };
-    var processAjaxError = function (res) {
+    var processAjaxError = function(res) {
 
         // process 401 by redirecting to login page
         // otherwise just alert the error
@@ -97,12 +129,12 @@ app.factory('Api', ['$http', '$q', '$window', '$location', function ($http, $q, 
     };
 
     // set up recaptcha
-    var deferred = $q.defer();
+    var recaptchaDefer = $q.defer();
     factory.getRecaptcha = function() {
-        return deferred.promise;
+        return recaptchaDefer.promise;
     };
     $window.recaptchaLoaded = function() {
-        deferred.resolve($window.grecaptcha);
+        recaptchaDefer.resolve($window.grecaptcha);
     };
 
     return factory;
@@ -111,11 +143,12 @@ app.factory('Api', ['$http', '$q', '$window', '$location', function ($http, $q, 
 // -----------------------------------------------------------------
 // User factory
 // -----------------------------------------------------------------
-app.factory('User', ['$window', 'Api', function ($window, Api) {
+app.factory('User', ['$window', 'Api', function($window, Api) {
 
     var factory = {};
 
     // get/store user
+    // todo wait for refresh check
     var user;
     Api.get('public/user').then(function(data) {
         user = data.success;
@@ -154,7 +187,7 @@ app.factory('User', ['$window', 'Api', function ($window, Api) {
             if (data.success) {
                 user = null;
                 $window.localStorage.jwt = '';
-                $window.localStorage.refreshJwt = '';
+                $window.localStorage.jwtRefresh = '';
 
             }
             return data;
@@ -254,7 +287,7 @@ app.controller('LoginController', ['$scope', '$location', '$window', 'User', fun
             if (data.success) {
                 // store jwt data and redirect to url
                 $window.localStorage.jwt = data.success.jwt;
-                $window.localStorage.refreshJwt = data.success.refreshJwt;
+                $window.localStorage.jwtRefresh = data.success.jwtRefresh;
                 $window.localStorage.loginUrl = '';
                 $location.path($scope.loginUrl).replace();
             }

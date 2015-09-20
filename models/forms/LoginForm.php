@@ -52,23 +52,32 @@ class LoginForm extends Model
     }
 
     /**
-     * Logs in a user using the provided username and password.
-     * @param int $exp jwt expiration
-     * @param int $refreshExp jwt refresh expiration
+     * Generate jwt tokens for user
+     * @param int $jwtExpire jwt expiration
+     * @param int $jwtRefreshExpire jwt refresh expiration
+     * @param User $user optional user model
      * @return boolean whether the user is logged in successfully
      */
-    public function login($exp, $refreshExp)
+    public function generateJwt($jwtExpire, $jwtRefreshExpire, $user = null)
     {
-        if ($this->validate()) {
-            /** @var \app\components\JwtAuth $jwtAuth */
-            $jwtAuth = Yii::$app->jwtAuth;
+        /** @var \app\components\JwtAuth $jwtAuth */
+        $jwtAuth = Yii::$app->jwtAuth;
 
-            $user = $this->getUser();
-            $jwt = $jwtAuth->encode($user->toArray(), $exp);
-            $refresh = $jwtAuth->encode($user->authKey, $refreshExp); // use authKey as the refresh for now
-            return [ $user, $jwt, $refresh ];
+        // get user data
+        $user = $user ?: $this->getUser();
+        if (!$user) {
+            return null;
         }
-        return false;
+
+        // generate jwt
+        $data = $user->toArray();
+        $jwt = $jwtAuth->encode($data, $jwtExpire);
+        $jwtRefresh = $jwtAuth->encode($user->accessToken, $jwtRefreshExpire);
+        return [
+            "user" => $data,
+            "jwt" => $jwt,
+            "jwtRefresh" => $jwtRefresh,
+        ];
     }
 
     /**

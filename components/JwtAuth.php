@@ -31,7 +31,7 @@ class JwtAuth extends HttpBearerAuth
      * @var int jwt expiration leeway
      * @link https://github.com/firebase/php-jwt#example
      */
-    public $leeway = 60; // 10 minutes
+    public $leeway = 30; // 30 seconds
 
     /**
      * @var mixed payload data
@@ -89,21 +89,18 @@ class JwtAuth extends HttpBearerAuth
      * @param \yii\web\Request $request
      * @return bool|object
      */
-    public function getPayload($request = null) {
-
+    public function getHeaderPayload($request = null)
+    {
         if ($this->payload === null) {
-
             $this->payload = false;
             $request = $request ?: Yii::$app->request;
             $authHeader = $request->getHeaders()->get('Authorization');
             if ($authHeader !== null && preg_match("/^Bearer\\s+(.*?)$/", $authHeader, $matches)) {
-                $jwt = $matches[1];
-                $this->payload = $this->decode($jwt);
+                $this->payload = $this->decode($matches[1]);
             }
         }
 
         return $this->payload;
-
     }
 
     /**
@@ -111,20 +108,11 @@ class JwtAuth extends HttpBearerAuth
      */
     public function authenticate($user, $request, $response)
     {
-        $payload = $this->getPayload($request);
+        $payload = $this->getHeaderPayload($request);
         if (!$payload) {
             return null;
         }
-
         // todo expire payload
         return $payload->data;
-    }
-
-    /**
-     * @inheritdoc
-     */
-    public function challenge($response)
-    {
-        $response->getHeaders()->set('WWW-Authenticate', "Bearer realm=\"{$this->realm}\"");
     }
 }

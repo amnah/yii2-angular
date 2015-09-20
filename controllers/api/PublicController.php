@@ -10,6 +10,9 @@ use app\models\User;
 
 class PublicController extends BaseController
 {
+    /**
+     * @inheritdoc
+     */
     public function behaviors()
     {
         $behaviors = parent::behaviors();
@@ -28,18 +31,6 @@ class PublicController extends BaseController
         return $behaviors;
     }
 
-    public function actionUser()
-    {
-        /** @var \app\components\JwtAuth $jwtAuth */
-        $jwtAuth = Yii::$app->jwtAuth;
-
-        $payload = $jwtAuth->getPayload();
-        if (!$payload) {
-            return [ "success" => null ];
-        }
-        return ["success" => $payload->data];
-    }
-
     /**
      * Contact
      */
@@ -54,21 +45,57 @@ class PublicController extends BaseController
     }
 
     /**
+     * User
+     */
+    public function actionUser()
+    {
+        /** @var \app\components\JwtAuth $jwtAuth */
+        $jwtAuth = Yii::$app->jwtAuth;
+
+        $payload = $jwtAuth->getHeaderPayload();
+        if (!$payload) {
+            return ["success" => null];
+        }
+        return ["success" => $payload->data];
+    }
+
+    /**
+     * Refresh jwt token based off of jwtRefresh
+     */
+    public function actionJwtRefresh()
+    {
+        /** @var \app\components\JwtAuth $jwtAuth */
+        $jwtAuth = Yii::$app->jwtAuth;
+
+        list ($jwtExpire, $jwtRefreshExpire) = $this->getJwtExpireTimes();
+
+        $failure = ["success" => null];
+        $jwtRefresh = Yii::$app->request->post("jwtRefresh");
+        $payload = $jwtAuth->decode($jwtRefresh);
+        if (!$payload) {
+            return $failure;
+        }
+
+        $user = User::findIdentityByAccessToken($payload->data);
+        if ($user) {
+            $model = new LoginForm();
+            return ["success" => $model->generateJwt($jwtExpire, $jwtRefreshExpire, $user)];
+        }
+        return $failure;
+    }
+
+    /**
      * Login
      */
     public function actionLogin()
     {
-        $exp = 60*10; // 10 min
-        $refreshExp = 60*60*24*30; // 1 month
+        list ($jwtExpire, $jwtRefreshExpire) = $this->getJwtExpireTimes();
 
         // notice that we set the second parameter $formName = ""
         $model = new LoginForm();
         $model->load(Yii::$app->request->post(), "");
-        list($user, $jwt, $refresh) = $model->login($exp, $refreshExp);
-        if ($jwt) {
-            return [
-                "success" => [ "user" => $user->toArray(), "jwt" => $jwt, "refresh" => $refresh ]
-            ];
+        if ($model->validate()) {
+            return ["success" => $model->generateJwt($jwtExpire, $jwtRefreshExpire)];
         }
         return ["errors" => $model->errors];
     }
@@ -79,6 +106,18 @@ class PublicController extends BaseController
     public function actionLogout()
     {
         return ["success" => Yii::$app->user->logout()];
+    }
+
+    /**
+     * Get jwt expire times, jwt and jwtRefresh
+     * @return array
+     */
+    protected function getJwtExpireTimes()
+    {
+        return [
+            60*5,           // 5 minutes
+            60*60*24*30,    // 30 days
+        ];
     }
 
     /**

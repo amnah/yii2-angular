@@ -12,7 +12,7 @@ class UserController extends \app\controllers\api\BaseController
         /** @var \app\components\JwtAuth $jwtAuth */
         $jwtAuth = Yii::$app->jwtAuth;
 
-        $payload = $jwtAuth->getPayload();
+        $payload = $jwtAuth->getHeaderPayload();
         if (!$payload) {
             return [ "success" => null ];
         }
