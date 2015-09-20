@@ -51,38 +51,9 @@ app.config(['$httpProvider', function($httpProvider) {
     }]);
 }]);
 
-app.run(['jwtRefresher', function(jwtRefresher) {
-    jwtRefresher.start();
-    jwtRefresher.refresh();
-}]);
-
-app.factory('jwtRefresher', ['$window', '$interval', 'Api', function($window, $interval, Api) {
-
-    var factory = {};
-    var refreshInterval;
-    var refreshTime = 1000*60*4; // check every 4 minutes, as the jwt lasts for 5 minutes
-
-    factory.refresh = function() {
-        var jwtRefresh = $window.localStorage.jwtRefresh;
-        if (jwtRefresh) {
-            Api.post('public/jwt-refresh', {jwtRefresh: jwtRefresh}).then(function (data) {
-                if (data.success) {
-                    $window.localStorage.jwt = data.success.jwt;
-                    $window.localStorage.jwtRefresh = data.success.jwtRefresh;
-                }
-            });
-        }
-    };
-
-    factory.start = function() {
-        refreshInterval = $interval(factory.refresh, refreshTime);
-    };
-
-    factory.stop = function() {
-        $interval.cancel(refreshInterval);
-    };
-
-    return factory;
+app.run(['User', function(User) {
+    User.doJwtRefresh();
+    User.startJwtRefreshInterval();
 }]);
 
 // -----------------------------------------------------------------
@@ -128,31 +99,19 @@ app.factory('Api', ['$http', '$q', '$window', '$location', function($http, $q, $
         return $http['delete'](apiUrl + url).then(processAjaxSuccess, processAjaxError);
     };
 
-    // set up recaptcha
-    var recaptchaDefer = $q.defer();
-    factory.getRecaptcha = function() {
-        return recaptchaDefer.promise;
-    };
-    $window.recaptchaLoaded = function() {
-        recaptchaDefer.resolve($window.grecaptcha);
-    };
-
     return factory;
 }]);
 
 // -----------------------------------------------------------------
 // User factory
 // -----------------------------------------------------------------
-app.factory('User', ['Api', function(Api) {
+app.factory('User', ['$window', '$location', '$interval', '$q', 'Api', function($window, $location, $interval, $q, Api) {
 
     var factory = {};
 
-    // get/store user
-    // todo wait for refresh check
     var user;
-    Api.get('public/user').then(function(data) {
-        user = data.success;
-    });
+    var refreshTime = 1000*60*4; // check every 4 minutes, as the jwt lasts for 5 minutes
+    var refreshInterval;
 
     factory.getAttributes = function() {
         return user ? user : null;
@@ -166,29 +125,84 @@ app.factory('User', ['Api', function(Api) {
         return user ? true : false;
     };
 
-    factory.register = function(data) {
-        return Api.post('public/register', data).then(function(data) {
-            user = data.success;
-            return data;
-        });
+    // get login url via (1) local storage or (2) fallbackUrl
+    factory.getLoginUrl = function(fallbackUrl) {
+        var loginUrl = $window.localStorage.loginUrl;
+        if (!loginUrl && fallbackUrl) {
+            loginUrl = fallbackUrl;
+        }
+        if (!loginUrl) {
+            loginUrl = '';
+        }
+        return loginUrl;
+    };
+
+    factory.redirect = function(url) {
+        $window.localStorage.loginUrl = '';
+        $location.path(url).replace();
+    };
+
+    factory.startJwtRefreshInterval = function() {
+        refreshInterval = $interval(factory.doJwtRefresh, refreshTime);
+    };
+
+    factory.cancelJwtRefreshInterval = function() {
+        $interval.cancel(refreshInterval);
+    };
+
+    factory.doJwtRefresh = function() {
+        var jwtRefresh = $window.localStorage.jwtRefresh;
+        if (jwtRefresh) {
+            Api.post('public/jwt-refresh', {jwtRefresh: jwtRefresh}).then(function (data) {
+                factory.setUser(data);
+            });
+        }
+    };
+
+    factory.start = function() {
+        refreshInterval = $interval(factory.refresh, refreshTime);
+    };
+
+    factory.setUser = function(data) {
+        if (data && data.success && data.success.user) {
+            user = data.success.user;
+            $window.localStorage.jwt = data.success.jwt;
+            $window.localStorage.jwtRefresh = data.success.jwtRefresh;
+        } else {
+            user = null;
+            $window.localStorage.jwt = '';
+            $window.localStorage.jwtRefresh = '';
+        }
     };
 
     factory.login = function(data) {
         return Api.post('public/login', data).then(function(data) {
-            if (data.success) {
-                user = data.success.user;
-            }
+            factory.setUser(data);
             return data;
         });
     };
 
     factory.logout = function() {
         return Api.post('public/logout').then(function(data) {
-            if (data.success) {
-                user = null;
-            }
+            factory.setUser(data);
             return data;
         });
+    };
+
+    factory.register = function(data) {
+        return Api.post('public/register', data).then(function(data) {
+            factory.setUser(data);
+            return data;
+        });
+    };
+
+    // set up recaptcha
+    var recaptchaDefer = $q.defer();
+    factory.getRecaptcha = function() {
+        return recaptchaDefer.promise;
+    };
+    $window.recaptchaLoaded = function() {
+        recaptchaDefer.resolve($window.grecaptcha);
     };
 
     return factory;
@@ -197,14 +211,13 @@ app.factory('User', ['Api', function(Api) {
 // -------------------------------------------------------------
 // Nav controller
 // -------------------------------------------------------------
-app.controller('NavController', ['$scope', '$window', 'User', function($scope, $window, User) {
+app.controller('NavController', ['$scope', 'User', function($scope, User) {
 
     $scope.User = User;
 
     $scope.logout = function() {
         User.logout().then(function(data) {
-            $window.localStorage.jwt = '';
-            $window.localStorage.jwtRefresh = '';
+            User.setUser(null);
         });
 
     };
@@ -213,7 +226,7 @@ app.controller('NavController', ['$scope', '$window', 'User', function($scope, $
 // -------------------------------------------------------------
 // Contact controller
 // -------------------------------------------------------------
-app.controller('ContactController', ['$scope', 'Api', function($scope, Api) {
+app.controller('ContactController', ['$scope', 'Api', 'User', function($scope, Api, User) {
 
     $scope.errors = {};
     $scope.sitekey = RECAPTCHA_SITEKEY;
@@ -228,7 +241,7 @@ app.controller('ContactController', ['$scope', 'Api', function($scope, Api) {
     // set up and store grecaptcha data
     var recaptchaId;
     var grecaptchaObj;
-    Api.getRecaptcha().then(function(grecaptcha) {
+    User.getRecaptcha().then(function(grecaptcha) {
         grecaptchaObj = grecaptcha;
         if (RECAPTCHA_SITEKEY) {
             recaptchaId = grecaptcha.render("contact-captcha", {sitekey: $scope.sitekey});
@@ -264,7 +277,7 @@ app.controller('ContactController', ['$scope', 'Api', function($scope, Api) {
 // -------------------------------------------------------------
 // Login controller
 // -------------------------------------------------------------
-app.controller('LoginController', ['$scope', '$location', '$window', 'User', function($scope, $location, $window, User) {
+app.controller('LoginController', ['$scope', 'User', function($scope, User) {
 
     $scope.errors = {};
     $scope.LoginForm = {
@@ -273,11 +286,7 @@ app.controller('LoginController', ['$scope', '$location', '$window', 'User', fun
         rememberMe: true
     };
 
-    // get and update login url if set
-    $scope.loginUrl = '';
-    if ($window.localStorage.loginUrl) {
-        $scope.loginUrl = $window.localStorage.loginUrl;
-    }
+    $scope.loginUrl = User.getLoginUrl();
 
     // process form submit
     $scope.submit = function() {
@@ -286,11 +295,7 @@ app.controller('LoginController', ['$scope', '$location', '$window', 'User', fun
         User.login($scope.LoginForm).then(function(data) {
             $scope.submitting  = false;
             if (data.success) {
-                // store jwt data and redirect to url
-                $window.localStorage.jwt = data.success.jwt;
-                $window.localStorage.jwtRefresh = data.success.jwtRefresh;
-                $window.localStorage.loginUrl = '';
-                $location.path($scope.loginUrl).replace();
+                User.redirect($scope.loginUrl);
             }
             else if (data.errors) {
                 $scope.errors = data.errors;
@@ -302,7 +307,7 @@ app.controller('LoginController', ['$scope', '$location', '$window', 'User', fun
 // -------------------------------------------------------------
 // Register controller
 // -------------------------------------------------------------
-app.controller('RegisterController', ['$scope', '$location', 'User', 'Api', function($scope, $location, User, Api) {
+app.controller('RegisterController', ['$scope', '$location', 'User', function($scope, $location, User) {
 
     $scope.errors = {};
     $scope.sitekey = RECAPTCHA_SITEKEY;
@@ -315,7 +320,7 @@ app.controller('RegisterController', ['$scope', '$location', 'User', 'Api', func
     // set up and store grecaptcha data
     var recaptchaId;
     var grecaptchaObj;
-    Api.getRecaptcha().then(function(grecaptcha) {
+    User.getRecaptcha().then(function(grecaptcha) {
         grecaptchaObj = grecaptcha;
         if (RECAPTCHA_SITEKEY) {
             recaptchaId = grecaptcha.render("register-captcha", {sitekey: RECAPTCHA_SITEKEY});
