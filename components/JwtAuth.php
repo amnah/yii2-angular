@@ -67,38 +67,17 @@ class JwtAuth extends HttpBearerAuth
     /**
      * Decode jwt string
      * @param string $jwt
-     * @param bool $verify
      * @return object
      * @throws Exception
      */
-    public function decode($jwt, $verify = true)
+    public function decode($jwt)
     {
-        // decode only
-        if (!$verify) {
-            return $this->decodeNoVerify($jwt);
-        }
-
-        // decode and verify
         JWT::$leeway = $this->leeway;
         try {
             return JWT::decode($jwt, $this->key, [$this->algorithm]);
         } catch (Exception $e) {
             return false;
         }
-    }
-
-    /**
-     * Decode jwt string without verify signature
-     * NOTE: BE VERY CAREFUL WITH THIS. IT IS EXTREMELY DANGEROUS TO
-     *       DECODE WITHOUT VERIFICATION
-     * @param string $jwt
-     * @return object
-     */
-    public function decodeNoVerify($jwt)
-    {
-        $tks = explode('.', $jwt);
-        list($headb64, $bodyb64, $cryptob64) = $tks;
-        return JWT::jsonDecode(JWT::urlsafeB64Decode($bodyb64));
     }
 
     /**
