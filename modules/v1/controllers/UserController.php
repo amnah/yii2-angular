@@ -14,7 +14,7 @@ class UserController extends \app\controllers\api\BaseController
 
         $payload = $jwtAuth->getHeaderPayload();
         if (!$payload) {
-            return [ "success" => null ];
+            return ["success" => null];
         }
         return ["success" => $payload->data];
     }

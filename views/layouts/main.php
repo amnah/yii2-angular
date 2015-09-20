@@ -20,8 +20,6 @@ $min = YII_ENV_PROD ? ".min" : "";
     <?php $this->head() ?>
     <link rel="stylesheet" type="text/css" href="/vendor/bootstrap/3.3.5/bootstrap<?= $min ?>.css" />
     <link rel="stylesheet" type="text/css" href="/css/site.css" />
-
-    <script src="https://www.google.com/recaptcha/api.js?onload=recaptchaLoaded&render=explicit" async defer></script>
 </head>
 <body ng-app="App">
 <?php $this->beginBody() ?>
@@ -87,6 +85,10 @@ $min = YII_ENV_PROD ? ".min" : "";
 <script src="/vendor/angular/1.4.5/angular<?= $min ?>.js"></script>
 <script src="/vendor/angular/1.4.5/angular-route<?= $min ?>.js"></script>
 <script src="/js/app.js"></script>
+
+<?php if (getenv("RECAPTCHA_SITEKEY")): ?>
+    <script src="https://www.google.com/recaptcha/api.js?onload=recaptchaLoaded&render=explicit" async defer></script>
+<?php endif; ?>
 
 <?php $this->endBody() ?>
 </body>
