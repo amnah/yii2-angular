@@ -143,7 +143,7 @@ app.factory('Api', ['$http', '$q', '$window', '$location', function($http, $q, $
 // -----------------------------------------------------------------
 // User factory
 // -----------------------------------------------------------------
-app.factory('User', ['$window', 'Api', function($window, Api) {
+app.factory('User', ['Api', function(Api) {
 
     var factory = {};
 
@@ -186,9 +186,6 @@ app.factory('User', ['$window', 'Api', function($window, Api) {
         return Api.post('public/logout').then(function(data) {
             if (data.success) {
                 user = null;
-                $window.localStorage.jwt = '';
-                $window.localStorage.jwtRefresh = '';
-
             }
             return data;
         });
@@ -200,12 +197,16 @@ app.factory('User', ['$window', 'Api', function($window, Api) {
 // -------------------------------------------------------------
 // Nav controller
 // -------------------------------------------------------------
-app.controller('NavController', ['$scope', 'User', function($scope, User) {
+app.controller('NavController', ['$scope', '$window', 'User', function($scope, $window, User) {
 
     $scope.User = User;
 
     $scope.logout = function() {
-        User.logout();
+        User.logout().then(function(data) {
+            $window.localStorage.jwt = '';
+            $window.localStorage.jwtRefresh = '';
+        });
+
     };
 }]);
 
