@@ -51,11 +51,6 @@ app.config(['$httpProvider', function($httpProvider) {
     }]);
 }]);
 
-app.run(['User', function(User) {
-    User.doJwtRefresh();
-    User.startJwtRefreshInterval();
-}]);
-
 // -----------------------------------------------------------------
 // Api factory
 // -----------------------------------------------------------------
@@ -81,7 +76,7 @@ app.factory('Api', ['$http', '$q', '$window', '$location', function($http, $q, $
 
         // calculate and return error msg
         var error = '[ ' + res.status + ' ] ' + (res.data.message || res.statusText);
-        return $q.reject(error);
+        return $q.reject(res);
     };
 
     // define REST functions
@@ -110,7 +105,13 @@ app.factory('User', ['$window', '$location', '$interval', '$q', 'Api', function(
     var factory = {};
 
     var user;
-    var refreshTime = 1000*60*4; // check every 4 minutes, as the jwt lasts for 5 minutes
+
+    // set minimum of once per minute just in case
+    var minRefreshTime = 1000*60;
+    var refreshTime = JWT_REFRESH_TIME;
+    if (refreshTime < minRefreshTime) {
+        refreshTime = minRefreshTime;
+    }
     var refreshInterval;
 
     factory.getAttributes = function() {
@@ -138,6 +139,7 @@ app.factory('User', ['$window', '$location', '$interval', '$q', 'Api', function(
     };
 
     factory.redirect = function(url) {
+        url = url ? url : '';
         $window.localStorage.loginUrl = '';
         $location.path(url).replace();
     };
@@ -205,6 +207,10 @@ app.factory('User', ['$window', '$location', '$interval', '$q', 'Api', function(
         recaptchaDefer.resolve($window.grecaptcha);
     };
 
+    // initialize jwt intervals
+    factory.doJwtRefresh();
+    factory.startJwtRefreshInterval();
+
     return factory;
 }]);
 
@@ -231,8 +237,8 @@ app.controller('ContactController', ['$scope', 'Api', 'User', function($scope, A
     $scope.errors = {};
     $scope.sitekey = RECAPTCHA_SITEKEY;
     $scope.ContactForm = {
-        name: '',
-        email: '',
+        name: User.getAttribute('username'),
+        email: User.getAttribute('email'),
         subject: '',
         body: '',
         captcha: ''
@@ -266,8 +272,7 @@ app.controller('ContactController', ['$scope', 'Api', 'User', function($scope, A
             $scope.submitting  = false;
             if (data.success) {
                 $scope.errors = false;
-            }
-            else if (data.errors) {
+            } else if (data.errors) {
                 $scope.errors = data.errors;
             }
         });
@@ -296,8 +301,7 @@ app.controller('LoginController', ['$scope', 'User', function($scope, User) {
             $scope.submitting  = false;
             if (data.success) {
                 User.redirect($scope.loginUrl);
-            }
-            else if (data.errors) {
+            } else if (data.errors) {
                 $scope.errors = data.errors;
             }
         });
@@ -307,7 +311,7 @@ app.controller('LoginController', ['$scope', 'User', function($scope, User) {
 // -------------------------------------------------------------
 // Register controller
 // -------------------------------------------------------------
-app.controller('RegisterController', ['$scope', '$location', 'User', function($scope, $location, User) {
+app.controller('RegisterController', ['$scope', 'User', function($scope, User) {
 
     $scope.errors = {};
     $scope.sitekey = RECAPTCHA_SITEKEY;
@@ -344,9 +348,8 @@ app.controller('RegisterController', ['$scope', '$location', 'User', function($s
         User.register($scope.RegisterForm).then(function(data) {
             $scope.submitting  = false;
             if (data.success) {
-                $location.path('/');
-            }
-            else if (data.errors) {
+                User.redirect();
+            } else if (data.errors) {
                 $scope.errors = data.errors;
             }
         });

@@ -80,6 +80,10 @@ $min = YII_ENV_PROD ? ".min" : "";
     ?>
     var API_URL = '<?= $apiUrl ?>';
     var RECAPTCHA_SITEKEY= '<?= getenv("RECAPTCHA_SITEKEY") ?>';
+
+    // set jwt ttl to one minute less than jwtExpire
+    // note: multiply by 1000 because $interval takes milliseconds
+    var JWT_REFRESH_TIME = <?= ((int) Yii::$app->params["jwtExpire"] - 60) * 1000 ?>;
 </script>
 
 <script src="/vendor/angular/1.4.5/angular<?= $min ?>.js"></script>
