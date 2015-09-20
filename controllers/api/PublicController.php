@@ -74,6 +74,12 @@ class PublicController extends BaseController
         $jwtRefresh = Yii::$app->request->post("jwtRefresh");
         $payload = $jwtAuth->decode($jwtRefresh);
         if (!$payload) {
+
+            // clear out token if desired
+            $payload = $jwtAuth->decode($jwtRefresh, false);
+            $accessToken = $payload->data;
+            // ???
+
             return $failure;
         }
 

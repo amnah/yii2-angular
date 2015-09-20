@@ -8,7 +8,6 @@ use Yii;
 use yii\filters\auth\HttpBearerAuth;
 use yii\base\InvalidConfigException;
 use Firebase\JWT\JWT;
-use app\models\User;
 
 class JwtAuth extends HttpBearerAuth
 {
@@ -71,17 +70,36 @@ class JwtAuth extends HttpBearerAuth
     /**
      * Decode jwt string
      * @param string $jwt
+     * @param bool $verify
      * @return object
      * @throws Exception
      */
-    public function decode($jwt)
+    public function decode($jwt, $verify = true)
     {
+        // decode only
+        if (!$verify) {
+            return $this->decodeNoVerify($jwt);
+        }
+
+        // decode and verify
         JWT::$leeway = $this->leeway;
         try {
             return JWT::decode($jwt, $this->key, [$this->algorithm]);
         } catch (Exception $e) {
             return false;
         }
+    }
+
+    /**
+     * Decode jwt string without verify signature
+     * @param string $jwt
+     * @return object
+     */
+    public function decodeNoVerify($jwt)
+    {
+        $tks = explode('.', $jwt);
+        list($headb64, $bodyb64, $cryptob64) = $tks;
+        return JWT::jsonDecode(JWT::urlsafeB64Decode($bodyb64));
     }
 
     /**
@@ -112,7 +130,6 @@ class JwtAuth extends HttpBearerAuth
         if (!$payload) {
             return null;
         }
-        // todo expire payload
         return $payload->data;
     }
 }
