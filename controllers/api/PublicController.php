@@ -67,7 +67,8 @@ class PublicController extends BaseController
         /** @var \app\components\JwtAuth $jwtAuth */
         $jwtAuth = Yii::$app->jwtAuth;
 
-        list ($jwtExpire, $jwtRefreshExpire) = $this->getJwtExpireTimes();
+        $jwtExpire = Yii::$app->params["jwtExpire"];
+        $jwtRefreshExpire = Yii::$app->params["jwtRefreshExpire"];
 
         $failure = ["success" => null];
         $jwtRefresh = Yii::$app->request->post("jwtRefresh");
@@ -89,7 +90,8 @@ class PublicController extends BaseController
      */
     public function actionLogin()
     {
-        list ($jwtExpire, $jwtRefreshExpire) = $this->getJwtExpireTimes();
+        $jwtExpire = Yii::$app->params["jwtExpire"];
+        $jwtRefreshExpire = Yii::$app->params["jwtRefreshExpire"];
 
         // notice that we set the second parameter $formName = ""
         $model = new LoginForm();
@@ -106,18 +108,6 @@ class PublicController extends BaseController
     public function actionLogout()
     {
         return ["success" => Yii::$app->user->logout()];
-    }
-
-    /**
-     * Get jwt expire times, jwt and jwtRefresh
-     * @return array
-     */
-    protected function getJwtExpireTimes()
-    {
-        return [
-            60*5,           // 5 minutes
-            60*60*24*30,    // 30 days
-        ];
     }
 
     /**
