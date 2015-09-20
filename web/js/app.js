@@ -15,7 +15,11 @@ app.config(['$httpProvider', function($httpProvider) {
 // -------------------------------------------------------------
 // Routes
 // -------------------------------------------------------------
-app.config(['$routeProvider', function($routeProvider) {
+app.config(['$routeProvider', '$httpProvider', function($routeProvider, $httpProvider) {
+
+    // push authInterceptor for jwt httpBearerAuth
+    $httpProvider.interceptors.push('authInterceptor');
+
     $routeProvider.
         when('/about', {
             templateUrl: '/partials/about.html'
@@ -35,25 +39,49 @@ app.config(['$routeProvider', function($routeProvider) {
 }]);
 
 // -----------------------------------------------------------------
-// Api Factory
+// Auth interceptor for jwt factory
 // -----------------------------------------------------------------
-app.factory('Api', ['$http', '$q', '$window', function ($http, $q, $window) {
+app.factory('authInterceptor', ['$q', '$window', function ($q, $window) {
+    return {
+        request: function (config) {
+            // add jwt into httpBearerAuth
+            if ($window.localStorage.jwt) {
+                config.headers.Authorization = 'Bearer ' + $window.localStorage.jwt;
+            }
+            return config;
+        }
+    };
+}]);
+
+// -----------------------------------------------------------------
+// Api factory
+// -----------------------------------------------------------------
+app.factory('Api', ['$http', '$q', '$window', '$location', function ($http, $q, $window, $location) {
 
     var factory = {};
-
-    // set api url
     var apiUrl = API_URL;
 
-    // process $http ajax success/error
+    // process ajax success/error calls
     var processAjaxSuccess = function (res) {
         return res.data;
     };
     var processAjaxError = function (res) {
+
+        // process 401 by redirecting to login page
+        // otherwise just alert the error
+        if (res.status == 401) {
+            $window.localStorage.loginUrl = $location.path();
+            $location.path('/login').replace();
+        } else {
+            alert(error);
+        }
+
+        // calculate and return error msg
         var error = '[ ' + res.status + ' ] ' + (res.data.message || res.statusText);
-        alert(error);
-        return {error: error};
+        return $q.reject(error);
     };
 
+    // define REST functions
     factory.get = function(url, data) {
         return $http.get(apiUrl + url, {params: data}).then(processAjaxSuccess, processAjaxError);
     };
@@ -81,9 +109,9 @@ app.factory('Api', ['$http', '$q', '$window', function ($http, $q, $window) {
 }]);
 
 // -----------------------------------------------------------------
-// User Factory
+// User factory
 // -----------------------------------------------------------------
-app.factory('User', ['Api', function (Api) {
+app.factory('User', ['$window', 'Api', function ($window, Api) {
 
     var factory = {};
 
@@ -114,14 +142,21 @@ app.factory('User', ['Api', function (Api) {
 
     factory.login = function(data) {
         return Api.post('public/login', data).then(function(data) {
-            user = data.success;
+            if (data.success) {
+                user = data.success.user;
+            }
             return data;
         });
     };
 
     factory.logout = function() {
         return Api.post('public/logout').then(function(data) {
-            user = data.success ? null : user;
+            if (data.success) {
+                user = null;
+                $window.localStorage.jwt = '';
+                $window.localStorage.refreshJwt = '';
+
+            }
             return data;
         });
     };
@@ -195,7 +230,7 @@ app.controller('ContactController', ['$scope', 'Api', function($scope, Api) {
 // -------------------------------------------------------------
 // Login controller
 // -------------------------------------------------------------
-app.controller('LoginController', ['$scope', '$location', 'User', function($scope, $location, User) {
+app.controller('LoginController', ['$scope', '$location', '$window', 'User', function($scope, $location, $window, User) {
 
     $scope.errors = {};
     $scope.LoginForm = {
@@ -204,6 +239,12 @@ app.controller('LoginController', ['$scope', '$location', 'User', function($scop
         rememberMe: true
     };
 
+    // get and update login url if set
+    $scope.loginUrl = '';
+    if ($window.localStorage.loginUrl) {
+        $scope.loginUrl = $window.localStorage.loginUrl;
+    }
+
     // process form submit
     $scope.submit = function() {
         $scope.errors = {};
@@ -211,7 +252,11 @@ app.controller('LoginController', ['$scope', '$location', 'User', function($scop
         User.login($scope.LoginForm).then(function(data) {
             $scope.submitting  = false;
             if (data.success) {
-                $location.path('/');
+                // store jwt data and redirect to url
+                $window.localStorage.jwt = data.success.jwt;
+                $window.localStorage.refreshJwt = data.success.refreshJwt;
+                $window.localStorage.loginUrl = '';
+                $location.path($scope.loginUrl).replace();
             }
             else if (data.errors) {
                 $scope.errors = data.errors;

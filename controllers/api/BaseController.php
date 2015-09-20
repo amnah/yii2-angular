@@ -32,6 +32,7 @@ class BaseController extends Controller
     {
         $behaviors = parent::behaviors();
         $behaviors["corsFilter"] = Cors::className();
+        $behaviors["jwtAuth"] = Yii::$app->jwtAuth;
         return $behaviors;
     }
 }

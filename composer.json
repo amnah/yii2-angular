@@ -20,7 +20,8 @@
         "yiisoft/yii2-swiftmailer": "*",
         "yiisoft/yii2-redis": "*",
         "josegonzalez/dotenv": "*",
-        "himiklab/yii2-recaptcha-widget" : "*"
+        "himiklab/yii2-recaptcha-widget": "*",
+        "firebase/php-jwt": "*"
     },
     "require-dev": {
         "yiisoft/yii2-codeception": "*",

@@ -17,6 +17,10 @@ $config = [
                 'application/json' => 'yii\web\JsonParser', // required for POST input via `php://input`
             ]
         ],
+        'jwtAuth' => [
+            'class' => 'app\components\JwtAuth',
+            'key' => getenv('YII_KEY'),
+        ],
         'redis' => [
             'class' => 'yii\redis\Connection',
         ],
@@ -25,7 +29,8 @@ $config = [
         ],
         'user' => [
             'identityClass' => 'app\models\User',
-            'enableAutoLogin' => true,
+            'enableSession' => false,
+            'enableAutoLogin' => false,
         ],
         'errorHandler' => [
             'errorAction' => 'site/error',

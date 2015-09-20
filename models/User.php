@@ -100,4 +100,15 @@ class User extends \yii\base\Object implements \yii\web\IdentityInterface
     {
         return $this->password === $password;
     }
+
+    /**
+     *
+     */
+    public function toArray()
+    {
+        return [
+            "id" => $this->id,
+            "username" => $this->username,
+        ];
+    }
 }

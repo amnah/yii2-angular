@@ -4,6 +4,8 @@
 
     <p>Please fill out the following fields to login:</p>
 
+    <p ng-show="loginUrl">After logging in, you will be redirected to <strong>{{ loginUrl }}</strong></p>
+
     <form id="login-form" class="form-horizontal" role="form" ng-submit="submit()">
 
         <div class="form-group" ng-class="{'has-error': errors.email}">

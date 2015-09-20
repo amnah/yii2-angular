@@ -53,14 +53,20 @@ class LoginForm extends Model
 
     /**
      * Logs in a user using the provided username and password.
-     * @param int $loginDuration
+     * @param int $exp jwt expiration
+     * @param int $refreshExp jwt refresh expiration
      * @return boolean whether the user is logged in successfully
      */
-    public function login($loginDuration)
+    public function login($exp, $refreshExp)
     {
         if ($this->validate()) {
-            return true;
-            return Yii::$app->user->login($this->getUser(), $this->rememberMe ? $loginDuration : 0);
+            /** @var \app\components\JwtAuth $jwtAuth */
+            $jwtAuth = Yii::$app->jwtAuth;
+
+            $user = $this->getUser();
+            $jwt = $jwtAuth->encode($user->toArray(), $exp);
+            $refresh = $jwtAuth->encode($user->authKey, $refreshExp); // use authKey as the refresh for now
+            return [ $user, $jwt, $refresh ];
         }
         return false;
     }

@@ -6,6 +6,7 @@ use Yii;
 use yii\filters\VerbFilter;
 use app\models\forms\ContactForm;
 use app\models\forms\LoginForm;
+use app\models\User;
 
 class PublicController extends BaseController
 {
@@ -16,18 +17,27 @@ class PublicController extends BaseController
             "class" => VerbFilter::className(),
             "actions" => [
                 "contact" => ["post", "options"],
-                "register" => ["post", "options"],
                 "login" => ["post", "options"],
                 "logout" => ["post", "options"],
+                "register" => ["post", "options"],
             ],
         ];
+
+        unset($behaviors["jwtAuth"]);
 
         return $behaviors;
     }
 
     public function actionUser()
     {
-        return ["user" => null];
+        /** @var \app\components\JwtAuth $jwtAuth */
+        $jwtAuth = Yii::$app->jwtAuth;
+
+        $payload = $jwtAuth->getPayload();
+        if (!$payload) {
+            return [ "success" => null ];
+        }
+        return ["success" => $payload->data];
     }
 
     /**
@@ -48,13 +58,17 @@ class PublicController extends BaseController
      */
     public function actionLogin()
     {
-        $loginDuration = 60*60*24*30; // 1 month
+        $exp = 60*10; // 10 min
+        $refreshExp = 60*60*24*30; // 1 month
 
         // notice that we set the second parameter $formName = ""
         $model = new LoginForm();
         $model->load(Yii::$app->request->post(), "");
-        if ($model->login($loginDuration)) {
-            return ["success" => $model->getUser()];
+        list($user, $jwt, $refresh) = $model->login($exp, $refreshExp);
+        if ($jwt) {
+            return [
+                "success" => [ "user" => $user->toArray(), "jwt" => $jwt, "refresh" => $refresh ]
+            ];
         }
         return ["errors" => $model->errors];
     }
