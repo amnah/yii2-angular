@@ -72,11 +72,11 @@ app.factory('Api', ['$http', '$q', '$window', '$location', function($http, $q, $
             $window.localStorage.loginUrl = $location.path();
             $location.path('/login').replace();
         } else {
+            var error = '[ ' + res.status + ' ] ' + (res.data.message || res.statusText);
             alert(error);
         }
 
         // calculate and return error msg
-        var error = '[ ' + res.status + ' ] ' + (res.data.message || res.statusText);
         return $q.reject(res);
     };
 
@@ -104,16 +104,15 @@ app.factory('Api', ['$http', '$q', '$window', '$location', function($http, $q, $
 app.factory('User', ['$window', '$location', '$interval', '$q', 'Api', 'jwtHelper', function($window, $location, $interval, $q, Api, jwtHelper) {
 
     var factory = {};
-
     var user;
 
     // set minimum of once per minute just in case
     var minRefreshTime = 1000*60;
+    var refreshInterval;
     var refreshTime = JWT_REFRESH_TIME;
     if (refreshTime < minRefreshTime) {
         refreshTime = minRefreshTime;
     }
-    var refreshInterval;
 
     factory.getAttributes = function() {
         return user ? user : null;
