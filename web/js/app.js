@@ -3,7 +3,8 @@
 // Angular App
 // -------------------------------------------------------------
 var app = angular.module('App', [
-    'ngRoute'
+    'ngRoute',
+    'angular-jwt'
 ]);
 
 // -------------------------------------------------------------
@@ -100,7 +101,7 @@ app.factory('Api', ['$http', '$q', '$window', '$location', function($http, $q, $
 // -----------------------------------------------------------------
 // User factory
 // -----------------------------------------------------------------
-app.factory('User', ['$window', '$location', '$interval', '$q', 'Api', function($window, $location, $interval, $q, Api) {
+app.factory('User', ['$window', '$location', '$interval', '$q', 'Api', 'jwtHelper', function($window, $location, $interval, $q, Api, jwtHelper) {
 
     var factory = {};
 
@@ -161,8 +162,13 @@ app.factory('User', ['$window', '$location', '$interval', '$q', 'Api', function(
         }
     };
 
-    factory.start = function() {
-        refreshInterval = $interval(factory.refresh, refreshTime);
+    factory.parseJwt = function(jwt) {
+        // get jwt from input or local storage
+        jwt = jwt || $window.localStorage.jwt;
+        if (!jwt) {
+            return null;
+        }
+        return jwtHelper.decodeToken(jwt);
     };
 
     factory.setUser = function(data) {
@@ -198,6 +204,16 @@ app.factory('User', ['$window', '$location', '$interval', '$q', 'Api', function(
         });
     };
 
+    // attempt to set up user from jwt. this is faster than waiting for the automatic refresh
+    var jwtToken = factory.parseJwt();
+    if (jwtToken) {
+        user = jwtToken.data;
+    }
+
+    // initialize jwt intervals
+    factory.doJwtRefresh();
+    factory.startJwtRefreshInterval();
+
     // set up recaptcha
     var recaptchaDefer = $q.defer();
     factory.getRecaptcha = function() {
@@ -206,10 +222,6 @@ app.factory('User', ['$window', '$location', '$interval', '$q', 'Api', function(
     $window.recaptchaLoaded = function() {
         recaptchaDefer.resolve($window.grecaptcha);
     };
-
-    // initialize jwt intervals
-    factory.doJwtRefresh();
-    factory.startJwtRefreshInterval();
 
     return factory;
 }]);

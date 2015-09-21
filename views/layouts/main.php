@@ -88,6 +88,7 @@ $min = YII_ENV_PROD ? ".min" : "";
 
 <script src="/vendor/angular/1.4.5/angular<?= $min ?>.js"></script>
 <script src="/vendor/angular/1.4.5/angular-route<?= $min ?>.js"></script>
+<script src="/vendor/angular-jwt/0.0.9/angular-jwt<?= $min ?>.js"></script>
 <script src="/js/app.js"></script>
 
 <?php if (getenv("RECAPTCHA_SITEKEY")): ?>
