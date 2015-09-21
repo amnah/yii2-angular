@@ -86,8 +86,8 @@ $min = YII_ENV_PROD ? ".min" : "";
     var JWT_REFRESH_TIME = <?= ((int) Yii::$app->params["jwtExpire"] - 60) * 1000 ?>;
 </script>
 
-<script src="/vendor/angular/1.4.5/angular<?= $min ?>.js"></script>
-<script src="/vendor/angular/1.4.5/angular-route<?= $min ?>.js"></script>
+<script src="/vendor/angular/1.4.6/angular<?= $min ?>.js"></script>
+<script src="/vendor/angular/1.4.6/angular-route<?= $min ?>.js"></script>
 <script src="/vendor/angular-jwt/0.0.9/angular-jwt<?= $min ?>.js"></script>
 <script src="/js/app.js"></script>
 
