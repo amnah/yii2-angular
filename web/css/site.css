@@ -21,6 +21,9 @@ ng\:form {
     position:absolute;
 }
 
+/* ui-bootstrap */
+.nav, .pagination, .carousel, .panel-title a { cursor: pointer; }
+
 /* --------------------------------------------------------------------- */
 /* Site
 /* --------------------------------------------------------------------- */

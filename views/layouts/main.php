@@ -3,11 +3,10 @@
 /* @var $this \yii\web\View */
 /* @var $content string */
 
-use yii\bootstrap\Nav;
-use yii\bootstrap\NavBar;
 use yii\helpers\Url;
 
 $min = YII_ENV_PROD ? ".min" : "";
+$appName = "Yii 2 Angular";
 
 ?>
 <?php $this->beginPage() ?>
@@ -16,7 +15,7 @@ $min = YII_ENV_PROD ? ".min" : "";
 <head>
     <meta charset="<?= Yii::$app->charset ?>">
     <meta name="viewport" content="width=device-width, initial-scale=1">
-    <title><?= Yii::$app->name ?></title>
+    <title><?= $appName ?></title>
     <?php $this->head() ?>
     <link rel="stylesheet" type="text/css" href="/vendor/bootstrap/3.3.5/bootstrap<?= $min ?>.css" />
     <link rel="stylesheet" type="text/css" href="/css/site.css" />
@@ -25,34 +24,31 @@ $min = YII_ENV_PROD ? ".min" : "";
 <?php $this->beginBody() ?>
 
 <div class="wrap">
-    <?php
-    NavBar::begin([
-        'brandLabel' => 'My Company',
-        'brandUrl' => '/#',
-        'options' => [
-            'class' => 'navbar-inverse navbar-fixed-top',
-        ],
-    ]);
-    echo Nav::widget([
-        'options' => ['class' => 'navbar-nav navbar-right ng-cloak', 'ng-controller' => 'NavController'],
-        'items' => [
-            ['label' => 'About', 'url' => '/#/about'],
-            ['label' => 'Contact', 'url' => '/#/contact'],
-            [
-                'label' => 'Login',
-                'url' => '/#login',
-                'options' => ['ng-if' => '!User.isLoggedIn()']
-            ],
-            [
-                'label' => 'Logout ({{ User.getAttribute("username") }})',
-                'logout' => '/#logout',
-                'options' => ['ng-if' => 'User.isLoggedIn()'],
-                'linkOptions' => ['ng-click' => 'logout()'],
-            ],
-        ],
-    ]);
-    NavBar::end();
-    ?>
+    <nav id="w0" class="navbar-inverse navbar-fixed-top navbar" role="navigation" ng-controller="NavController">
+        <div class="container">
+            <div class="navbar-header">
+                <button type="button" class="navbar-toggle" ng-click="isCollapsed = !isCollapsed">
+                    <span class="sr-only">Toggle navigation</span>
+                    <span class="icon-bar"></span>
+                    <span class="icon-bar"></span>
+                    <span class="icon-bar"></span>
+                </button>
+                <a class="navbar-brand" href="/#/"><?= $appName ?></a>
+            </div>
+            <div class="collapse navbar-collapse" collapse="isCollapsed">
+                <ul id="w1" class="navbar-nav navbar-right ng-cloak nav">
+                    <li><a href="/#/about">About</a></li>
+                    <li><a href="/#/contact">Contact</a></li>
+                    <li ng-if="!User.isLoggedIn()"><a href="/#/login">Login</a></li>
+                    <li ng-if="User.isLoggedIn()">
+                        <a ng-click="logout()">
+                            Logout ({{ User.getAttribute('username') }})
+                        </a>
+                    </li>
+                </ul>
+            </div>
+        </div>
+    </nav>
 
     <div class="container">
         <?= $content ?>
@@ -61,7 +57,7 @@ $min = YII_ENV_PROD ? ".min" : "";
 
 <footer class="footer">
     <div class="container">
-        <p class="pull-left">&copy; My Company <?= date('Y') ?></p>
+        <p class="pull-left">&copy; <?= $appName ?> <?= date('Y') ?></p>
 
         <p class="pull-right"><?= Yii::powered() ?></p>
     </div>
@@ -76,7 +72,7 @@ $min = YII_ENV_PROD ? ".min" : "";
             $apiUrl = Url::to($apiUrl, true);
             $apiUrl = str_replace("://", "://api.", $apiUrl);
         }
-        $apiUrl .= "/";
+        $apiUrl = rtrim($apiUrl, "/") . "/";
     ?>
     var API_URL = '<?= $apiUrl ?>';
     var RECAPTCHA_SITEKEY= '<?= getenv("RECAPTCHA_SITEKEY") ?>';
@@ -87,8 +83,10 @@ $min = YII_ENV_PROD ? ".min" : "";
 </script>
 
 <script src="/vendor/angular/1.4.6/angular<?= $min ?>.js"></script>
+<script src="/vendor/angular/1.4.6/angular-animate<?= $min ?>.js"></script>
 <script src="/vendor/angular/1.4.6/angular-route<?= $min ?>.js"></script>
 <script src="/vendor/angular-jwt/0.0.9/angular-jwt<?= $min ?>.js"></script>
+<script src="/vendor/ui-bootstrap/ui-bootstrap-tpls-0.13.4<?= $min ?>.js"></script>
 <script src="/js/app.js"></script>
 
 <?php if (getenv("RECAPTCHA_SITEKEY")): ?>

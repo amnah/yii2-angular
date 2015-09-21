@@ -4,7 +4,9 @@
 // -------------------------------------------------------------
 var app = angular.module('App', [
     'ngRoute',
-    'angular-jwt'
+    'ngAnimate',
+    'angular-jwt',
+    'ui.bootstrap'
 ]);
 
 // -------------------------------------------------------------
@@ -231,6 +233,7 @@ app.factory('User', ['$window', '$location', '$interval', '$q', 'Api', 'jwtHelpe
 app.controller('NavController', ['$scope', 'User', function($scope, User) {
 
     $scope.User = User;
+    $scope.isCollapsed = true;
 
     $scope.logout = function() {
         User.logout().then(function(data) {
