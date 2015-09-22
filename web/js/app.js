@@ -251,6 +251,7 @@ app.controller('ContactController', ['$scope', 'Api', 'User', function($scope, A
 
     $scope.errors = {};
     $scope.sitekey = RECAPTCHA_SITEKEY;
+    $scope.successName = '';
     $scope.ContactForm = {
         name: User.getAttribute('username'),
         email: User.getAttribute('email'),
@@ -285,7 +286,11 @@ app.controller('ContactController', ['$scope', 'Api', 'User', function($scope, A
         Api.post('public/contact', $scope.ContactForm).then(function(data) {
             $scope.submitting  = false;
             if (data.success) {
+                $scope.successName = $scope.ContactForm.name;
                 $scope.errors = false;
+                if (recaptchaId) {
+                    recaptchaId = grecaptchaObj.reset(recaptchaId);
+                }
             } else if (data.errors) {
                 $scope.errors = data.errors;
             }
