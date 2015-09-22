@@ -166,10 +166,12 @@ app.factory('User', ['$window', '$location', '$interval', '$q', 'Api', 'jwtHelpe
     factory.parseJwt = function(jwt) {
         // get jwt from input or local storage
         jwt = jwt || $window.localStorage.jwt;
-        if (!jwt) {
-            return null;
-        }
-        return jwtHelper.decodeToken(jwt);
+        return jwt ? jwtHelper.decodeToken(jwt) : null;
+    };
+
+    factory.checkJwtExpired = function(jwt) {
+        jwt = jwt || $window.localStorage.jwt;
+        return jwt ? jwtHelper.isTokenExpired(jwt) : true;
     };
 
     factory.setUser = function(data) {
@@ -237,7 +239,7 @@ app.controller('NavController', ['$scope', 'User', function($scope, User) {
 
     $scope.logout = function() {
         User.logout().then(function(data) {
-            User.setUser(null);
+            // do something
         });
     };
 }]);
@@ -260,16 +262,15 @@ app.controller('ContactController', ['$scope', 'Api', 'User', function($scope, A
     // set up and store grecaptcha data
     var recaptchaId;
     var grecaptchaObj;
-    User.getRecaptcha().then(function(grecaptcha) {
-        grecaptchaObj = grecaptcha;
-        if (RECAPTCHA_SITEKEY) {
+    if (RECAPTCHA_SITEKEY) {
+        User.getRecaptcha().then(function (grecaptcha) {
+            grecaptchaObj = grecaptcha;
             recaptchaId = grecaptcha.render("contact-captcha", {sitekey: $scope.sitekey});
-        }
-    });
+        });
+    }
 
     // process form submit
     $scope.submit = function() {
-
         // check captcha before making POST request
         if (RECAPTCHA_SITEKEY) {
             $scope.ContactForm.captcha = grecaptchaObj.getResponse(recaptchaId);
@@ -334,19 +335,20 @@ app.controller('RegisterController', ['$scope', 'User', function($scope, User) {
         captcha: ''
     };
 
+    $scope.loginUrl = User.getLoginUrl();
+
     // set up and store grecaptcha data
     var recaptchaId;
     var grecaptchaObj;
-    User.getRecaptcha().then(function(grecaptcha) {
-        grecaptchaObj = grecaptcha;
-        if (RECAPTCHA_SITEKEY) {
+    if (RECAPTCHA_SITEKEY) {
+        User.getRecaptcha().then(function(grecaptcha) {
+            grecaptchaObj = grecaptcha;
             recaptchaId = grecaptcha.render("register-captcha", {sitekey: RECAPTCHA_SITEKEY});
-        }
-    });
+        });
+    }
 
     // process form submit
     $scope.submit = function() {
-
         // check captcha before making POST request
         if (RECAPTCHA_SITEKEY) {
             $scope.RegisterForm.captcha = grecaptchaObj.getResponse(recaptchaId);
