@@ -27,21 +27,21 @@ $appName = "Yii 2 Angular";
     <nav id="w0" class="navbar-inverse navbar-fixed-top navbar" role="navigation" ng-controller="NavController">
         <div class="container">
             <div class="navbar-header">
-                <button type="button" class="navbar-toggle" ng-click="isCollapsed = !isCollapsed">
+                <button type="button" class="navbar-toggle" ng-click="isCollapsed=!isCollapsed">
                     <span class="sr-only">Toggle navigation</span>
                     <span class="icon-bar"></span>
                     <span class="icon-bar"></span>
                     <span class="icon-bar"></span>
                 </button>
-                <a class="navbar-brand" href="/#/"><?= $appName ?></a>
+                <a class="navbar-brand" href="/#/" ng-click="isCollapsed=true"><?= $appName ?></a>
             </div>
             <div class="collapse navbar-collapse" collapse="isCollapsed">
                 <ul id="w1" class="navbar-nav navbar-right ng-cloak nav">
-                    <li><a href="/#/about">About</a></li>
-                    <li><a href="/#/contact">Contact</a></li>
-                    <li ng-if="!User.isLoggedIn()"><a href="/#/login">Login</a></li>
-                    <li ng-if="User.isLoggedIn()">
-                        <a ng-click="logout()">
+                    <li><a href="/#/about" ng-click="isCollapsed=true">About</a></li>
+                    <li><a href="/#/contact" ng-click="isCollapsed=true">Contact</a></li>
+                    <li ng-show="!User.isLoggedIn()"><a href="/#/login" ng-click="isCollapsed=true">Login</a></li>
+                    <li ng-show="User.isLoggedIn()">
+                        <a ng-click="isCollapsed=true;logout()">
                             Logout ({{ User.getAttribute('username') }})
                         </a>
                     </li>
