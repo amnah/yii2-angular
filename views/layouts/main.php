@@ -64,17 +64,7 @@ $appName = "Yii 2 Angular";
 </footer>
 
 <script type="text/javascript">
-    <?php 
-        // set api url 
-        $apiUrl = "/v1";  
-        if (YII_ENV_PROD) {
-            // get absolute url and add "api" subdomain
-            $apiUrl = Url::to($apiUrl, true);
-            $apiUrl = str_replace("://", "://api.", $apiUrl);
-        }
-        $apiUrl = rtrim($apiUrl, "/") . "/";
-    ?>
-    var API_URL = '<?= $apiUrl ?>';
+    var API_URL = '<?= rtrim(getenv("API_URL"), "/") . "/" ?>';
     var RECAPTCHA_SITEKEY= '<?= getenv("RECAPTCHA_SITEKEY") ?>';
 
     // set jwt ttl to one minute less than jwtExpire
