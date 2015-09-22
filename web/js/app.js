@@ -239,7 +239,6 @@ app.controller('NavController', ['$scope', 'User', function($scope, User) {
         User.logout().then(function(data) {
             User.setUser(null);
         });
-
     };
 }]);
 
