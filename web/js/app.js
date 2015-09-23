@@ -254,7 +254,7 @@ app.controller('ContactController', ['$scope', 'Api', 'User', function($scope, A
     $scope.sitekey = RECAPTCHA_SITEKEY;
     $scope.successName = '';
     $scope.ContactForm = {
-        name: User.getAttribute('username'),
+        name: '',
         email: User.getAttribute('email'),
         subject: '',
         body: '',
@@ -368,7 +368,7 @@ app.controller('RegisterController', ['$scope', 'User', function($scope, User) {
         User.register($scope.RegisterForm).then(function(data) {
             $scope.submitting  = false;
             if (data.success) {
-                $scope.successName = data.success.user.username;
+                $scope.successName = data.success.user.email;
                 $scope.errors = false;
                 User.startJwtRefreshInterval();
             } else if (data.errors) {

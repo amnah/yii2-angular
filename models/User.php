@@ -5,7 +5,7 @@ namespace app\models;
 class User extends \yii\base\Object implements \yii\web\IdentityInterface
 {
     public $id;
-    public $username;
+    public $email;
     public $password;
     public $authKey;
     public $accessToken;
@@ -13,14 +13,14 @@ class User extends \yii\base\Object implements \yii\web\IdentityInterface
     private static $users = [
         '100' => [
             'id' => '100',
-            'username' => 'admin',
+            'email' => 'admin',
             'password' => 'admin',
             'authKey' => 'test100key',
             'accessToken' => '100-token',
         ],
         '101' => [
             'id' => '101',
-            'username' => 'demo',
+            'email' => 'demo',
             'password' => 'demo',
             'authKey' => 'test101key',
             'accessToken' => '101-token',
@@ -52,13 +52,13 @@ class User extends \yii\base\Object implements \yii\web\IdentityInterface
     /**
      * Finds user by username
      *
-     * @param  string      $username
+     * @param string $email
      * @return static|null
      */
-    public static function findByUsername($username)
+    public static function findByEmail($email)
     {
         foreach (self::$users as $user) {
-            if (strcasecmp($user['username'], $username) === 0) {
+            if (strcasecmp($user['email'], $email) === 0) {
                 return new static($user);
             }
         }
@@ -108,12 +108,12 @@ class User extends \yii\base\Object implements \yii\web\IdentityInterface
     {
         return [
             "id" => $this->id,
-            "username" => $this->username,
+            "email" => $this->email,
         ];
     }
 
     /**
-     * Register user (faux)
+     * Register user (note: doesn't really create any user)
      * @param array $input
      * @return static|array
      */
@@ -121,23 +121,16 @@ class User extends \yii\base\Object implements \yii\web\IdentityInterface
     {
         // check for data
         $errors = [];
-        if (empty($input["email"])) {
+        $email    = !empty($input["email"])    ? trim($input["email"]) : "";
+        $password = !empty($input["password"]) ? $input["password"]    : "";
+        if (!$email) {
             $errors["email"] = ["Email is required"];
-        }
-        if (empty($input["password"])) {
-            $errors["password"] = ["Password is required"];
-        }
-        if ($errors) {
-            return $errors;
-        }
-
-        // check for existing user
-        $email = $input["email"];
-        $password = $input["password"];
-        if (self::findByUsername($email)) {
+        } elseif (self::findByEmail($email)) {
             $errors["email"] = ["Email [ $email ] is already taken"];
         }
-        if (strlen($password) < 3) {
+        if (!$password) {
+            $errors["password"] = ["Password is required"];
+        } elseif (strlen($password) < 3) {
             $errors["password"] = ["Password must be at least 3 characters"];
         }
         if ($errors) {
@@ -146,7 +139,7 @@ class User extends \yii\base\Object implements \yii\web\IdentityInterface
 
         // create user
         return new static([
-            "username" => $email,
+            "email" => $email,
             "password" => $password,
             "accessToken" => '102-token',
         ]);
