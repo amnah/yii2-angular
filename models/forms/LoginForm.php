@@ -52,35 +52,6 @@ class LoginForm extends Model
     }
 
     /**
-     * Generate jwt tokens for user
-     * @param int $jwtExpire jwt expiration
-     * @param int $jwtRefreshExpire jwt refresh expiration
-     * @param User $user optional user model
-     * @return boolean whether the user is logged in successfully
-     */
-    public function generateJwt($jwtExpire, $jwtRefreshExpire, $user = null)
-    {
-        /** @var \app\components\JwtAuth $jwtAuth */
-        $jwtAuth = Yii::$app->jwtAuth;
-
-        // get user data
-        $user = $user ?: $this->getUser();
-        if (!$user) {
-            return null;
-        }
-
-        // generate jwt
-        $data = $user->toArray();
-        $jwt = $jwtAuth->encode($data, $jwtExpire);
-        $jwtRefresh = $jwtAuth->encode($user->accessToken, $jwtRefreshExpire);
-        return [
-            "user" => $data,
-            "jwt" => $jwt,
-            "jwtRefresh" => $jwtRefresh,
-        ];
-    }
-
-    /**
      * Finds user by [[username]]
      *
      * @return User|null

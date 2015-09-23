@@ -2,6 +2,8 @@
 
 namespace app\models;
 
+use Yii;
+
 class User extends \yii\base\Object implements \yii\web\IdentityInterface
 {
     public $id;
@@ -143,5 +145,27 @@ class User extends \yii\base\Object implements \yii\web\IdentityInterface
             "password" => $password,
             "accessToken" => '102-token',
         ]);
+    }
+
+    /**
+     * Generate jwt tokens for user
+     * @param int $jwtExpire jwt expiration
+     * @param int $jwtRefreshExpire jwt refresh expiration
+     * @return boolean whether the user is logged in successfully
+     */
+    public function generateJwt($jwtExpire, $jwtRefreshExpire)
+    {
+        /** @var \app\components\JwtAuth $jwtAuth */
+        $jwtAuth = Yii::$app->jwtAuth;
+
+        // generate jwt
+        $data = $this->toArray();
+        $jwt = $jwtAuth->encode($data, $jwtExpire);
+        $jwtRefresh = $jwtAuth->encode($this->accessToken, $jwtRefreshExpire);
+        return [
+            "user" => $data,
+            "jwt" => $jwt,
+            "jwtRefresh" => $jwtRefresh,
+        ];
     }
 }

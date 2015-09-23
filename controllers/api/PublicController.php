@@ -65,6 +65,7 @@ class PublicController extends BaseController
     public function actionJwtRefresh()
     {
         /** @var \app\components\JwtAuth $jwtAuth */
+        /** @var User $user */
         $jwtAuth = Yii::$app->jwtAuth;
 
         $jwtExpire = Yii::$app->params["jwtExpire"];
@@ -79,8 +80,7 @@ class PublicController extends BaseController
 
         $user = User::findIdentityByAccessToken($payload->data);
         if ($user) {
-            $loginForm = new LoginForm();
-            return ["success" => $loginForm->generateJwt($jwtExpire, $jwtRefreshExpire, $user)];
+            return ["success" => $user->generateJwt($jwtExpire, $jwtRefreshExpire)];
         }
         return $failure;
     }
@@ -97,7 +97,7 @@ class PublicController extends BaseController
         $loginForm = new LoginForm();
         $loginForm->load(Yii::$app->request->post(), "");
         if ($loginForm->validate()) {
-            return ["success" => $loginForm->generateJwt($jwtExpire, $jwtRefreshExpire)];
+            return ["success" => $loginForm->getUser()->generateJwt($jwtExpire, $jwtRefreshExpire)];
         }
         return ["errors" => $loginForm->errors];
     }
@@ -119,10 +119,10 @@ class PublicController extends BaseController
         $jwtRefreshExpire = Yii::$app->params["jwtRefreshExpire"];
 
         // attempt to register user
+        /** @var User $user */
         $user = User::register(Yii::$app->request->post());
         if (!is_array($user)) {
-            $loginForm = new LoginForm();
-            return ["success" => $loginForm->generateJwt($jwtExpire, $jwtRefreshExpire, $user)];
+            return ["success" => $user->generateJwt($jwtExpire, $jwtRefreshExpire)];
         }
         return ["errors" => $user];
     }
