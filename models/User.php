@@ -102,7 +102,7 @@ class User extends \yii\base\Object implements \yii\web\IdentityInterface
     }
 
     /**
-     *
+     * Export public attributes to array
      */
     public function toArray()
     {
@@ -110,5 +110,45 @@ class User extends \yii\base\Object implements \yii\web\IdentityInterface
             "id" => $this->id,
             "username" => $this->username,
         ];
+    }
+
+    /**
+     * Register user (faux)
+     * @param array $input
+     * @return static|array
+     */
+    public static function register($input)
+    {
+        // check for data
+        $errors = [];
+        if (empty($input["email"])) {
+            $errors["email"] = ["Email is required"];
+        }
+        if (empty($input["password"])) {
+            $errors["password"] = ["Password is required"];
+        }
+        if ($errors) {
+            return $errors;
+        }
+
+        // check for existing user
+        $email = $input["email"];
+        $password = $input["password"];
+        if (self::findByUsername($email)) {
+            $errors["email"] = ["Email [ $email ] is already taken"];
+        }
+        if (strlen($password) < 3) {
+            $errors["password"] = ["Password must be at least 3 characters"];
+        }
+        if ($errors) {
+            return $errors;
+        }
+
+        // create user
+        return new static([
+            "username" => $email,
+            "password" => $password,
+            "accessToken" => '102-token',
+        ]);
     }
 }

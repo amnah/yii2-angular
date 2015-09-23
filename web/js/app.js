@@ -147,6 +147,7 @@ app.factory('User', ['$window', '$location', '$interval', '$q', 'Api', 'jwtHelpe
     };
 
     factory.startJwtRefreshInterval = function() {
+        $interval.cancel(refreshInterval);
         refreshInterval = $interval(factory.doJwtRefresh, refreshTime);
     };
 
@@ -304,13 +305,12 @@ app.controller('ContactController', ['$scope', 'Api', 'User', function($scope, A
 app.controller('LoginController', ['$scope', 'User', function($scope, User) {
 
     $scope.errors = {};
+    $scope.loginUrl = User.getLoginUrl();
     $scope.LoginForm = {
         email: '',
         password: '',
         rememberMe: true
     };
-
-    $scope.loginUrl = User.getLoginUrl();
 
     // process form submit
     $scope.submit = function() {
@@ -319,6 +319,7 @@ app.controller('LoginController', ['$scope', 'User', function($scope, User) {
         User.login($scope.LoginForm).then(function(data) {
             $scope.submitting  = false;
             if (data.success) {
+                User.startJwtRefreshInterval();
                 User.redirect($scope.loginUrl);
             } else if (data.errors) {
                 $scope.errors = data.errors;
@@ -334,13 +335,12 @@ app.controller('RegisterController', ['$scope', 'User', function($scope, User) {
 
     $scope.errors = {};
     $scope.sitekey = RECAPTCHA_SITEKEY;
+    $scope.successName = '';
     $scope.RegisterForm = {
         email: '',
-        newPassword: '',
+        password: '',
         captcha: ''
     };
-
-    $scope.loginUrl = User.getLoginUrl();
 
     // set up and store grecaptcha data
     var recaptchaId;
@@ -368,7 +368,9 @@ app.controller('RegisterController', ['$scope', 'User', function($scope, User) {
         User.register($scope.RegisterForm).then(function(data) {
             $scope.submitting  = false;
             if (data.success) {
-                User.redirect();
+                $scope.successName = data.success.user.username;
+                $scope.errors = false;
+                User.startJwtRefreshInterval();
             } else if (data.errors) {
                 $scope.errors = data.errors;
             }

@@ -79,8 +79,8 @@ class PublicController extends BaseController
 
         $user = User::findIdentityByAccessToken($payload->data);
         if ($user) {
-            $model = new LoginForm();
-            return ["success" => $model->generateJwt($jwtExpire, $jwtRefreshExpire, $user)];
+            $loginForm = new LoginForm();
+            return ["success" => $loginForm->generateJwt($jwtExpire, $jwtRefreshExpire, $user)];
         }
         return $failure;
     }
@@ -94,12 +94,12 @@ class PublicController extends BaseController
         $jwtRefreshExpire = Yii::$app->params["jwtRefreshExpire"];
 
         // notice that we set the second parameter $formName = ""
-        $model = new LoginForm();
-        $model->load(Yii::$app->request->post(), "");
-        if ($model->validate()) {
-            return ["success" => $model->generateJwt($jwtExpire, $jwtRefreshExpire)];
+        $loginForm = new LoginForm();
+        $loginForm->load(Yii::$app->request->post(), "");
+        if ($loginForm->validate()) {
+            return ["success" => $loginForm->generateJwt($jwtExpire, $jwtRefreshExpire)];
         }
-        return ["errors" => $model->errors];
+        return ["errors" => $loginForm->errors];
     }
 
     /**
@@ -115,27 +115,15 @@ class PublicController extends BaseController
      */
     public function actionRegister()
     {
-        // notice that we set the second parameter $formName = ""
-        $user = new User(["scenario" => "register"]);
-        $profile = new Profile();
-        $user->load(Yii::$app->request->post(), "");
-        $profile->load(Yii::$app->request->post(), "");
-        if ($user->validate() && $profile->validate()) {
-            $user->register(Role::ROLE_USER, Yii::$app->request->userIP, User::STATUS_ACTIVE);
-            $profile->register($user->id);
-            $this->afterRegister($user, $profile);
-            return ["success" => $user];
-        }
-        return ["errors" => $user->errors];
-    }
+        $jwtExpire = Yii::$app->params["jwtExpire"];
+        $jwtRefreshExpire = Yii::$app->params["jwtRefreshExpire"];
 
-    /**
-     * After Register
-     * @param User $user
-     * @param Profile $profile
-     */
-    protected function afterRegister($user, $profile)
-    {
-        // create user token
+        // attempt to register user
+        $user = User::register(Yii::$app->request->post());
+        if (!is_array($user)) {
+            $loginForm = new LoginForm();
+            return ["success" => $loginForm->generateJwt($jwtExpire, $jwtRefreshExpire, $user)];
+        }
+        return ["errors" => $user];
     }
 }

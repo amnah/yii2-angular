@@ -40,6 +40,7 @@ $appName = "Yii 2 Angular";
                     <li><a href="/#/about" ng-click="isCollapsed=true">About</a></li>
                     <li><a href="/#/contact" ng-click="isCollapsed=true">Contact</a></li>
                     <li ng-show="!User.isLoggedIn()"><a href="/#/login" ng-click="isCollapsed=true">Login</a></li>
+                    <li ng-show="!User.isLoggedIn()"><a href="/#/register" ng-click="isCollapsed=true">Register</a></li>
                     <li ng-show="User.isLoggedIn()">
                         <a ng-click="logout()">
                             Logout ({{ User.getAttribute('username') }})
