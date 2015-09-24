@@ -55,6 +55,19 @@ app.config(['$httpProvider', function($httpProvider) {
 }]);
 
 // -----------------------------------------------------------------
+// Initialization
+// -----------------------------------------------------------------
+app.run(['User', function(User) {
+    User.startJwtRefreshInterval(true);
+
+    // attempt to set up user from jwt. this is faster than waiting for the automatic refresh
+    var jwtToken = User.parseJwt();
+    if (jwtToken) {
+        User.setUser(jwtToken.data);
+    }
+}]);
+
+// -----------------------------------------------------------------
 // Api factory
 // -----------------------------------------------------------------
 app.factory('Api', ['$http', '$q', '$window', '$location', function($http, $q, $window, $location) {
@@ -146,9 +159,12 @@ app.factory('User', ['$window', '$location', '$interval', '$q', 'Api', 'jwtHelpe
         $location.path(url).replace();
     };
 
-    factory.startJwtRefreshInterval = function() {
+    factory.startJwtRefreshInterval = function(runAtStart) {
         $interval.cancel(refreshInterval);
         refreshInterval = $interval(factory.doJwtRefresh, refreshTime);
+        if (runAtStart) {
+            factory.doJwtRefresh();
+        }
     };
 
     factory.cancelJwtRefreshInterval = function() {
@@ -159,7 +175,7 @@ app.factory('User', ['$window', '$location', '$interval', '$q', 'Api', 'jwtHelpe
         var jwtRefresh = $window.localStorage.jwtRefresh;
         if (jwtRefresh) {
             Api.post('public/jwt-refresh', {jwtRefresh: jwtRefresh}).then(function (data) {
-                factory.setUser(data);
+                factory.setUserAndJwt(data);
             });
         }
     };
@@ -175,56 +191,49 @@ app.factory('User', ['$window', '$location', '$interval', '$q', 'Api', 'jwtHelpe
         return jwt ? jwtHelper.isTokenExpired(jwt) : true;
     };
 
-    factory.setUser = function(data) {
+    factory.setUser = function(userData) {
+        user = userData;
+    };
+
+    factory.setUserAndJwt = function(data) {
+        user = null;
+        $window.localStorage.jwt = '';
+        $window.localStorage.jwtRefresh = '';
         if (data && data.success && data.success.user) {
             user = data.success.user;
             $window.localStorage.jwt = data.success.jwt;
             $window.localStorage.jwtRefresh = data.success.jwtRefresh;
-        } else {
-            user = null;
-            $window.localStorage.jwt = '';
-            $window.localStorage.jwtRefresh = '';
         }
     };
 
     factory.login = function(data) {
         return Api.post('public/login', data).then(function(data) {
-            factory.setUser(data);
+            factory.setUserAndJwt(data);
             return data;
         });
     };
 
     factory.logout = function() {
         return Api.post('public/logout').then(function(data) {
-            factory.setUser(data);
+            factory.setUserAndJwt(data);
             return data;
         });
     };
 
     factory.register = function(data) {
         return Api.post('public/register', data).then(function(data) {
-            factory.setUser(data);
+            factory.setUserAndJwt(data);
             return data;
         });
     };
 
-    // attempt to set up user from jwt. this is faster than waiting for the automatic refresh
-    var jwtToken = factory.parseJwt();
-    if (jwtToken) {
-        user = jwtToken.data;
-    }
-
-    // initialize jwt intervals
-    factory.doJwtRefresh();
-    factory.startJwtRefreshInterval();
-
     // set up recaptcha
     var recaptchaDefer = $q.defer();
-    factory.getRecaptcha = function() {
-        return recaptchaDefer.promise;
-    };
     $window.recaptchaLoaded = function() {
         recaptchaDefer.resolve($window.grecaptcha);
+    };
+    factory.getRecaptcha = function() {
+        return recaptchaDefer.promise;
     };
 
     return factory;
