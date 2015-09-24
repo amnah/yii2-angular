@@ -47,20 +47,24 @@ class JwtAuth extends HttpBearerAuth
      * @param mixed $data
      * @param int $expire seconds
      * @return string
+     * @link http://websec.io/2014/08/04/Securing-Requests-with-JWT.html
      */
     public function encode($data, $expire = 0)
     {
-        // http://websec.io/2014/08/04/Securing-Requests-with-JWT.html
+        // build token data
         $time = time();
         $tokenArray = [
             "iss" => Yii::$app->id,
             "iat" => $time,
             "nbf" => $time,
-            "data" => $data,
         ];
+        $tokenArray = array_merge($tokenArray, $data);
+
+        // add in expire time if set
         if ($expire) {
             $tokenArray["exp"] = $time + $expire;
         }
+
         return JWT::encode($tokenArray, $this->key, $this->algorithm);
     }
 

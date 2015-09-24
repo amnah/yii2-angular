@@ -63,7 +63,7 @@ app.run(['User', function(User) {
     // attempt to set up user from jwt. this is faster than waiting for the automatic refresh
     var jwtToken = User.parseJwt();
     if (jwtToken) {
-        User.setUser(jwtToken.data);
+        User.setUser(jwtToken.user);
     }
 }]);
 

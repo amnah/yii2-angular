@@ -27,7 +27,6 @@ class PublicController extends BaseController
         ];
 
         unset($behaviors["jwtAuth"]);
-
         return $behaviors;
     }
 
@@ -56,7 +55,7 @@ class PublicController extends BaseController
         if (!$payload) {
             return ["success" => null];
         }
-        return ["success" => $payload->data];
+        return ["success" => $payload->user];
     }
 
     /**
@@ -78,7 +77,7 @@ class PublicController extends BaseController
             return $failure;
         }
 
-        $user = User::findIdentityByAccessToken($payload->data);
+        $user = User::findIdentityByAccessToken($payload->accessToken);
         if ($user) {
             return ["success" => $user->generateJwt($jwtExpire, $jwtRefreshExpire)];
         }
