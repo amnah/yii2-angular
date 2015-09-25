@@ -7,6 +7,7 @@ use Exception;
 use Yii;
 use yii\filters\auth\HttpBearerAuth;
 use yii\base\InvalidConfigException;
+use yii\web\IdentityInterface;
 use Firebase\JWT\JWT;
 
 class JwtAuth extends HttpBearerAuth
@@ -112,6 +113,8 @@ class JwtAuth extends HttpBearerAuth
         if (!$payload) {
             return null;
         }
-        return $payload->data;
+        /* @var $class IdentityInterface */
+        $class = $user->identityClass;
+        return $class::findIdentity($payload->user->id);
     }
 }
