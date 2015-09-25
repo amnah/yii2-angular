@@ -5,9 +5,10 @@ namespace app\components;
 use Exception;
 
 use Yii;
-use yii\filters\auth\HttpBearerAuth;
 use yii\base\InvalidConfigException;
+use yii\filters\auth\HttpBearerAuth;
 use yii\web\IdentityInterface;
+use yii\web\Request;
 use Firebase\JWT\JWT;
 
 class JwtAuth extends HttpBearerAuth
@@ -18,20 +19,25 @@ class JwtAuth extends HttpBearerAuth
     public $key;
 
     /**
-     * @var string jwt algorithm
+     * @var string Jwt algorithm
      */
     public $algorithm = 'HS256';
 
     /**
-     * @var int jwt expiration leeway
-     * @link https://github.com/firebase/php-jwt#example
+     * @var int Expiration
      */
-    public $leeway = 30; // 30 seconds
+    public $expire = 604800; // 1 week
 
     /**
-     * @var mixed payload data
+     * @var int Jwt expiration leeway
+     * @link https://github.com/firebase/php-jwt#example
      */
-    private $payload = null;
+    public $leeway = 0; // 30 seconds
+
+    /**
+     * @var object Payload data in Authorization Bearer
+     */
+    private $headerPayload = null;
 
     /**
      * @inheritdoc
@@ -45,12 +51,12 @@ class JwtAuth extends HttpBearerAuth
 
     /**
      * Encode data into jwt string
-     * @param mixed $data
-     * @param int $expire seconds
+     * @param array $data
+     * @param null|int $expire seconds from current time
      * @return string
      * @link http://websec.io/2014/08/04/Securing-Requests-with-JWT.html
      */
-    public function encode($data, $expire = 0)
+    public function encode($data, $expire = null)
     {
         // build token data
         $time = time();
@@ -62,6 +68,7 @@ class JwtAuth extends HttpBearerAuth
         $tokenArray = array_merge($tokenArray, $data);
 
         // add in expire time if set
+        $expire = $expire === null ? $this->expire : $expire;
         if ($expire) {
             $tokenArray["exp"] = $time + $expire;
         }
@@ -86,25 +93,6 @@ class JwtAuth extends HttpBearerAuth
     }
 
     /**
-     * Get payload from request headers
-     * @param \yii\web\Request $request
-     * @return bool|object
-     */
-    public function getHeaderPayload($request = null)
-    {
-        if ($this->payload === null) {
-            $this->payload = false;
-            $request = $request ?: Yii::$app->request;
-            $authHeader = $request->getHeaders()->get('Authorization');
-            if ($authHeader !== null && preg_match("/^Bearer\\s+(.*?)$/", $authHeader, $matches)) {
-                $this->payload = $this->decode($matches[1]);
-            }
-        }
-
-        return $this->payload;
-    }
-
-    /**
      * @inheritdoc
      */
     public function authenticate($user, $request, $response)
@@ -113,8 +101,28 @@ class JwtAuth extends HttpBearerAuth
         if (!$payload) {
             return null;
         }
+
         /* @var $class IdentityInterface */
         $class = $user->identityClass;
         return $class::findIdentity($payload->user->id);
+    }
+
+    /**
+     * Get payload from request headers
+     * @param Request $request
+     * @return bool|object
+     */
+    public function getHeaderPayload($request = null)
+    {
+        if ($this->headerPayload === null) {
+            $this->headerPayload = false;
+            $request = $request ?: Yii::$app->request;
+            $authHeader = $request->getHeaders()->get('Authorization');
+            if ($authHeader !== null && preg_match("/^Bearer\\s+(.*?)$/", $authHeader, $matches)) {
+                $this->headerPayload = $this->decode($matches[1]);
+            }
+        }
+
+        return $this->headerPayload;
     }
 }
