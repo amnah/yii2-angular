@@ -14,22 +14,13 @@ var app = angular.module('App', [
 // -------------------------------------------------------------
 app.config(['$routeProvider', function($routeProvider) {
 
-    $routeProvider.
-        when('/about', {
-            templateUrl: '/partials/about.html'
-        }).
-        when('/contact', {
-            templateUrl: '/partials/contact.html'
-        }).
-        when('/register', {
-            templateUrl: '/partials/register.html'
-        }).
-        when('/login', {
-            templateUrl: '/partials/login.html'
-        }).
-        otherwise({
-            templateUrl: '/partials/index.html'
-        });
+    var staticPaths = ['about', 'contact', 'register', 'login'];
+
+    for (var i=0; i<staticPaths.length; i++) {
+        var path = staticPaths[i];
+        $routeProvider.when('/' + path, {templateUrl: '/partials/' + path + '.html'});
+    }
+    $routeProvider.otherwise({templateUrl: '/partials/index.html'});
 }]);
 
 // -----------------------------------------------------------------
