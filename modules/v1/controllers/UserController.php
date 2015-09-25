@@ -16,6 +16,6 @@ class UserController extends \app\controllers\api\BaseController
         if (!$payload) {
             return ["success" => null];
         }
-        return ["success" => $payload->data];
+        return ["success" => $payload->user];
     }
 }
