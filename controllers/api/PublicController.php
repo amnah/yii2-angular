@@ -67,9 +67,7 @@ class PublicController extends BaseController
         /** @var User $user */
         $jwtAuth = Yii::$app->jwtAuth;
 
-        $jwtExpire = Yii::$app->params["jwtExpire"];
-        $jwtRefreshExpire = Yii::$app->params["jwtRefreshExpire"];
-
+        // decode jwt
         $failure = ["success" => null];
         $jwtRefresh = Yii::$app->request->post("jwtRefresh");
         $payload = $jwtAuth->decode($jwtRefresh);
@@ -77,9 +75,10 @@ class PublicController extends BaseController
             return $failure;
         }
 
-        $user = User::findIdentityByAccessToken($payload->accessToken);
+        // attempt to find user and generate auth data
+        $user = User::findIdentityByAccessToken($payload->token);
         if ($user) {
-            return ["success" => $user->generateJwt($jwtExpire, $jwtRefreshExpire)];
+            return ["success" => $user->generateAuthJwtData($payload->rememberMe)];
         }
         return $failure;
     }
@@ -89,14 +88,12 @@ class PublicController extends BaseController
      */
     public function actionLogin()
     {
-        $jwtExpire = Yii::$app->params["jwtExpire"];
-        $jwtRefreshExpire = Yii::$app->params["jwtRefreshExpire"];
-
         // notice that we set the second parameter $formName = ""
         $loginForm = new LoginForm();
         $loginForm->load(Yii::$app->request->post(), "");
         if ($loginForm->validate()) {
-            return ["success" => $loginForm->getUser()->generateJwt($jwtExpire, $jwtRefreshExpire)];
+            $authJwtData = $loginForm->getUser()->generateAuthJwtData($loginForm->rememberMe);
+            return ["success" => $authJwtData];
         }
         return ["errors" => $loginForm->errors];
     }
@@ -114,14 +111,12 @@ class PublicController extends BaseController
      */
     public function actionRegister()
     {
-        $jwtExpire = Yii::$app->params["jwtExpire"];
-        $jwtRefreshExpire = Yii::$app->params["jwtRefreshExpire"];
-
         // attempt to register user
         /** @var User $user */
         $user = User::register(Yii::$app->request->post());
+        $rememberMe = true;
         if (!is_array($user)) {
-            return ["success" => $user->generateJwt($jwtExpire, $jwtRefreshExpire)];
+            return ["success" => $user->generateAuthJwtData($rememberMe)];
         }
         return ["errors" => $user];
     }

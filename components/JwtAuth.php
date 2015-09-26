@@ -7,9 +7,9 @@ use Exception;
 use Yii;
 use yii\base\InvalidConfigException;
 use yii\filters\auth\HttpBearerAuth;
-use yii\web\IdentityInterface;
 use yii\web\Request;
 use Firebase\JWT\JWT;
+use app\models\User;
 
 class JwtAuth extends HttpBearerAuth
 {
@@ -21,18 +21,29 @@ class JwtAuth extends HttpBearerAuth
     /**
      * @var string Jwt algorithm
      */
-    public $algorithm = 'HS256';
+    public $algorithm = "HS256";
 
     /**
-     * @var int Expiration
+     * @var int|string Token expiration - integer = seconds, string = strtotime()
+     *                 Example: "+5 minutes" = 300
      */
-    public $expire = 604800; // 1 week
+    public $exp = "+5 minutes";
 
     /**
-     * @var int Jwt expiration leeway
+     * @var int|string Refresh token expiration
+     */
+    public $expRefresh = "+1 week";
+
+    /**
+     * @var int|string Refresh token when user doesn't use "remember me"
+     */
+    public $expRefreshNoRemember = "+2 hrs";
+
+    /**
+     * @var int Jwt expiration leeway (in seconds)
      * @link https://github.com/firebase/php-jwt#example
      */
-    public $leeway = 0; // 30 seconds
+    public $leeway = 30;
 
     /**
      * @var object Payload data in Authorization Bearer
@@ -45,18 +56,49 @@ class JwtAuth extends HttpBearerAuth
     public function init()
     {
         if (empty($this->key)) {
-            throw new InvalidConfigException(get_class($this) . '::key must be configured with a secret key.');
+            throw new InvalidConfigException(get_class($this) . "::key must be configured with a secret key.");
         }
+    }
+
+    /**
+     * @inheritdoc
+     */
+    public function authenticate($user, $request, $response)
+    {
+        $payload = $this->getHeaderPayload($request);
+        if (!$payload) {
+            return null;
+        }
+        return User::findIdentity($payload->user->id);
+    }
+
+    /**
+     * Get payload from request headers
+     * @param Request $request
+     * @return bool|object
+     */
+    public function getHeaderPayload($request = null)
+    {
+        if ($this->headerPayload === null) {
+            $this->headerPayload = false;
+            $request = $request ?: Yii::$app->request;
+            $authHeader = $request->getHeaders()->get("Authorization");
+            if ($authHeader !== null && preg_match("/^Bearer\\s+(.*?)$/", $authHeader, $matches)) {
+                $this->headerPayload = $this->decode($matches[1]);
+            }
+        }
+
+        return $this->headerPayload;
     }
 
     /**
      * Encode data into jwt string
      * @param array $data
-     * @param null|int $expire seconds from current time
+     * @param int|string $exp seconds from current time
      * @return string
      * @link http://websec.io/2014/08/04/Securing-Requests-with-JWT.html
      */
-    public function encode($data, $expire = null)
+    public function encode($data, $exp = null)
     {
         // build token data
         $time = time();
@@ -68,9 +110,9 @@ class JwtAuth extends HttpBearerAuth
         $tokenArray = array_merge($tokenArray, $data);
 
         // add in expire time if set
-        $expire = $expire === null ? $this->expire : $expire;
-        if ($expire) {
-            $tokenArray["exp"] = $time + $expire;
+        $exp = $exp === null ? $this->exp : $exp;
+        if ($exp) {
+            $tokenArray["exp"] = is_string($exp) ? strtotime($exp) : $time + $exp;
         }
 
         return JWT::encode($tokenArray, $this->key, $this->algorithm);
@@ -93,36 +135,46 @@ class JwtAuth extends HttpBearerAuth
     }
 
     /**
-     * @inheritdoc
+     * Get exp time in seconds (convert string)
+     * @param int|string $exp
+     * @return int
      */
-    public function authenticate($user, $request, $response)
+    public function getExpInSeconds($exp = null)
     {
-        $payload = $this->getHeaderPayload($request);
-        if (!$payload) {
-            return null;
+        $exp = $exp === null ? $this->exp : $exp;
+        if (is_numeric($exp)) {
+            return $exp;
+        } elseif (is_string($exp)) {
+            return strtotime($exp) - time();
         }
-
-        /* @var $class IdentityInterface */
-        $class = $user->identityClass;
-        return $class::findIdentity($payload->user->id);
+        return 0;
     }
 
     /**
-     * Get payload from request headers
-     * @param Request $request
-     * @return bool|object
+     * Generate a jwt token for user
+     * @param User $user
+     * @return string
      */
-    public function getHeaderPayload($request = null)
+    public function generateUserToken($user)
     {
-        if ($this->headerPayload === null) {
-            $this->headerPayload = false;
-            $request = $request ?: Yii::$app->request;
-            $authHeader = $request->getHeaders()->get('Authorization');
-            if ($authHeader !== null && preg_match("/^Bearer\\s+(.*?)$/", $authHeader, $matches)) {
-                $this->headerPayload = $this->decode($matches[1]);
-            }
-        }
+        return $this->encode([
+            "sub" => $user->getId(),
+            "user" => $user->toArray(),
+        ]);
+    }
 
-        return $this->headerPayload;
+    /**
+     * Generate a jwt refresh token
+     * @param string $token
+     * @param bool $rememberMe
+     * @return string
+     */
+    public function generateRefreshToken($token, $rememberMe)
+    {
+        $exp = $rememberMe ? $this->expRefresh : $this->expRefreshNoRemember;
+        return $this->encode([
+            "token" => $token,
+            "rememberMe" => (int) $rememberMe,
+        ], $exp);
     }
 }

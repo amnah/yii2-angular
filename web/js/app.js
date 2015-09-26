@@ -112,7 +112,7 @@ app.factory('User', ['$window', '$location', '$interval', '$q', '$localStorage',
     // set minimum of once per minute just in case
     var minRefreshTime = 1000*60;
     var refreshInterval;
-    var refreshTime = JWT_REFRESH_TIME;
+    var refreshTime = JWT_REFRESH_TIME; // some leeway is added on the server side
     if (refreshTime < minRefreshTime) {
         refreshTime = minRefreshTime;
     }

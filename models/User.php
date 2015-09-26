@@ -149,24 +149,18 @@ class User extends \yii\base\Object implements \yii\web\IdentityInterface
     }
 
     /**
-     * Generate jwt tokens for user
-     * @param int $jwtExpire jwt expiration
-     * @param int $jwtRefreshExpire jwt refresh expiration
+     * Generate auth data (user and jwt tokens)
+     * @param bool $rememberMe
      * @return boolean whether the user is logged in successfully
      */
-    public function generateJwt($jwtExpire, $jwtRefreshExpire)
+    public function generateAuthJwtData($rememberMe = true)
     {
         /** @var \app\components\JwtAuth $jwtAuth */
         $jwtAuth = Yii::$app->jwtAuth;
-
-        // generate jwt
-        $user = $this->toArray();
-        $jwt = $jwtAuth->encode(["user" => $user], $jwtExpire);
-        $jwtRefresh = $jwtAuth->encode(["accessToken" => $this->accessToken], $jwtRefreshExpire);
         return [
-            "user" => $user,
-            "jwt" => $jwt,
-            "jwtRefresh" => $jwtRefresh,
+            "user" => $this->toArray(),
+            "jwt" => $jwtAuth->generateUserToken($this),
+            "jwtRefresh" => $jwtAuth->generateRefreshToken($this->accessToken, $rememberMe),
         ];
     }
 }
