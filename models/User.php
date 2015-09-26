@@ -141,6 +141,7 @@ class User extends \yii\base\Object implements \yii\web\IdentityInterface
 
         // create user
         return new static([
+            "id" => 102,
             "email" => $email,
             "password" => $password,
             "accessToken" => '102-token',

@@ -5,7 +5,7 @@
 var app = angular.module('App', [
     'ngRoute',
     'ngAnimate',
-    'angular-jwt',
+    'ngStorage',
     'ui.bootstrap'
 ]);
 
@@ -33,11 +33,11 @@ app.config(['$httpProvider', function($httpProvider) {
     $httpProvider.defaults.headers.common["X-Requested-With"] = 'XMLHttpRequest';
 
     // add jwt into http headers
-    $httpProvider.interceptors.push(['$window', function($window) {
+    $httpProvider.interceptors.push(['$localStorage', function($localStorage) {
         return {
             request: function(config) {
-                if ($window.localStorage.jwt) {
-                    config.headers.Authorization = 'Bearer ' + $window.localStorage.jwt;
+                if ($localStorage.jwt) {
+                    config.headers.Authorization = 'Bearer ' + $localStorage.jwt;
                 }
                 return config;
             }
@@ -51,17 +51,14 @@ app.config(['$httpProvider', function($httpProvider) {
 app.run(['User', function(User) {
     User.startJwtRefreshInterval(true);
 
-    // attempt to set up user from jwt. this is faster than waiting for the automatic refresh
-    var jwtToken = User.parseJwt();
-    if (jwtToken) {
-        User.setUser(jwtToken.user);
-    }
+    // attempt to set up user from local storage. this is faster than waiting for the automatic refresh
+    User.loadFromLocalStorage();
 }]);
 
 // -----------------------------------------------------------------
 // Api factory
 // -----------------------------------------------------------------
-app.factory('Api', ['$http', '$q', '$window', '$location', function($http, $q, $window, $location) {
+app.factory('Api', ['$http', '$q', '$location', '$localStorage', function($http, $q, $location, $localStorage) {
 
     var factory = {};
     var apiUrl = API_URL;
@@ -75,7 +72,7 @@ app.factory('Api', ['$http', '$q', '$window', '$location', function($http, $q, $
         // process 401 by redirecting to login page
         // otherwise just alert the error
         if (res.status == 401) {
-            $window.localStorage.loginUrl = $location.path();
+            $localStorage.loginUrl = $location.path();
             $location.path('/login').replace();
         } else {
             var error = '[ ' + res.status + ' ] ' + (res.data.message || res.statusText);
@@ -107,7 +104,7 @@ app.factory('Api', ['$http', '$q', '$window', '$location', function($http, $q, $
 // -----------------------------------------------------------------
 // User factory
 // -----------------------------------------------------------------
-app.factory('User', ['$window', '$location', '$interval', '$q', 'Api', 'jwtHelper', function($window, $location, $interval, $q, Api, jwtHelper) {
+app.factory('User', ['$window', '$location', '$interval', '$q', '$localStorage', 'Api', function($window, $location, $interval, $q, $localStorage, Api) {
 
     var factory = {};
     var user;
@@ -134,7 +131,7 @@ app.factory('User', ['$window', '$location', '$interval', '$q', 'Api', 'jwtHelpe
 
     // get login url via (1) local storage or (2) fallbackUrl
     factory.getLoginUrl = function(fallbackUrl) {
-        var loginUrl = $window.localStorage.loginUrl;
+        var loginUrl = $localStorage.loginUrl;
         if (!loginUrl && fallbackUrl) {
             loginUrl = fallbackUrl;
         }
@@ -146,7 +143,7 @@ app.factory('User', ['$window', '$location', '$interval', '$q', 'Api', 'jwtHelpe
 
     factory.redirect = function(url) {
         url = url ? url : '';
-        $window.localStorage.loginUrl = '';
+        $localStorage.loginUrl = '';
         $location.path(url).replace();
     };
 
@@ -163,7 +160,7 @@ app.factory('User', ['$window', '$location', '$interval', '$q', 'Api', 'jwtHelpe
     };
 
     factory.doJwtRefresh = function() {
-        var jwtRefresh = $window.localStorage.jwtRefresh;
+        var jwtRefresh = $localStorage.jwtRefresh;
         if (jwtRefresh) {
             Api.post('public/jwt-refresh', {jwtRefresh: jwtRefresh}).then(function (data) {
                 factory.setUserAndJwt(data);
@@ -171,15 +168,8 @@ app.factory('User', ['$window', '$location', '$interval', '$q', 'Api', 'jwtHelpe
         }
     };
 
-    factory.parseJwt = function(jwt) {
-        // get jwt from input or local storage
-        jwt = jwt || $window.localStorage.jwt;
-        return jwt ? jwtHelper.decodeToken(jwt) : null;
-    };
-
-    factory.checkJwtExpired = function(jwt) {
-        jwt = jwt || $window.localStorage.jwt;
-        return jwt ? jwtHelper.isTokenExpired(jwt) : true;
+    factory.loadFromLocalStorage = function() {
+        user = $localStorage.user;
     };
 
     factory.setUser = function(userData) {
@@ -188,12 +178,13 @@ app.factory('User', ['$window', '$location', '$interval', '$q', 'Api', 'jwtHelpe
 
     factory.setUserAndJwt = function(data) {
         user = null;
-        $window.localStorage.jwt = '';
-        $window.localStorage.jwtRefresh = '';
+        $localStorage.jwt = '';
+        $localStorage.jwtRefresh = '';
         if (data && data.success && data.success.user) {
             user = data.success.user;
-            $window.localStorage.jwt = data.success.jwt;
-            $window.localStorage.jwtRefresh = data.success.jwtRefresh;
+            $localStorage.user = data.success.user;
+            $localStorage.jwt = data.success.jwt;
+            $localStorage.jwtRefresh = data.success.jwtRefresh;
         }
     };
 

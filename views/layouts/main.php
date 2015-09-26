@@ -76,7 +76,7 @@ $appName = "Yii 2 Angular";
 <script src="/vendor/angular/1.4.6/angular<?= $min ?>.js"></script>
 <script src="/vendor/angular/1.4.6/angular-animate<?= $min ?>.js"></script>
 <script src="/vendor/angular/1.4.6/angular-route<?= $min ?>.js"></script>
-<script src="/vendor/angular-jwt/0.0.9/angular-jwt<?= $min ?>.js"></script>
+<script src="/vendor/ngStorage/0.3.9/ngStorage<?= $min ?>.js"></script>
 <script src="/vendor/ui-bootstrap/ui-bootstrap-tpls-0.13.4<?= $min ?>.js"></script>
 <script src="/js/app.js"></script>
 
