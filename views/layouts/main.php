@@ -20,11 +20,11 @@ $appName = "Yii 2 Angular";
     <link rel="stylesheet" type="text/css" href="/vendor/bootstrap/3.3.5/bootstrap<?= $min ?>.css" />
     <link rel="stylesheet" type="text/css" href="/css/site.css" />
 </head>
-<body ng-app="App">
+<body ng-app="app">
 <?php $this->beginBody() ?>
 
 <div class="wrap">
-    <nav id="w0" class="navbar-inverse navbar-fixed-top navbar" role="navigation" ng-controller="NavController">
+    <nav id="w0" class="navbar-inverse navbar-fixed-top navbar" role="navigation" ng-controller="NavCtrl">
         <div class="container">
             <div class="navbar-header">
                 <button type="button" class="navbar-toggle" ng-click="isCollapsed=!isCollapsed">

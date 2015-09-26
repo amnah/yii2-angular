@@ -1,32 +1,49 @@
 
 // -------------------------------------------------------------
 // Angular App
+// This is based off of this style guide:
+// https://github.com/toddmotto/angularjs-styleguide
 // -------------------------------------------------------------
-var app = angular.module('App', [
+angular.module('app', [
+    // angular modules
     'ngRoute',
     'ngAnimate',
+
+    // third party modules
     'ngStorage',
     'ui.bootstrap'
+
+    // custom modules
+
 ]);
 
 // -------------------------------------------------------------
 // Routes
 // -------------------------------------------------------------
-app.config(['$routeProvider', function($routeProvider) {
+angular
+    .module('app')
+    .config(routeConfig);
+
+// @ngInject
+function routeConfig($routeProvider) {
 
     var staticPaths = ['about', 'contact', 'register', 'login'];
-
     for (var i=0; i<staticPaths.length; i++) {
         var path = staticPaths[i];
         $routeProvider.when('/' + path, {templateUrl: '/partials/' + path + '.html'});
     }
     $routeProvider.otherwise({templateUrl: '/partials/index.html'});
-}]);
+}
 
 // -----------------------------------------------------------------
 // Set up ajax requests and jwt processing
 // -----------------------------------------------------------------
-app.config(['$httpProvider', function($httpProvider) {
+angular
+    .module('app')
+    .config(ajaxConfig);
+
+// @ngInject
+function ajaxConfig($httpProvider) {
 
     // set up ajax requests
     // http://www.yiiframework.com/forum/index.php/topic/62721-yii2-and-angularjs-post/
@@ -43,45 +60,34 @@ app.config(['$httpProvider', function($httpProvider) {
             }
         };
     }]);
-}]);
+}
 
 // -----------------------------------------------------------------
 // Initialization
 // -----------------------------------------------------------------
-app.run(['User', function(User) {
-    User.startJwtRefreshInterval(true);
+angular
+    .module('app')
+    .run(appInit);
 
+// @ngInject
+function appInit(User) {
     // attempt to set up user from local storage. this is faster than waiting for the automatic refresh
     User.loadFromLocalStorage();
-}]);
+    User.startJwtRefreshInterval(true);
+}
 
 // -----------------------------------------------------------------
 // Api factory
 // -----------------------------------------------------------------
-app.factory('Api', ['$http', '$q', '$location', '$localStorage', function($http, $q, $location, $localStorage) {
+angular
+    .module('app')
+    .factory('Api', Api);
+
+// @ngInject
+function Api($http, $q, $location, $localStorage) {
 
     var factory = {};
     var apiUrl = API_URL;
-
-    // process ajax success/error calls
-    var processAjaxSuccess = function(res) {
-        return res.data;
-    };
-    var processAjaxError = function(res) {
-
-        // process 401 by redirecting to login page
-        // otherwise just alert the error
-        if (res.status == 401) {
-            $localStorage.loginUrl = $location.path();
-            $location.path('/login').replace();
-        } else {
-            var error = '[ ' + res.status + ' ] ' + (res.data.message || res.statusText);
-            alert(error);
-        }
-
-        // calculate and return error msg
-        return $q.reject(res);
-    };
 
     // define REST functions
     factory.get = function(url, data) {
@@ -99,12 +105,37 @@ app.factory('Api', ['$http', '$q', '$location', '$localStorage', function($http,
     };
 
     return factory;
-}]);
+
+    // process ajax success/error calls
+    function processAjaxSuccess(res) {
+        return res.data;
+    }
+    function processAjaxError(res) {
+
+        // process 401 by redirecting to login page
+        // otherwise just alert the error
+        if (res.status == 401) {
+            $localStorage.loginUrl = $location.path();
+            $location.path('/login').replace();
+        } else {
+            var error = '[ ' + res.status + ' ] ' + (res.data.message || res.statusText);
+            alert(error);
+        }
+
+        // calculate and return error msg
+        return $q.reject(res);
+    }
+}
 
 // -----------------------------------------------------------------
 // User factory
 // -----------------------------------------------------------------
-app.factory('User', ['$window', '$location', '$interval', '$q', '$localStorage', 'Api', function($window, $location, $interval, $q, $localStorage, Api) {
+angular
+    .module('app')
+    .factory('User', User);
+
+// @ngInject
+function User($window, $location, $interval, $q, $localStorage, Api) {
 
     var factory = {};
     var user;
@@ -178,6 +209,7 @@ app.factory('User', ['$window', '$location', '$interval', '$q', '$localStorage',
 
     factory.setUserAndJwt = function(data) {
         user = null;
+        $localStorage.user = '';
         $localStorage.jwt = '';
         $localStorage.jwtRefresh = '';
         if (data && data.success && data.success.user) {
@@ -219,12 +251,17 @@ app.factory('User', ['$window', '$location', '$interval', '$q', '$localStorage',
     };
 
     return factory;
-}]);
+}
 
 // -------------------------------------------------------------
 // Nav controller
 // -------------------------------------------------------------
-app.controller('NavController', ['$scope', 'User', function($scope, User) {
+angular
+    .module('app')
+    .controller('NavCtrl', NavCtrl);
+
+// @ngInject
+function NavCtrl($scope, User) {
 
     $scope.User = User;
     $scope.isCollapsed = true;
@@ -234,12 +271,17 @@ app.controller('NavController', ['$scope', 'User', function($scope, User) {
             // do something
         });
     };
-}]);
+}
 
 // -------------------------------------------------------------
 // Contact controller
 // -------------------------------------------------------------
-app.controller('ContactController', ['$scope', 'Api', 'User', function($scope, Api, User) {
+angular
+    .module('app')
+    .controller('ContactCtrl', ContactCtrl);
+
+// @ngInject
+function ContactCtrl($scope, Api, User) {
 
     $scope.errors = {};
     $scope.sitekey = RECAPTCHA_SITEKEY;
@@ -288,12 +330,17 @@ app.controller('ContactController', ['$scope', 'Api', 'User', function($scope, A
             }
         });
     };
-}]);
+}
 
 // -------------------------------------------------------------
 // Login controller
 // -------------------------------------------------------------
-app.controller('LoginController', ['$scope', 'User', function($scope, User) {
+angular
+    .module('app')
+    .controller('LoginCtrl', LoginCtrl);
+
+// @ngInject
+function LoginCtrl($scope, User) {
 
     $scope.errors = {};
     $scope.loginUrl = User.getLoginUrl();
@@ -317,12 +364,17 @@ app.controller('LoginController', ['$scope', 'User', function($scope, User) {
             }
         });
     };
-}]);
+}
 
 // -------------------------------------------------------------
 // Register controller
 // -------------------------------------------------------------
-app.controller('RegisterController', ['$scope', 'User', function($scope, User) {
+angular
+    .module('app')
+    .controller('RegisterCtrl', RegisterCtrl);
+
+// @ngInject
+function RegisterCtrl($scope, User) {
 
     $scope.errors = {};
     $scope.sitekey = RECAPTCHA_SITEKEY;
@@ -367,4 +419,4 @@ app.controller('RegisterController', ['$scope', 'User', function($scope, User) {
             }
         });
     };
-}]);
+}
