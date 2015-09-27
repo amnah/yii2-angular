@@ -3,8 +3,6 @@
 /* @var $this \yii\web\View */
 /* @var $content string */
 
-use yii\helpers\Url;
-
 $min = YII_ENV_PROD ? ".min" : "";
 $appName = "Yii 2 Angular";
 
@@ -78,7 +76,7 @@ $appName = "Yii 2 Angular";
 <script src="/vendor/angular/1.4.6/angular-route<?= $min ?>.js"></script>
 <script src="/vendor/ngStorage/0.3.9/ngStorage<?= $min ?>.js"></script>
 <script src="/vendor/ui-bootstrap/ui-bootstrap-tpls-0.13.4<?= $min ?>.js"></script>
-<script src="/js/app.js"></script>
+<script src="/assets/compiled/app.compiled<?= $min ?>.js"></script>
 
 <?php if (getenv("RECAPTCHA_SITEKEY")): ?>
     <script src="https://www.google.com/recaptcha/api.js?onload=recaptchaLoaded&render=explicit" async defer></script>

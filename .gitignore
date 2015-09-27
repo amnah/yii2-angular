@@ -28,3 +28,6 @@ phpunit.phar
 
 # dotenv file
 .env
+
+# node
+node_modules
