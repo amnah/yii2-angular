@@ -1,10 +1,10 @@
 
-<div class="site-contact ng-cloak" ng-controller="ContactCtrl">
+<div class="site-contact ng-cloak" ng-controller="ContactCtrl as vm">
     <h1>Contact</h1>
 
-    <div class="success" ng-show="errors === false">
+    <div class="success" ng-show="vm.errors === false">
         <div class="alert alert-success">
-            Thank you for contacting us [ {{ successName }} ]. We will respond to you as soon as possible.
+            Thank you for contacting us [ {{ vm.ContactForm.name }} ]. We will respond to you as soon as possible.
         </div>
 
         <p>
@@ -28,35 +28,35 @@
 
     <div class="row">
         <div class="col-lg-5">
-            <form id="contact-form" role="form" ng-submit="submit()">
+            <form id="contact-form" role="form" ng-submit="vm.submit()">
 
-                <div class="form-group" ng-class="{'has-error': errors.name}">
+                <div class="form-group" ng-class="{'has-error': vm.errors.name}">
                     <label class="control-label" for="contactform-name">Name</label>
-                    <input type="text" id="contactform-name" class="form-control" ng-model="ContactForm.name">
-                    <p class="help-block help-block-error">{{ errors.name[0] }}</p>
+                    <input type="text" id="contactform-name" class="form-control" ng-model="vm.ContactForm.name">
+                    <p class="help-block help-block-error">{{ vm.errors.name[0] }}</p>
                 </div>
-                <div class="form-group" ng-class="{'has-error': errors.email}">
+                <div class="form-group" ng-class="{'has-error': vm.errors.email}">
                     <label class="control-label" for="contactform-email">Email</label>
-                    <input type="text" id="contactform-email" class="form-control" ng-model="ContactForm.email">
-                    <p class="help-block help-block-error">{{ errors.email[0] }}</p>
+                    <input type="text" id="contactform-email" class="form-control" ng-model="vm.ContactForm.email">
+                    <p class="help-block help-block-error">{{ vm.errors.email[0] }}</p>
                 </div>
-                <div class="form-group" ng-class="{'has-error': errors.subject}">
+                <div class="form-group" ng-class="{'has-error': vm.errors.subject}">
                     <label class="control-label" for="contactform-subject">Subject</label>
-                    <input type="text" id="contactform-subject" class="form-control" ng-model="ContactForm.subject">
-                    <p class="help-block help-block-error">{{ errors.subject[0] }}</p>
+                    <input type="text" id="contactform-subject" class="form-control" ng-model="vm.ContactForm.subject">
+                    <p class="help-block help-block-error">{{ vm.errors.subject[0] }}</p>
                 </div>
-                <div class="form-group" ng-class="{'has-error': errors.body}">
+                <div class="form-group" ng-class="{'has-error': vm.errors.body}">
                     <label class="control-label" for="contactform-body">Body</label>
-                    <textarea id="contactform-body" class="form-control" rows="6" ng-model="ContactForm.body"></textarea>
-                    <p class="help-block help-block-error">{{ errors.body[0] }}</p>
+                    <textarea id="contactform-body" class="form-control" rows="6" ng-model="vm.ContactForm.body"></textarea>
+                    <p class="help-block help-block-error">{{ vm.errors.body[0] }}</p>
                 </div>
-                <div class="form-group" ng-class="{'has-error': errors.captcha}" ng-show="sitekey">
+                <div class="form-group" ng-class="{'has-error': vm.errors.captcha}" ng-show="vm.sitekey">
                     <label class="control-label">Captcha</label>
                     <div id="contact-captcha"></div>
-                    <p class="help-block help-block-error">{{ errors.captcha[0] }}</p>
+                    <p class="help-block help-block-error">{{ vm.errors.captcha[0] }}</p>
                 </div>
                 <div class="form-group">
-                    <button type="submit" class="btn btn-primary" ng-disabled="submitting">Submit</button>
+                    <button type="submit" class="btn btn-primary" ng-disabled="vm.submitting">Submit</button>
                 </div>
 
             </form>

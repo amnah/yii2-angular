@@ -1,46 +1,46 @@
 
-<div class="site-register ng-cloak" ng-controller="RegisterCtrl">
+<div class="site-register ng-cloak" ng-controller="RegisterCtrl as vm">
     <h1>Register</h1>
 
-    <div class="success" ng-show="errors === false">
+    <div class="success" ng-show="vm.errors === false">
         <div class="alert alert-success">
-            User [ {{ successName }} ] created
+            User [ {{ vm.RegisterForm.email }} ] created
         </div>
     </div>
 
-    <div ng-show="errors !== false">
+    <div ng-show="vm.errors !== false">
         <p>Please fill out the following fields to register:</p>
 
-        <form id="register-form" class="form-horizontal" role="form" ng-submit="submit()">
+        <form id="register-form" class="form-horizontal" role="form" ng-submit="vm.submit()">
 
-            <div class="form-group" ng-class="{'has-error': errors.email}">
+            <div class="form-group" ng-class="{'has-error': vm.errors.email}">
                 <label class="col-lg-1 control-label" for="registerform-email">Email</label>
                 <div class="col-lg-3">
-                    <input type="text" id="registerform-email" class="form-control" ng-model="RegisterForm.email">
+                    <input type="text" id="registerform-email" class="form-control" ng-model="vm.RegisterForm.email">
                 </div>
                 <div class="col-lg-8">
-                    <p class="help-block help-block-error">{{ errors.email[0] }}</p>
+                    <p class="help-block help-block-error">{{ vm.errors.email[0] }}</p>
                 </div>
             </div>
-            <div class="form-group" ng-class="{'has-error': errors.password}">
+            <div class="form-group" ng-class="{'has-error': vm.errors.password}">
                 <label class="col-lg-1 control-label" for="registerform-password">Password</label>
                 <div class="col-lg-3">
-                    <input type="password" id="registerform-password" class="form-control" ng-model="RegisterForm.password">
+                    <input type="password" id="registerform-password" class="form-control" ng-model="vm.RegisterForm.password">
                 </div>
                 <div class="col-lg-8">
-                    <p class="help-block help-block-error">{{ errors.password[0] }}</p>
+                    <p class="help-block help-block-error">{{ vm.errors.password[0] }}</p>
                 </div>
             </div>
-            <div class="form-group" ng-class="{'has-error': errors.captcha}" ng-show="RECAPTCHA_SITEKEY">
+            <div class="form-group" ng-class="{'has-error': vm.errors.captcha}" ng-show="vm.sitekey">
                 <label class="col-lg-1 control-label">Captcha</label>
                 <div class="col-lg-3">
                     <div id="register-captcha"></div>
                 </div>
-                <p class="help-block help-block-error">{{ errors.captcha[0] }}</p>
+                <p class="help-block help-block-error">{{ vm.errors.captcha[0] }}</p>
             </div>
             <div class="form-group">
                 <div class="col-lg-offset-1 col-lg-11">
-                    <button type="submit" class="btn btn-primary" ng-disabled="submitting">Register</button>
+                    <button type="submit" class="btn btn-primary" ng-disabled="vm.submitting">Register</button>
                 </div>
             </div>
 

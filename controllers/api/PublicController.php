@@ -37,7 +37,8 @@ class PublicController extends BaseController
     {
         $model = new ContactForm();
         $toEmail = Yii::$app->params["adminEmail"];
-        if ($model->load(Yii::$app->request->post(), "") && $model->contact($toEmail)) {
+        $model->load(Yii::$app->request->post(), "");
+        if ($model->contact($toEmail)) {
             return ["success" => true];
         }
         return ["errors" => $model->errors];

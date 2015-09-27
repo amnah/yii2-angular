@@ -24,26 +24,26 @@ $appName = "Yii 2 Angular";
 <?php $this->beginBody() ?>
 
 <div class="wrap">
-    <nav id="w0" class="navbar-inverse navbar-fixed-top navbar" role="navigation" ng-controller="NavCtrl">
+    <nav id="w0" class="navbar-inverse navbar-fixed-top navbar" role="navigation" ng-controller="NavCtrl as vm">
         <div class="container">
             <div class="navbar-header">
-                <button type="button" class="navbar-toggle" ng-click="isCollapsed=!isCollapsed">
+                <button type="button" class="navbar-toggle" ng-click="vm.isCollapsed=!vm.isCollapsed">
                     <span class="sr-only">Toggle navigation</span>
                     <span class="icon-bar"></span>
                     <span class="icon-bar"></span>
                     <span class="icon-bar"></span>
                 </button>
-                <a class="navbar-brand" href="/#/" ng-click="isCollapsed=true"><?= $appName ?></a>
+                <a class="navbar-brand" href="/#/" ng-click="vm.isCollapsed=true"><?= $appName ?></a>
             </div>
-            <div class="collapse navbar-collapse" collapse="isCollapsed">
+            <div class="collapse navbar-collapse" collapse="vm.isCollapsed">
                 <ul id="w1" class="navbar-nav navbar-right ng-cloak nav">
-                    <li><a href="/#/about" ng-click="isCollapsed=true">About</a></li>
-                    <li><a href="/#/contact" ng-click="isCollapsed=true">Contact</a></li>
-                    <li ng-show="!User.isLoggedIn()"><a href="/#/login" ng-click="isCollapsed=true">Login</a></li>
-                    <li ng-show="!User.isLoggedIn()"><a href="/#/register" ng-click="isCollapsed=true">Register</a></li>
-                    <li ng-show="User.isLoggedIn()">
-                        <a ng-click="logout()">
-                            Logout ({{ User.getAttribute('email') }})
+                    <li><a href="/#/about" ng-click="vm.isCollapsed=true">About</a></li>
+                    <li><a href="/#/contact" ng-click="vm.isCollapsed=true">Contact</a></li>
+                    <li ng-show="!vm.User.isLoggedIn()"><a href="/#/login" ng-click="vm.isCollapsed=true">Login</a></li>
+                    <li ng-show="!vm.User.isLoggedIn()"><a href="/#/register" ng-click="vm.isCollapsed=true">Register</a></li>
+                    <li ng-show="vm.User.isLoggedIn()">
+                        <a ng-click="vm.logout()">
+                            Logout ({{ vm.User.getAttribute('email') }})
                         </a>
                     </li>
                 </ul>

@@ -1,6 +1,6 @@
 
 // -------------------------------------------------------------
-// Angular App
+//Angular App
 // This is based off of this style guide:
 // https://github.com/toddmotto/angularjs-styleguide
 // -------------------------------------------------------------
@@ -8,13 +8,10 @@ angular.module('app', [
     // angular modules
     'ngRoute',
     'ngAnimate',
-
     // third party modules
     'ngStorage',
     'ui.bootstrap'
-
     // custom modules
-
 ]);
 
 // -------------------------------------------------------------
@@ -261,12 +258,13 @@ angular
     .controller('NavCtrl', NavCtrl);
 
 // @ngInject
-function NavCtrl($scope, User) {
+function NavCtrl(User) {
 
-    $scope.User = User;
-    $scope.isCollapsed = true;
+    var vm = this;
+    vm.User = User;
+    vm.isCollapsed = true;
 
-    $scope.logout = function() {
+    vm.logout = function() {
         User.logout().then(function(data) {
             // do something
         });
@@ -281,52 +279,41 @@ angular
     .controller('ContactCtrl', ContactCtrl);
 
 // @ngInject
-function ContactCtrl($scope, Api, User) {
+function ContactCtrl(Api, User) {
 
-    $scope.errors = {};
-    $scope.sitekey = RECAPTCHA_SITEKEY;
-    $scope.successName = '';
-    $scope.ContactForm = {
-        name: '',
-        email: User.getAttribute('email'),
-        subject: '',
-        body: '',
-        captcha: ''
-    };
+    var vm = this;
+    vm.errors = {};
+    vm.sitekey = RECAPTCHA_SITEKEY;
+    vm.ContactForm = { email: User.getAttribute('email') };
 
     // set up and store grecaptcha data
     var recaptchaId;
     var grecaptchaObj;
-    if (RECAPTCHA_SITEKEY) {
+    if (vm.sitekey) {
         User.getRecaptcha().then(function (grecaptcha) {
             grecaptchaObj = grecaptcha;
-            recaptchaId = grecaptcha.render("contact-captcha", {sitekey: $scope.sitekey});
+            recaptchaId = grecaptcha.render("contact-captcha", {sitekey: vm.sitekey});
         });
     }
 
     // process form submit
-    $scope.submit = function() {
+    vm.submit = function() {
         // check captcha before making POST request
-        if (RECAPTCHA_SITEKEY) {
-            $scope.ContactForm.captcha = grecaptchaObj.getResponse(recaptchaId);
-            if (!$scope.ContactForm.captcha) {
-                $scope.errors.captcha = ['Invalid captcha'];
-                return false;
-            }
+        vm.errors = {};
+        vm.ContactForm.captcha = vm.sitekey ? grecaptchaObj.getResponse(recaptchaId) : '';
+        if (vm.sitekey && !vm.ContactForm.captcha) {
+            vm.errors.captcha = ['Invalid captcha'];
+            return false;
         }
 
-        $scope.errors = {};
-        $scope.submitting  = true;
-        Api.post('public/contact', $scope.ContactForm).then(function(data) {
-            $scope.submitting  = false;
+        vm.submitting  = true;
+        Api.post('public/contact', vm.ContactForm).then(function(data) {
+            vm.submitting  = false;
             if (data.success) {
-                $scope.successName = $scope.ContactForm.name;
-                $scope.errors = false;
-                if (recaptchaId) {
-                    recaptchaId = grecaptchaObj.reset(recaptchaId);
-                }
+                vm.errors = false;
+                recaptchaId = vm.sitekey ? grecaptchaObj.reset(recaptchaId) : null;
             } else if (data.errors) {
-                $scope.errors = data.errors;
+                vm.errors = data.errors;
             }
         });
     };
@@ -340,27 +327,24 @@ angular
     .controller('LoginCtrl', LoginCtrl);
 
 // @ngInject
-function LoginCtrl($scope, User) {
+function LoginCtrl(User) {
 
-    $scope.errors = {};
-    $scope.loginUrl = User.getLoginUrl();
-    $scope.LoginForm = {
-        email: '',
-        password: '',
-        rememberMe: true
-    };
+    var vm = this;
+    vm.errors = {};
+    vm.loginUrl = User.getLoginUrl();
+    vm.LoginForm = { rememberMe: true };
 
     // process form submit
-    $scope.submit = function() {
-        $scope.errors = {};
-        $scope.submitting  = true;
-        User.login($scope.LoginForm).then(function(data) {
-            $scope.submitting  = false;
+    vm.submit = function() {
+        vm.errors = {};
+        vm.submitting  = true;
+        User.login(vm.LoginForm).then(function(data) {
+            vm.submitting  = false;
             if (data.success) {
                 User.startJwtRefreshInterval();
-                User.redirect($scope.loginUrl);
+                User.redirect(vm.loginUrl);
             } else if (data.errors) {
-                $scope.errors = data.errors;
+                vm.errors = data.errors;
             }
         });
     };
@@ -374,48 +358,42 @@ angular
     .controller('RegisterCtrl', RegisterCtrl);
 
 // @ngInject
-function RegisterCtrl($scope, User) {
+function RegisterCtrl(User) {
 
-    $scope.errors = {};
-    $scope.sitekey = RECAPTCHA_SITEKEY;
-    $scope.successName = '';
-    $scope.RegisterForm = {
-        email: '',
-        password: '',
-        captcha: ''
-    };
+    var vm = this;
+    vm.errors = {};
+    vm.sitekey = RECAPTCHA_SITEKEY;
+    vm.RegisterForm = {};
 
     // set up and store grecaptcha data
     var recaptchaId;
     var grecaptchaObj;
-    if (RECAPTCHA_SITEKEY) {
-        User.getRecaptcha().then(function(grecaptcha) {
+    if (vm.sitekey) {
+        User.getRecaptcha().then(function (grecaptcha) {
             grecaptchaObj = grecaptcha;
-            recaptchaId = grecaptcha.render("register-captcha", {sitekey: RECAPTCHA_SITEKEY});
+            recaptchaId = grecaptcha.render("register-captcha", {sitekey: vm.sitekey});
         });
     }
 
     // process form submit
-    $scope.submit = function() {
+    vm.submit = function() {
         // check captcha before making POST request
-        if (RECAPTCHA_SITEKEY) {
-            $scope.RegisterForm.captcha = grecaptchaObj.getResponse(recaptchaId);
-            if (!$scope.RegisterForm.captcha) {
-                $scope.errors.captcha = ['Invalid captcha'];
-                return false;
-            }
+        vm.errors = {};
+        vm.RegisterForm.captcha = vm.sitekey ? grecaptchaObj.getResponse(recaptchaId) : '';
+        if (vm.sitekey && !vm.RegisterForm.captcha) {
+            vm.errors.captcha = ['Invalid captcha'];
+            return false;
         }
 
-        $scope.errors = {};
-        $scope.submitting  = true;
-        User.register($scope.RegisterForm).then(function(data) {
-            $scope.submitting  = false;
+        vm.submitting  = true;
+        User.register(vm.RegisterForm).then(function(data) {
+            vm.submitting  = false;
             if (data.success) {
-                $scope.successName = data.success.user.email;
-                $scope.errors = false;
+                vm.errors = false;
+                recaptchaId = vm.sitekey ? grecaptchaObj.reset(recaptchaId) : null;
                 User.startJwtRefreshInterval();
             } else if (data.errors) {
-                $scope.errors = data.errors;
+                vm.errors = data.errors;
             }
         });
     };
