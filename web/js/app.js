@@ -27,9 +27,9 @@ function routeConfig($routeProvider) {
     var staticPaths = ['about', 'contact', 'register', 'login'];
     for (var i=0; i<staticPaths.length; i++) {
         var path = staticPaths[i];
-        $routeProvider.when('/' + path, {templateUrl: '/partials/' + path + '.html'});
+        $routeProvider.when('/' + path, {templateUrl: '/views/' + path + '.html'});
     }
-    $routeProvider.otherwise({templateUrl: '/partials/index.html'});
+    $routeProvider.otherwise({templateUrl: '/views/index.html'});
 }
 
 // -----------------------------------------------------------------
