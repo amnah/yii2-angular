@@ -6,6 +6,7 @@
     // This is based off of this style guide:
     // https://github.com/toddmotto/angularjs-styleguide
     // -------------------------------------------------------------
+
     angular.module('app', [
         // angular modules
         'ngRoute',

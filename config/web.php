@@ -72,6 +72,10 @@ $config = [
         'assetManager' => [
             'bundles' => false,
         ],
+        'gulpAsset' => [
+            'class' => 'app\components\GulpAsset',
+            'useManifest' => !YII_ENV_DEV,
+        ],
         'security' => [
             'passwordHashStrategy' => 'password_hash',
         ],
