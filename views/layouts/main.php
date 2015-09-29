@@ -17,8 +17,12 @@ $min = !YII_ENV_DEV ? ".min" : "";  // use min version unless in dev
     <meta name="viewport" content="width=device-width, initial-scale=1">
     <title><?= $appName ?></title>
     <?php $this->head() ?>
-    <link rel="stylesheet" type="text/css" href="/vendor/bootstrap/3.3.5/bootstrap<?= $min ?>.css" />
-    <link rel="stylesheet" type="text/css" href="<?= $assetManager->getFile("site.compiled{$min}.css") ?>" />
+
+    <!-- add the asset files individually or use the compiled one built from gulp -->
+    <!--<link rel="stylesheet" type="text/css" href="<?= $assetManager->getFile("vendor.compiled{$min}.css") ?>">-->
+
+    <link rel="stylesheet" type="text/css" href="/vendor/bootstrap/3.3.5/bootstrap<?= $min ?>.css">
+    <link rel="stylesheet" type="text/css" href="<?= $assetManager->getFile("site.compiled{$min}.css") ?>">
 </head>
 <body ng-app="app">
 <?php $this->beginBody() ?>
@@ -72,6 +76,9 @@ $min = !YII_ENV_DEV ? ".min" : "";  // use min version unless in dev
     // note: multiply by 1000 because $interval takes milliseconds
     var JWT_REFRESH_TIME = <?= Yii::$app->jwtAuth->getExpInSeconds() * 1000 ?>;
 </script>
+
+<!-- add the asset files individually or use the compiled one built from gulp -->
+<!--<script src="<?= $assetManager->getFile("vendor.compiled{$min}.js") ?>"></script>-->
 
 <script src="/vendor/angular/1.4.6/angular<?= $min ?>.js"></script>
 <script src="/vendor/angular/1.4.6/angular-animate<?= $min ?>.js"></script>
