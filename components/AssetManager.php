@@ -3,12 +3,17 @@
 namespace app\components;
 
 use Yii;
-use yii\base\Component;
 use yii\base\InvalidConfigException;
+use yii\web\AssetManager as YiiAssetManager;
 use InvalidArgumentException;
 
-class GulpAsset extends Component
+class AssetManager extends YiiAssetManager
 {
+    /**
+     * @inheritdoc
+     */
+    public $bundles = false;
+
     /**
      * @var string Asset directory on server
      */

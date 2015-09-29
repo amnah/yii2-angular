@@ -70,10 +70,7 @@ $config = [
             'rules'          => [],
         ],
         'assetManager' => [
-            'bundles' => false,
-        ],
-        'gulpAsset' => [
-            'class' => 'app\components\GulpAsset',
+            'class' => 'app\components\AssetManager',
             'useManifest' => !YII_ENV_DEV,
         ],
         'security' => [

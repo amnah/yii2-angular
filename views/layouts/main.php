@@ -2,10 +2,10 @@
 
 /* @var $this \yii\web\View */
 /* @var $content string */
-/* @var $gulpAsset \app\components\GulpAsset */
+/* @var $assetManager \app\components\AssetManager */
 
 $appName = "Yii 2 Angular";
-$gulpAsset = Yii::$app->gulpAsset;
+$assetManager = Yii::$app->assetManager;
 $min = !YII_ENV_DEV ? ".min" : "";  // use min version unless in dev
 
 ?>
@@ -18,7 +18,7 @@ $min = !YII_ENV_DEV ? ".min" : "";  // use min version unless in dev
     <title><?= $appName ?></title>
     <?php $this->head() ?>
     <link rel="stylesheet" type="text/css" href="/vendor/bootstrap/3.3.5/bootstrap<?= $min ?>.css" />
-    <link rel="stylesheet" type="text/css" href="<?= $gulpAsset->getFile("site.compiled{$min}.css") ?>" />
+    <link rel="stylesheet" type="text/css" href="<?= $assetManager->getFile("site.compiled{$min}.css") ?>" />
 </head>
 <body ng-app="app">
 <?php $this->beginBody() ?>
@@ -78,7 +78,7 @@ $min = !YII_ENV_DEV ? ".min" : "";  // use min version unless in dev
 <script src="/vendor/angular/1.4.6/angular-route<?= $min ?>.js"></script>
 <script src="/vendor/ngStorage/0.3.9/ngStorage<?= $min ?>.js"></script>
 <script src="/vendor/ui-bootstrap/ui-bootstrap-tpls-0.13.4<?= $min ?>.js"></script>
-<script src="<?= $gulpAsset->getFile("app.compiled{$min}.js") ?>"></script>
+<script src="<?= $assetManager->getFile("app.compiled{$min}.js") ?>"></script>
 
 <?php if (getenv("RECAPTCHA_SITEKEY")): ?>
     <script src="https://www.google.com/recaptcha/api.js?onload=recaptchaLoaded&render=explicit" async defer></script>

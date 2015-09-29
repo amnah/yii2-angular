@@ -9,8 +9,6 @@ var rev = require('gulp-rev');
 var del = require('del');
 
 var dest = 'web/compiled';
-var date = new Date();
-var processTime = date.getHours() + ':' + date.getMinutes() + ':' + date.getSeconds();
 
 // -------------------------------------------------------------
 // Default task
