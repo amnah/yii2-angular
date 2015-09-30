@@ -23,6 +23,8 @@ $min = !YII_ENV_DEV ? ".min" : "";  // use min version unless in dev
 
     <link rel="stylesheet" type="text/css" href="/vendor/bootstrap/3.3.5/bootstrap<?= $min ?>.css">
     <link rel="stylesheet" type="text/css" href="<?= $assetManager->getFile("site.compiled{$min}.css") ?>">
+
+    <base href="/">
 </head>
 <body ng-app="app">
 <?php $this->beginBody() ?>
@@ -37,14 +39,14 @@ $min = !YII_ENV_DEV ? ".min" : "";  // use min version unless in dev
                     <span class="icon-bar"></span>
                     <span class="icon-bar"></span>
                 </button>
-                <a class="navbar-brand" href="/#/" ng-click="vm.isCollapsed=true"><?= $appName ?></a>
+                <a class="navbar-brand" href="/" ng-click="vm.isCollapsed=true"><?= $appName ?></a>
             </div>
             <div class="collapse navbar-collapse" collapse="vm.isCollapsed">
                 <ul id="w1" class="navbar-nav navbar-right ng-cloak nav">
-                    <li><a href="/#/about" ng-click="vm.isCollapsed=true">About</a></li>
-                    <li><a href="/#/contact" ng-click="vm.isCollapsed=true">Contact</a></li>
-                    <li ng-show="!vm.User.isLoggedIn()"><a href="/#/login" ng-click="vm.isCollapsed=true">Login</a></li>
-                    <li ng-show="!vm.User.isLoggedIn()"><a href="/#/register" ng-click="vm.isCollapsed=true">Register</a></li>
+                    <li><a href="/about" ng-click="vm.isCollapsed=true">About</a></li>
+                    <li><a href="/contact" ng-click="vm.isCollapsed=true">Contact</a></li>
+                    <li ng-show="!vm.User.isLoggedIn()"><a href="/login" ng-click="vm.isCollapsed=true">Login</a></li>
+                    <li ng-show="!vm.User.isLoggedIn()"><a href="/register" ng-click="vm.isCollapsed=true">Register</a></li>
                     <li ng-show="vm.User.isLoggedIn()">
                         <a ng-click="vm.logout()">
                             Logout ({{ vm.User.getAttribute('email') }})
