@@ -6,13 +6,17 @@
         .controller('ProfileCtrl', ProfileCtrl);
 
     // @ngInject
-    function ProfileCtrl(Api, User) {
+    function ProfileCtrl(User) {
 
         var vm = this;
         vm.User = User;
+        vm.isLoaded = false;
 
-        Api.get('user').then(function(data) {
-            vm.User.setUser(data.success);
+        User.getUser().then(function(user) {
+            if (!user) {
+                User.authRedirect();
+            }
+            vm.isLoaded = true;
         });
     }
 

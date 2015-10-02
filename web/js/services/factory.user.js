@@ -19,8 +19,50 @@
             refreshTime = minRefreshTime;
         }
 
-        factory.getAttributes = function() {
-            return user ? user : null;
+        factory.startJwtRefreshInterval = function(runAtStart) {
+            $interval.cancel(refreshInterval);
+            refreshInterval = $interval(factory.getUser, refreshTime);
+            if (runAtStart) {
+                factory.getUser();
+            }
+        };
+
+        factory.getUser = function(useCache) {
+            // use cache if specified and valid. otherwise make api call to resolve
+            var userDefer = $q.defer();
+            var jwtRefresh = $localStorage.jwtRefresh;
+            if (useCache && user) {
+                userDefer.resolve(user);
+            } else if (jwtRefresh) {
+                Api.post('public/jwt-refresh', {jwtRefresh: jwtRefresh}).then(function (data) {
+                    factory.setUserAndJwt(data);
+                    userDefer.resolve(user);
+                });
+            } else {
+                userDefer.resolve(null);
+            }
+            return userDefer.promise;
+        };
+
+        factory.setUser = function(userData) {
+            user = userData;
+        };
+
+        factory.setUserAndJwt = function(data) {
+            user = null;
+            delete $localStorage.user;
+            delete $localStorage.jwt;
+            delete $localStorage.jwtRefresh;
+            if (data && data.success && data.success.user) {
+                user = data.success.user;
+                $localStorage.user = data.success.user;
+                $localStorage.jwt = data.success.jwt;
+                $localStorage.jwtRefresh = data.success.jwtRefresh;
+            }
+        };
+
+        factory.loadFromLocalStorage = function() {
+            user = $localStorage.user;
         };
 
         factory.getAttribute = function(attribute, defaultValue) {
@@ -29,6 +71,13 @@
 
         factory.isLoggedIn = function() {
             return user ? true : false;
+        };
+
+        factory.login = function(data) {
+            return Api.post('public/login', data).then(function(data) {
+                factory.setUserAndJwt(data);
+                return data;
+            });
         };
 
         // get login url via (1) local storage or (2) fallbackUrl
@@ -43,61 +92,6 @@
             return loginUrl;
         };
 
-        factory.redirect = function(url) {
-            url = url ? url : '';
-            $localStorage.loginUrl = '';
-            $location.path(url).replace();
-        };
-
-        factory.startJwtRefreshInterval = function(runAtStart) {
-            $interval.cancel(refreshInterval);
-            refreshInterval = $interval(factory.doJwtRefresh, refreshTime);
-            if (runAtStart) {
-                factory.doJwtRefresh();
-            }
-        };
-
-        factory.cancelJwtRefreshInterval = function() {
-            $interval.cancel(refreshInterval);
-        };
-
-        factory.doJwtRefresh = function() {
-            var jwtRefresh = $localStorage.jwtRefresh;
-            if (jwtRefresh) {
-                Api.post('public/jwt-refresh', {jwtRefresh: jwtRefresh}).then(function (data) {
-                    factory.setUserAndJwt(data);
-                });
-            }
-        };
-
-        factory.loadFromLocalStorage = function() {
-            user = $localStorage.user;
-        };
-
-        factory.setUser = function(userData) {
-            user = userData;
-        };
-
-        factory.setUserAndJwt = function(data) {
-            user = null;
-            $localStorage.user = '';
-            $localStorage.jwt = '';
-            $localStorage.jwtRefresh = '';
-            if (data && data.success && data.success.user) {
-                user = data.success.user;
-                $localStorage.user = data.success.user;
-                $localStorage.jwt = data.success.jwt;
-                $localStorage.jwtRefresh = data.success.jwtRefresh;
-            }
-        };
-
-        factory.login = function(data) {
-            return Api.post('public/login', data).then(function(data) {
-                factory.setUserAndJwt(data);
-                return data;
-            });
-        };
-
         factory.logout = function() {
             return Api.post('public/logout').then(function(data) {
                 factory.setUserAndJwt(data);
@@ -110,6 +104,19 @@
                 factory.setUserAndJwt(data);
                 return data;
             });
+        };
+
+        factory.redirect = function(url) {
+            url = url ? url : '';
+            $localStorage.loginUrl = '';
+            $location.path(url).replace();
+        };
+
+        factory.authRedirect = function(url) {
+            // set empty data so it will propagate to other controllers using this User factory
+            factory.setUserAndJwt(null);
+            $localStorage.loginUrl = url ? url : $location.path();
+            $location.path('/login').replace();
         };
 
         // set up recaptcha
