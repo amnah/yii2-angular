@@ -3,7 +3,6 @@
 namespace app\modules\v1\controllers;
 
 use Yii;
-use app\models\User;
 
 class UserController extends \app\controllers\api\BaseController
 {

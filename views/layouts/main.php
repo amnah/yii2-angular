@@ -26,7 +26,7 @@ $min = !YII_ENV_DEV ? ".min" : "";  // use min version unless in dev
 
     <base href="/">
 </head>
-<body ng-app="app">
+<body ng-app="app" ng-strict-di>
 <?php $this->beginBody() ?>
 
 <div class="wrap">
@@ -45,6 +45,7 @@ $min = !YII_ENV_DEV ? ".min" : "";  // use min version unless in dev
                 <ul id="w1" class="navbar-nav navbar-right ng-cloak nav">
                     <li><a href="/about" ng-click="vm.isCollapsed=true">About</a></li>
                     <li><a href="/contact" ng-click="vm.isCollapsed=true">Contact</a></li>
+                    <li><a href="/profile" ng-click="vm.isCollapsed=true">Profile</a></li>
                     <li ng-show="!vm.User.isLoggedIn()"><a href="/login" ng-click="vm.isCollapsed=true">Login</a></li>
                     <li ng-show="!vm.User.isLoggedIn()"><a href="/register" ng-click="vm.isCollapsed=true">Register</a></li>
                     <li ng-show="vm.User.isLoggedIn()">
