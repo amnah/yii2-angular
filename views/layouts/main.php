@@ -49,7 +49,7 @@ $min = !YII_ENV_DEV ? ".min" : "";  // use min version unless in dev
                     <li ng-show="!vm.User.isLoggedIn()"><a href="/login" ng-click="vm.isCollapsed=true">Login</a></li>
                     <li ng-show="!vm.User.isLoggedIn()"><a href="/register" ng-click="vm.isCollapsed=true">Register</a></li>
                     <li ng-show="vm.User.isLoggedIn()">
-                        <a ng-click="vm.logout()">
+                        <a ng-click="vm.User.logout()">
                             Logout ({{ vm.User.getAttribute('email') }})
                         </a>
                     </li>

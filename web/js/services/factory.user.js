@@ -92,9 +92,11 @@
             return loginUrl;
         };
 
-        factory.logout = function() {
+        factory.logout = function(logoutUrl) {
+            logoutUrl = logoutUrl ? logoutUrl : '/';
             return Api.post('public/logout').then(function(data) {
                 factory.setUserAndJwt(data);
+                factory.redirect(logoutUrl);
                 return data;
             });
         };
