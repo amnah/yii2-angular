@@ -14,7 +14,7 @@
 
         vm.logout = function() {
             User.logout().then(function(data) {
-                // do something
+                User.redirect('/');
             });
         };
     }
