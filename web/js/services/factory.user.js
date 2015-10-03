@@ -9,16 +9,10 @@
     function User($window, $location, $interval, $q, $localStorage, Api) {
 
         var factory = {};
-        var user;
+        var user = false;
 
-        // set minimum of once per minute just in case
-        var minRefreshTime = 1000*60;
         var refreshInterval;
-        var refreshTime = JWT_REFRESH_TIME; // some leeway is added on the server side
-        if (refreshTime < minRefreshTime) {
-            refreshTime = minRefreshTime;
-        }
-
+        var refreshTime = JWT_REFRESH_TIME;
         factory.startJwtRefreshInterval = function(runAtStart) {
             $interval.cancel(refreshInterval);
             refreshInterval = $interval(factory.getUser, refreshTime);
@@ -28,40 +22,34 @@
         };
 
         factory.getUser = function(useCache) {
-            // use cache if specified and valid. otherwise make api call to resolve
             var userDefer = $q.defer();
-            var jwtRefresh = $localStorage.jwtRefresh;
-            if (useCache && user) {
+            if (useCache && user !== false) {
                 userDefer.resolve(user);
-            } else if (jwtRefresh) {
-                Api.post('public/jwt-refresh', {jwtRefresh: jwtRefresh}).then(function (data) {
+            } else {
+                Api.post('public/refresh-jwt').then(function (data) {
                     factory.setUserAndJwt(data);
                     userDefer.resolve(user);
                 });
-            } else {
-                userDefer.resolve(null);
             }
             return userDefer.promise;
-        };
-
-        factory.setUser = function(userData) {
-            user = userData;
         };
 
         factory.setUserAndJwt = function(data) {
             user = null;
             delete $localStorage.user;
             delete $localStorage.jwt;
-            delete $localStorage.jwtRefresh;
             if (data && data.success && data.success.user) {
                 user = data.success.user;
                 $localStorage.user = data.success.user;
                 $localStorage.jwt = data.success.jwt;
-                $localStorage.jwtRefresh = data.success.jwtRefresh;
             }
         };
 
-        factory.loadFromLocalStorage = function() {
+        factory.setUser = function(userData) {
+            user = userData;
+        };
+
+        factory.setUserFromLocalStorage = function() {
             user = $localStorage.user;
         };
 
@@ -112,13 +100,6 @@
             url = url ? url : '';
             $localStorage.loginUrl = '';
             $location.path(url).replace();
-        };
-
-        factory.authRedirect = function(url) {
-            // set empty data so it will propagate to other controllers using this User factory
-            factory.setUserAndJwt(null);
-            $localStorage.loginUrl = url ? url : $location.path();
-            $location.path('/login').replace();
         };
 
         // set up recaptcha

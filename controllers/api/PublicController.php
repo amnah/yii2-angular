@@ -62,26 +62,21 @@ class PublicController extends BaseController
     /**
      * Refresh jwt token based off of jwtRefresh
      */
-    public function actionJwtRefresh()
+    public function actionRefreshJwt()
     {
         /** @var \app\components\JwtAuth $jwtAuth */
         /** @var User $user */
         $jwtAuth = Yii::$app->jwtAuth;
 
         // decode jwt
-        $failure = ["success" => null];
-        $jwtRefresh = Yii::$app->request->post("jwtRefresh");
-        $payload = $jwtAuth->decode($jwtRefresh);
+        $payload = $jwtAuth->getHeaderPayload();
         if (!$payload) {
-            return $failure;
+            return ["success" => null];
         }
 
         // attempt to find user and generate auth data
-        $user = User::findIdentityByAccessToken($payload->token);
-        if ($user) {
-            return ["success" => $user->generateAuthJwtData($payload->rememberMe)];
-        }
-        return $failure;
+        $user = User::findIdentity($payload->sub);
+        return ["success" => $user->generateAuthJwtData($payload->rememberMe)];
     }
 
     /**

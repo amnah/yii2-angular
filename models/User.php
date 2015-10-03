@@ -159,8 +159,7 @@ class User extends \yii\base\Object implements \yii\web\IdentityInterface
         $jwtAuth = Yii::$app->jwtAuth;
         return [
             "user" => $this->toArray(),
-            "jwt" => $jwtAuth->generateUserToken($this),
-            "jwtRefresh" => $jwtAuth->generateRefreshToken($this->accessToken, $rememberMe),
+            "jwt" => $jwtAuth->generateUserToken($this, $rememberMe),
         ];
     }
 }

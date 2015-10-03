@@ -74,10 +74,7 @@ $min = !YII_ENV_DEV ? ".min" : "";  // use min version unless in dev
 <script type="text/javascript">
     var API_URL = '<?= rtrim(getenv("API_URL"), "/") . "/" ?>';
     var RECAPTCHA_SITEKEY= '<?= getenv("RECAPTCHA_SITEKEY") ?>';
-
-    // set jwt ttl to one minute less than jwtExpire
-    // note: multiply by 1000 because $interval takes milliseconds
-    var JWT_REFRESH_TIME = <?= Yii::$app->jwtAuth->getExpInSeconds() * 1000 ?>;
+    var JWT_REFRESH_TIME = 60*60*1000; // every hour
 </script>
 
 <!-- add the asset files individually or use the compiled one built from gulp -->

@@ -24,26 +24,22 @@ class JwtAuth extends HttpBearerAuth
     public $algorithm = "HS256";
 
     /**
-     * @var int|string Token expiration - integer = seconds, string = strtotime()
-     *                 Example: "+5 minutes" = 300
+     * @var int|string Default token expiration. Integer = seconds, string = strtotime()
+     *                 Example: 300 = "+5 minutes"
      */
-    public $exp = "+5 minutes";
+    public $ttl = "+2 hrs";
 
     /**
-     * @var int|string Refresh token expiration
+     * @var int|string Token expiration when user sets "remember me"
+     * @link http://stackoverflow.com/questions/26739167/jwt-json-web-token-automatic-prolongation-of-expiration
      */
-    public $expRefresh = "+1 week";
-
-    /**
-     * @var int|string Refresh token when user doesn't use "remember me"
-     */
-    public $expRefreshNoRemember = "+2 hrs";
+    public $ttlRememberMe = "+1 week";
 
     /**
      * @var int Jwt expiration leeway (in seconds)
      * @link https://github.com/firebase/php-jwt#example
      */
-    public $leeway = 30;
+    public $leeway = 60;
 
     /**
      * @var object Payload data in Authorization Bearer
@@ -94,28 +90,23 @@ class JwtAuth extends HttpBearerAuth
     /**
      * Encode data into jwt string
      * @param array $data
-     * @param int|string $exp seconds from current time
+     * @param int|string $ttl seconds from current time
      * @return string
      * @link http://websec.io/2014/08/04/Securing-Requests-with-JWT.html
      */
-    public function encode($data, $exp = null)
+    public function encode($data, $ttl = null)
     {
         // build token data
-        $time = time();
-        $tokenArray = [
-            "iss" => Yii::$app->id,
-            "iat" => $time,
-            "nbf" => $time,
-        ];
-        $tokenArray = array_merge($tokenArray, $data);
+        $token = $this->getTokenDefaults();
+        $token = array_merge($token, $data);
 
         // add in expire time if set
-        $exp = $exp === null ? $this->exp : $exp;
-        if ($exp) {
-            $tokenArray["exp"] = is_string($exp) ? strtotime($exp) : $time + $exp;
+        $ttl = $ttl === null ? $this->ttl : $ttl;
+        if ($ttl) {
+            $token["exp"] = is_string($ttl) ? strtotime($ttl) : $token["iat"] + $ttl;
         }
 
-        return JWT::encode($tokenArray, $this->key, $this->algorithm);
+        return JWT::encode($token, $this->key, $this->algorithm);
     }
 
     /**
@@ -127,54 +118,48 @@ class JwtAuth extends HttpBearerAuth
     public function decode($jwt)
     {
         JWT::$leeway = $this->leeway;
+        $request = Yii::$app->request;
         try {
-            return JWT::decode($jwt, $this->key, [$this->algorithm]);
+            $payload = JWT::decode($jwt, $this->key, [$this->algorithm]);
+            $tokenDefaults = $this->getTokenDefaults();
+            if ($payload->iss != $tokenDefaults["iss"] || $payload->aud != $tokenDefaults["aud"]) {
+                return false;
+            }
+            return $payload;
         } catch (Exception $e) {
             return false;
         }
     }
 
     /**
-     * Get exp time in seconds (convert string)
-     * @param int|string $exp
-     * @return int
+     * Get token defaults
+     * @return array
      */
-    public function getExpInSeconds($exp = null)
+    protected function getTokenDefaults()
     {
-        $exp = $exp === null ? $this->exp : $exp;
-        if (is_numeric($exp)) {
-            return $exp;
-        } elseif (is_string($exp)) {
-            return strtotime($exp) - time();
-        }
-        return 0;
+        $time = time();
+        $request = Yii::$app->request;
+        return [
+            "iss" => $request->serverName,
+            "aud" => parse_url($request->getReferrer(), PHP_URL_HOST) ?: $request->serverName,
+            "iat" => $time,
+            "nbf" => $time,
+        ];
     }
 
     /**
      * Generate a jwt token for user
      * @param User $user
-     * @return string
-     */
-    public function generateUserToken($user)
-    {
-        return $this->encode([
-            "sub" => $user->getId(),
-            "user" => $user->toArray(),
-        ]);
-    }
-
-    /**
-     * Generate a jwt refresh token
-     * @param string $token
      * @param bool $rememberMe
      * @return string
      */
-    public function generateRefreshToken($token, $rememberMe)
+    public function generateUserToken($user, $rememberMe)
     {
-        $exp = $rememberMe ? $this->expRefresh : $this->expRefreshNoRemember;
+        $ttl = $rememberMe ? $this->ttlRememberMe : $this->ttl;
         return $this->encode([
-            "token" => $token,
-            "rememberMe" => (int) $rememberMe,
-        ], $exp);
+            "sub" => $user->getId(),
+            "user" => $user->toArray(),
+            "rememberMe" => $rememberMe ? 1 : 0,
+        ], $ttl);
     }
 }
