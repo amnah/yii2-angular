@@ -9,7 +9,7 @@
     function Api($http, $q, $location, $localStorage) {
 
         var factory = {};
-        var apiUrl = API_URL;
+        var apiUrl = AppConfig.apiUrl;
 
         // define REST functions
         factory.get = function(url, data) {

@@ -72,9 +72,11 @@ $min = !YII_ENV_DEV ? ".min" : "";  // use min version unless in dev
 </footer>
 
 <script type="text/javascript">
-    var API_URL = '<?= rtrim(getenv("API_URL"), "/") . "/" ?>';
-    var RECAPTCHA_SITEKEY= '<?= getenv("RECAPTCHA_SITEKEY") ?>';
-    var JWT_REFRESH_TIME = 60*60*1000; // every hour
+    var AppConfig = {
+        apiUrl: '<?= rtrim(getenv("API_URL"), "/") . "/" ?>',
+        recaptchaSitekey: '<?= getenv("RECAPTCHA_SITEKEY") ?>',
+        jwtRefreshTime: 60*60*1000
+    };
 </script>
 
 <!-- add the asset files individually or use the compiled one built from gulp -->

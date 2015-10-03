@@ -12,7 +12,7 @@
         var user = false;
 
         var refreshInterval;
-        var refreshTime = JWT_REFRESH_TIME;
+        var refreshTime = AppConfig.jwtRefreshTime;
         factory.startJwtRefreshInterval = function(runAtStart) {
             $interval.cancel(refreshInterval);
             refreshInterval = $interval(factory.getUser, refreshTime);

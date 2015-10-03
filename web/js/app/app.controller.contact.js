@@ -10,7 +10,7 @@
 
         var vm = this;
         vm.errors = {};
-        vm.sitekey = RECAPTCHA_SITEKEY;
+        vm.sitekey = AppConfig.recaptchaSitekey;
         vm.ContactForm = { email: User.getAttribute('email') };
 
         // set up and store grecaptcha data
