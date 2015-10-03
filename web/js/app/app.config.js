@@ -16,7 +16,8 @@
         $httpProvider.defaults.headers.common["X-Requested-With"] = 'XMLHttpRequest';
 
         // add jwt into http headers
-        $httpProvider.interceptors.push(['$localStorage', function($localStorage) {
+        // @ngInject
+        $httpProvider.interceptors.push(function($localStorage) {
             return {
                 request: function(config) {
                     if ($localStorage.jwt) {
@@ -25,7 +26,7 @@
                     return config;
                 }
             };
-        }]);
+        });
     }
 
 })();
