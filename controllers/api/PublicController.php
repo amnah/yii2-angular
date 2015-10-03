@@ -60,7 +60,7 @@ class PublicController extends BaseController
     }
 
     /**
-     * Refresh jwt token based off of jwtRefresh
+     * Refresh jwt token based off of header payload or post
      */
     public function actionRefreshJwt()
     {
@@ -68,17 +68,46 @@ class PublicController extends BaseController
         /** @var User $user */
         $jwtAuth = Yii::$app->jwtAuth;
 
-        // decode jwt
+        // decode jwt from header
         $payload = $jwtAuth->getHeaderPayload();
-        if (!$payload) {
-            return ["success" => null];
+        if ($payload) {
+            $jwt = $jwtAuth->regenerateToken($payload);
+            return ["success" => $this->generateAuthJwtData($payload->user, $payload->rememberMe, $jwt)];
         }
 
-        // attempt to find user and generate auth data
-        $user = User::findIdentity($payload->sub);
-        return ["success" => $user->generateAuthJwtData($payload->rememberMe)];
+        // decode jwt from post request -> get access token
+        $jwt = Yii::$app->request->post("jwt");
+        $payload = $jwtAuth->decode($jwt);
+        if ($payload) {
+            $user = User::findIdentityByAccessToken($payload->token);
+            return ["success" => $this->generateAuthJwtData($user->toArray(), $payload->rememberMe)];
+        }
+
+        return ["success" => null];
     }
 
+    /**
+     * Generate auth data (user and jwt tokens)
+     * @param array|object $userAttributes
+     * @param bool $rememberMe
+     * @param string $jwt
+     * @return boolean
+     */
+    protected function generateAuthJwtData($userAttributes, $rememberMe = true, $jwt = "")
+    {
+        /** @var \app\components\JwtAuth $jwtAuth */
+        $jwtAuth = Yii::$app->jwtAuth;
+
+        // use $jwt if set, otherwise generate
+        if (!$jwt) {
+            $jwt = $jwtAuth->generateUserToken($userAttributes, $rememberMe);;
+        }
+        return [
+            "user" => $userAttributes,
+            "jwt" => $jwt,
+        ];
+    }
+    
     /**
      * Login
      */
@@ -88,7 +117,8 @@ class PublicController extends BaseController
         $loginForm = new LoginForm();
         $loginForm->load(Yii::$app->request->post(), "");
         if ($loginForm->validate()) {
-            $authJwtData = $loginForm->getUser()->generateAuthJwtData($loginForm->rememberMe);
+            $user = $loginForm->getUser();
+            $authJwtData = $this->generateAuthJwtData($user->toArray(), $loginForm->rememberMe);
             return ["success" => $authJwtData];
         }
         return ["errors" => $loginForm->errors];
@@ -112,7 +142,7 @@ class PublicController extends BaseController
         $user = User::register(Yii::$app->request->post());
         $rememberMe = true;
         if (!is_array($user)) {
-            return ["success" => $user->generateAuthJwtData($rememberMe)];
+            return ["success" => $this->generateAuthJwtData($user->toArray(), $rememberMe)];
         }
         return ["errors" => $user];
     }

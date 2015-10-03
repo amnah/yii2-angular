@@ -89,7 +89,7 @@ class JwtAuth extends HttpBearerAuth
 
     /**
      * Encode data into jwt string
-     * @param array $data
+     * @param array|object $data
      * @param int|string $ttl seconds from current time
      * @return string
      * @link http://websec.io/2014/08/04/Securing-Requests-with-JWT.html
@@ -97,6 +97,7 @@ class JwtAuth extends HttpBearerAuth
     public function encode($data, $ttl = null)
     {
         // build token data
+        $data = (array) $data;
         $token = $this->getTokenDefaults();
         $token = array_merge($token, $data);
 
@@ -111,6 +112,7 @@ class JwtAuth extends HttpBearerAuth
 
     /**
      * Decode jwt string
+     * Check iss, aud, iat, nbt, and exp claims
      * @param string $jwt
      * @return object
      * @throws Exception
@@ -118,7 +120,6 @@ class JwtAuth extends HttpBearerAuth
     public function decode($jwt)
     {
         JWT::$leeway = $this->leeway;
-        $request = Yii::$app->request;
         try {
             $payload = JWT::decode($jwt, $this->key, [$this->algorithm]);
             $tokenDefaults = $this->getTokenDefaults();
@@ -149,17 +150,39 @@ class JwtAuth extends HttpBearerAuth
 
     /**
      * Generate a jwt token for user
-     * @param User $user
+     * @param array $userAttributes
      * @param bool $rememberMe
      * @return string
      */
-    public function generateUserToken($user, $rememberMe)
+    public function generateUserToken($userAttributes, $rememberMe)
     {
+        $userAttributes = (array) $userAttributes;
         $ttl = $rememberMe ? $this->ttlRememberMe : $this->ttl;
+        
         return $this->encode([
-            "sub" => $user->getId(),
-            "user" => $user->toArray(),
+            "sub" => $userAttributes->id,
+            "user" => $userAttributes,
             "rememberMe" => $rememberMe ? 1 : 0,
         ], $ttl);
+    }
+
+    /**
+     * Regenerate a token (update iat, nbf, and exp)
+     * @param object $payload
+     * @return string
+     */
+    public function regenerateToken($payload)
+    {
+        // calculate ttl
+        $ttl = null;
+        if (!empty($payload->exp)) {
+            $ttl = $payload->exp - $payload->iat;
+        }
+
+        // calculate time
+        $time = time();
+        $payload->iat = $time;
+        $payload->nbf = $time;
+        return $this->encode($payload, $ttl);
     }
 }

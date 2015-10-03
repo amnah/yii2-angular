@@ -147,19 +147,4 @@ class User extends \yii\base\Object implements \yii\web\IdentityInterface
             "accessToken" => '102-token',
         ]);
     }
-
-    /**
-     * Generate auth data (user and jwt tokens)
-     * @param bool $rememberMe
-     * @return boolean whether the user is logged in successfully
-     */
-    public function generateAuthJwtData($rememberMe = true)
-    {
-        /** @var \app\components\JwtAuth $jwtAuth */
-        $jwtAuth = Yii::$app->jwtAuth;
-        return [
-            "user" => $this->toArray(),
-            "jwt" => $jwtAuth->generateUserToken($this, $rememberMe),
-        ];
-    }
 }
