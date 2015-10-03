@@ -27,7 +27,7 @@ class JwtAuth extends HttpBearerAuth
      * @var int|string Default token expiration. Integer = seconds, string = strtotime()
      *                 Example: 300 = "+5 minutes"
      */
-    public $ttl = "+2 hrs";
+    public $ttl = "+2 hours";
 
     /**
      * @var int|string Token expiration when user sets "remember me"
@@ -173,14 +173,17 @@ class JwtAuth extends HttpBearerAuth
      * @param int $id
      * @return string
      */
-    public function generateUserAccessToken($accessToken, $id = null)
+    public function generateRefreshToken($accessToken, $id = null)
     {
         // add sub if set. this isn't needed, but can be set if desired
         if ($id) {
             $data["sub"] = $id;
         }
         $data["accessToken"] = $accessToken;
-        return $this->encode($data);
+
+        // set ttl = 0 so it won't get an exp
+        $ttl = 0;
+        return $this->encode($data, $ttl);
     }
 
     /**
