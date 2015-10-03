@@ -84,7 +84,7 @@ class PublicController extends BaseController
     }
 
     /**
-     * Refresh jwt token based off of header payload or post
+     * Refresh jwt token based off of refresh token or regular header payload
      */
     public function actionRefreshJwt()
     {
@@ -92,19 +92,24 @@ class PublicController extends BaseController
         /** @var User $user */
         $jwtAuth = Yii::$app->jwtAuth;
 
+        // decode jwt request token sent in post or get
+        $jwtRefresh = Yii::$app->request->post("jwtRefresh");
+        $jwtRefresh = $jwtRefresh ?: Yii::$app->request->get("jwtRefresh");
+        $payload    = $jwtRefresh ? $jwtAuth->decode($jwtRefresh) : false;
+        if ($payload) {
+            $user = User::findIdentityByAccessToken($payload->accessToken);
+
+            // set rememberMe = false so that the token ttl is shorter
+            // because the refresh token is permanent
+            $rememberMe = false;
+            return ["success" => $this->generateAuthJwtData($user->toArray(), $rememberMe)];
+        }
+
         // decode jwt from header
         $payload = $jwtAuth->getHeaderPayload();
         if ($payload) {
             $jwt = $jwtAuth->regenerateToken($payload);
             return ["success" => $this->generateAuthJwtData($payload->user, $payload->rememberMe, $jwt)];
-        }
-
-        // decode jwt from post request -> get access token
-        $jwt = Yii::$app->request->post("jwt");
-        $payload = $jwtAuth->decode($jwt);
-        if ($payload) {
-            $user = User::findIdentityByAccessToken($payload->accessToken);
-            return ["success" => $this->generateAuthJwtData($user->toArray(), $payload->rememberMe)];
         }
 
         return ["success" => null];
