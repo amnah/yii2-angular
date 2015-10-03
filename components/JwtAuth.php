@@ -160,10 +160,27 @@ class JwtAuth extends HttpBearerAuth
         $ttl = $rememberMe ? $this->ttlRememberMe : $this->ttl;
         
         return $this->encode([
-            "sub" => $userAttributes->id,
+            "sub" => $userAttributes["id"],
             "user" => $userAttributes,
             "rememberMe" => $rememberMe ? 1 : 0,
         ], $ttl);
+    }
+
+    /**
+     * Generate a jwt token for user based on access token
+     * Note: this token does NOT expire, so you should have some way to revoke the access token
+     * @param string $accessToken
+     * @param int $id
+     * @return string
+     */
+    public function generateUserAccessToken($accessToken, $id = null)
+    {
+        // add sub if set. this isn't needed, but can be set if desired
+        if ($id) {
+            $data["sub"] = $id;
+        }
+        $data["accessToken"] = $accessToken;
+        return $this->encode($data);
     }
 
     /**
