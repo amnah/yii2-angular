@@ -7,7 +7,7 @@ use Exception;
 use Yii;
 use yii\base\InvalidConfigException;
 use yii\filters\auth\HttpBearerAuth;
-use yii\web\Request;
+use yii\web\Cookie;
 use Firebase\JWT\JWT;
 use app\models\User;
 
@@ -31,7 +31,7 @@ class JwtAuth extends HttpBearerAuth
 
     /**
      * @var int|string Token expiration when user sets "remember me"
-     * @link http://stackoverflow.com/questions/26739167/jwt-json-web-token-automatic-prolongation-of-expiration
+     * @link http://stackoverflow.com/a/26834685
      */
     public $ttlRememberMe = "+1 week";
 
@@ -42,9 +42,14 @@ class JwtAuth extends HttpBearerAuth
     public $leeway = 60;
 
     /**
-     * @var object Payload data in Authorization Bearer
+     * @var string Name for cookie to store jwt data in
      */
-    private $headerPayload = null;
+    public $cookieName = "jwt";
+
+    /**
+     * @var object Payload from cookie or header auth
+     */
+    protected $payload;
 
     /**
      * @inheritdoc
@@ -54,6 +59,9 @@ class JwtAuth extends HttpBearerAuth
         if (empty($this->key)) {
             throw new InvalidConfigException(get_class($this) . "::key must be configured with a secret key.");
         }
+
+        $this->request = Yii::$app->request;
+        $this->response = Yii::$app->response;
     }
 
     /**
@@ -61,7 +69,11 @@ class JwtAuth extends HttpBearerAuth
      */
     public function authenticate($user, $request, $response)
     {
-        $payload = $this->getHeaderPayload($request);
+        if ($this->request->getMethod() == 'OPTIONS') {
+            return true;
+        }
+
+        $payload = $this->getPayload();
         if (!$payload) {
             return null;
         }
@@ -69,22 +81,59 @@ class JwtAuth extends HttpBearerAuth
     }
 
     /**
-     * Get payload from request headers
-     * @param Request $request
-     * @return bool|object
+     * Get payload from cookie or header
+     * @return object
      */
-    public function getHeaderPayload($request = null)
+    public function getPayload()
     {
-        if ($this->headerPayload === null) {
-            $this->headerPayload = false;
-            $request = $request ?: Yii::$app->request;
-            $authHeader = $request->getHeaders()->get("Authorization");
-            if ($authHeader !== null && preg_match("/^Bearer\\s+(.*?)$/", $authHeader, $matches)) {
-                $this->headerPayload = $this->decode($matches[1]);
+        if ($this->payload) {
+            return $this->payload;
+        }
+
+        // check cookie first
+        $request = Yii::$app->request;
+        $jwt = $request->cookies->getValue($this->cookieName);
+        if ($jwt) {
+            $payload = $this->decode($jwt);
+            if ($payload) {
+                $this->payload = $payload;
+                return $payload;
             }
         }
 
-        return $this->headerPayload;
+        // then check header
+        $authHeader = $request->getHeaders()->get("Authorization");
+        if ($authHeader !== null && preg_match("/^Bearer\\s+(.*?)$/", $authHeader, $matches)) {
+            $payload = $this->decode($matches[1]);
+            if ($payload) {
+                $this->payload = $payload;
+                return $payload;
+            }
+        }
+
+        return false;
+    }
+
+    /**
+     * Set jwt in cookie
+     * @param string $jwt
+     */
+    public function setCookieJwt($jwt)
+    {
+        $this->response->cookies->add(new Cookie([
+            "name" => $this->cookieName,
+            "value" => $jwt,
+            "secure" => $this->request->isSecureConnection,
+            "expire" => strtotime("+1 year"), // use exp claim in jwt instead of cookie
+        ]));
+    }
+
+    /**
+     * Remove jwt cookie
+     */
+    public function removeCookieJwt()
+    {
+        $this->response->cookies->remove($this->cookieName);
     }
 
     /**
@@ -126,6 +175,9 @@ class JwtAuth extends HttpBearerAuth
             if ($payload->iss != $tokenDefaults["iss"] || $payload->aud != $tokenDefaults["aud"]) {
                 return false;
             }
+            if (!$this->request->validateCsrfToken($payload->jti)) {
+                return false;
+            }
             return $payload;
         } catch (Exception $e) {
             return false;
@@ -141,8 +193,9 @@ class JwtAuth extends HttpBearerAuth
         $time = time();
         $request = Yii::$app->request;
         return [
-            "iss" => $request->serverName,
-            "aud" => parse_url($request->getReferrer(), PHP_URL_HOST) ?: $request->serverName,
+            "iss" => $request->getHostInfo(),
+            "aud" => parse_url($request->getReferrer(), PHP_URL_HOST) ?: $request->getHostInfo(),
+            "jti" => $request->getCsrfToken(),
             "iat" => $time,
             "nbf" => $time,
         ];
@@ -158,7 +211,7 @@ class JwtAuth extends HttpBearerAuth
     {
         $userAttributes = (array) $userAttributes;
         $ttl = $rememberMe ? $this->ttlRememberMe : $this->ttl;
-        
+
         return $this->encode([
             "sub" => $userAttributes["id"],
             "user" => $userAttributes,
@@ -199,10 +252,11 @@ class JwtAuth extends HttpBearerAuth
             $ttl = $payload->exp - $payload->iat;
         }
 
-        // calculate time
+        // calculate times and csrf
         $time = time();
         $payload->iat = $time;
         $payload->nbf = $time;
+        $payload->jti = $this->request->getCsrfToken(true);
         return $this->encode($payload, $ttl);
     }
 }

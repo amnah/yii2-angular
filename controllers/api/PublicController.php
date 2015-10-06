@@ -93,8 +93,7 @@ class PublicController extends BaseController
         $jwtAuth = Yii::$app->jwtAuth;
 
         // decode jwt request token sent in post or get
-        $jwtRefresh = Yii::$app->request->post("jwtRefresh");
-        $jwtRefresh = $jwtRefresh ?: Yii::$app->request->get("jwtRefresh");
+        $jwtRefresh = Yii::$app->request->get("jwtRefresh");
         $payload    = $jwtRefresh ? $jwtAuth->decode($jwtRefresh) : false;
         if ($payload) {
             $user = User::findIdentityByAccessToken($payload->accessToken);
@@ -105,8 +104,8 @@ class PublicController extends BaseController
             return ["success" => $this->generateAuthJwtData($user->toArray(), $rememberMe)];
         }
 
-        // decode jwt from header
-        $payload = $jwtAuth->getHeaderPayload();
+        // decode jwt from cookie or header
+        $payload = $jwtAuth->getPayload();
         if ($payload) {
             $jwt = $jwtAuth->regenerateToken($payload);
             return ["success" => $this->generateAuthJwtData($payload->user, $payload->rememberMe, $jwt)];
@@ -131,6 +130,10 @@ class PublicController extends BaseController
         if (!$jwt) {
             $jwt = $jwtAuth->generateUserToken($userAttributes, $rememberMe);;
         }
+
+        // add cookie
+        $jwtAuth->setCookieJwt($jwt);
+
         return [
             "user" => $userAttributes,
             "jwt" => $jwt,
