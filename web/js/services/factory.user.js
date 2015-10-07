@@ -6,13 +6,13 @@
         .factory('User', User);
 
     // @ngInject
-    function User($window, $location, $interval, $q, $localStorage, Api) {
+    function User($window, $location, $interval, $q, $localStorage, Config, Api) {
 
         var factory = {};
         var user = false;
 
         var refreshInterval;
-        var refreshTime = AppConfig.jwtRefreshTime;
+        var refreshTime = Config.jwtRefreshTime;
         factory.startJwtRefreshInterval = function(runAtStart) {
             $interval.cancel(refreshInterval);
             refreshInterval = $interval(factory.getUser, refreshTime);

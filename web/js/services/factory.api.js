@@ -6,10 +6,10 @@
         .factory('Api', Api);
 
     // @ngInject
-    function Api($http, $q, $location, $localStorage) {
+    function Api($http, $q, $location, $localStorage, Config) {
 
         var factory = {};
-        var apiUrl = AppConfig.apiUrl;
+        var apiUrl = Config.apiUrl;
 
         // define REST functions
         factory.get = function(url, data) {

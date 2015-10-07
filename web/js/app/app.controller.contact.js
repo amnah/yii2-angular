@@ -6,11 +6,11 @@
         .controller('ContactCtrl', ContactCtrl);
 
     // @ngInject
-    function ContactCtrl(Api, User) {
+    function ContactCtrl(Config, Api, User) {
 
         var vm = this;
         vm.errors = {};
-        vm.sitekey = AppConfig.recaptchaSitekey;
+        vm.sitekey = Config.recaptchaSitekey;
         vm.ContactForm = { email: User.getAttribute('email') };
 
         // set up and store grecaptcha data

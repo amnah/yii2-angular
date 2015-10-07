@@ -6,11 +6,11 @@
         .controller('RegisterCtrl', RegisterCtrl);
 
     // @ngInject
-    function RegisterCtrl(User) {
+    function RegisterCtrl(Config, User) {
 
         var vm = this;
         vm.errors = {};
-        vm.sitekey = AppConfig.recaptchaSitekey;
+        vm.sitekey = Config.recaptchaSitekey;
         vm.RegisterForm = {};
 
         // set up and store grecaptcha data
