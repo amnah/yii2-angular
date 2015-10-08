@@ -9,7 +9,7 @@
     function appInit(User) {
         // attempt to set up user from local storage. this is faster than waiting for the automatic refresh
         User.setUserFromLocalStorage();
-        User.startJwtRefreshInterval(true);
+        User.startTokenRenewInterval(true);
     }
 
 })();

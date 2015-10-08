@@ -11,11 +11,11 @@
         var factory = {};
         var user = false;
 
-        var refreshInterval;
-        var refreshTime = Config.jwtRefreshTime;
-        factory.startJwtRefreshInterval = function(runAtStart) {
-            $interval.cancel(refreshInterval);
-            refreshInterval = $interval(factory.getUser, refreshTime);
+        var renewInterval;
+        var renewTime = Config.tokenRenewInterval;
+        factory.startTokenRenewInterval = function(runAtStart) {
+            $interval.cancel(renewInterval);
+            renewInterval = $interval(factory.getUser, renewTime);
             if (runAtStart) {
                 factory.getUser();
             }
@@ -26,22 +26,28 @@
             if (useCache && user !== false) {
                 userDefer.resolve(user);
             } else {
-                Api.post('public/refresh-jwt').then(function (data) {
-                    factory.setUserAndJwt(data);
+                Api.get('public/renew-token').then(function (data) {
+                    factory.setUserAndToken(data);
                     userDefer.resolve(user);
                 });
             }
             return userDefer.promise;
         };
 
-        factory.setUserAndJwt = function(data) {
+        factory.setUserAndToken = function(data) {
             user = null;
             delete $localStorage.user;
-            delete $localStorage.jwt;
+            delete $localStorage.token;
+
+            // set data if valid
             if (data && data.success && data.success.user) {
                 user = data.success.user;
                 $localStorage.user = data.success.user;
-                $localStorage.jwt = data.success.jwt;
+
+                // set token only if we're not using cookies
+                if (!Config.useCookie) {
+                    $localStorage.token = data.success.token;
+                }
             }
         };
 
@@ -63,7 +69,7 @@
 
         factory.login = function(data) {
             return Api.post('public/login', data).then(function(data) {
-                factory.setUserAndJwt(data);
+                factory.setUserAndToken(data);
                 return data;
             });
         };
@@ -83,7 +89,7 @@
         factory.logout = function(logoutUrl) {
             logoutUrl = logoutUrl ? logoutUrl : '/';
             return Api.post('public/logout').then(function(data) {
-                factory.setUserAndJwt(data);
+                factory.setUserAndToken(data);
                 factory.redirect(logoutUrl);
                 return data;
             });
@@ -91,7 +97,7 @@
 
         factory.register = function(data) {
             return Api.post('public/register', data).then(function(data) {
-                factory.setUserAndJwt(data);
+                factory.setUserAndToken(data);
                 return data;
             });
         };

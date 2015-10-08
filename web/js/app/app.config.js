@@ -16,16 +16,16 @@
         // http://www.yiiframework.com/forum/index.php/topic/62721-yii2-and-angularjs-post/
         $httpProvider.defaults.headers.common["X-Requested-With"] = 'XMLHttpRequest';
 
-        if (Config.useCookies) {
+        if (Config.useCookie) {
             $httpProvider.defaults.withCredentials = true;
         } else {
-            // add jwt into http headers
+            // add token into http headers
             // @ngInject
             $httpProvider.interceptors.push(function($localStorage) {
                 return {
                     request: function(config) {
-                        if ($localStorage.jwt) {
-                            config.headers.Authorization = 'Bearer ' + $localStorage.jwt;
+                        if ($localStorage.token) {
+                            config.headers.Authorization = 'Bearer ' + $localStorage.token;
                         }
                         return config;
                     }

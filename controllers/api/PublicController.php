@@ -54,7 +54,7 @@ class PublicController extends BaseController
         $loginForm->load(Yii::$app->request->post(), "");
         if ($loginForm->validate()) {
             $user = $loginForm->getUser();
-            $authJwtData = $this->generateAuthJwtData($user->toArray(), $loginForm->rememberMe);
+            $authJwtData = $this->generateAuthJwtData($user->toArray(), $loginForm->rememberMe, $loginForm->useCookie);
             return ["success" => $authJwtData];
         }
         return ["errors" => $loginForm->errors];
@@ -65,7 +65,9 @@ class PublicController extends BaseController
      */
     public function actionLogout()
     {
-        return ["success" => Yii::$app->user->logout()];
+        /** @var \app\components\JwtAuth $jwtAuth */
+        $jwtAuth = Yii::$app->jwtAuth;
+        return ["success" => $jwtAuth->removeCookieToken() && Yii::$app->user->logout()];
     }
 
     /**
@@ -76,87 +78,101 @@ class PublicController extends BaseController
         // attempt to register user
         /** @var User $user */
         $user = User::register(Yii::$app->request->post());
-        $rememberMe = true;
         if (!is_array($user)) {
-            return ["success" => $this->generateAuthJwtData($user->toArray(), $rememberMe)];
+            return ["success" => $this->generateAuthJwtData($user->toArray())];
         }
         return ["errors" => $user];
     }
 
     /**
-     * Refresh jwt token based off of refresh token or regular header payload
+     * Renew token
      */
-    public function actionRefreshJwt()
+    public function actionRenewToken()
     {
-        /** @var \app\components\JwtAuth $jwtAuth */
-        /** @var User $user */
-        $jwtAuth = Yii::$app->jwtAuth;
-
-        // decode jwt request token sent in post or get
-        $jwtRefresh = Yii::$app->request->get("jwtRefresh");
-        $payload    = $jwtRefresh ? $jwtAuth->decode($jwtRefresh) : false;
-        if ($payload) {
-            $user = User::findIdentityByAccessToken($payload->accessToken);
-
-            // set rememberMe = false so that the token ttl is shorter
-            // because the refresh token is permanent
-            $rememberMe = false;
-            return ["success" => $this->generateAuthJwtData($user->toArray(), $rememberMe)];
+        $payload = $this->getPayloadFromAllSources();
+        if (!$payload) {
+            return ["error" => Yii::t("app", "Invalid token")];
         }
 
-        // decode jwt from cookie or header
-        $payload = $jwtAuth->getPayload();
-        if ($payload) {
-            $jwt = $jwtAuth->regenerateToken($payload);
-            return ["success" => $this->generateAuthJwtData($payload->user, $payload->rememberMe, $jwt)];
-        }
-
-        return ["success" => null];
+        return ["success" => $this->generateAuthJwtData($payload->user, $payload->rememberMe, $payload->useCookie)];
     }
 
     /**
-     * Generate auth data (user and jwt tokens)
-     * @param array|object $userAttributes
-     * @param bool $rememberMe
-     * @param string $jwt
-     * @return boolean
-     */
-    protected function generateAuthJwtData($userAttributes, $rememberMe = true, $jwt = "")
-    {
-        /** @var \app\components\JwtAuth $jwtAuth */
-        $jwtAuth = Yii::$app->jwtAuth;
-
-        // use $jwt if set, otherwise generate
-        if (!$jwt) {
-            $jwt = $jwtAuth->generateUserToken($userAttributes, $rememberMe);;
-        }
-
-        // add cookie
-        $jwtAuth->setCookieJwt($jwt);
-
-        return [
-            "user" => $userAttributes,
-            "jwt" => $jwt,
-        ];
-    }
-
-    /**
-     * Get jwt refresh token
+     * Get refresh token
      * Note: PERMANENT. You should have some way to revoke these access tokens
      */
-    public function actionGetRefreshToken()
+    public function actionRequestRefreshToken()
     {
         /** @var User $user */
         /** @var \app\components\JwtAuth $jwtAuth */
         $jwtAuth = Yii::$app->jwtAuth;
 
-        $payload = $jwtAuth->getHeaderPayload();
+        $payload = $this->getPayloadFromAllSources();
         if (!$payload) {
-            return ["success" => null];
+            return ["error" => Yii::t("app", "Invalid token")];
         }
 
         // get user based off of id and get access token
         $user = User::findIdentity($payload->sub);
-        return ["success" => $jwtAuth->generateUserAccessToken($user->accessToken)];
+
+        // generate refresh token
+        // note that we use $user->id here, but it can also be the id of your token table
+        $id = $user->id;
+        $token = $user->accessToken;
+        return ["success" => $jwtAuth->generateRefreshToken($id, $token, $payload->rememberMe, $payload->useCookie)];
+    }
+
+    public function actionRefreshToken()
+    {
+        /** @var User $user */
+        /** @var \app\components\JwtAuth $jwtAuth */
+        $jwtAuth = Yii::$app->jwtAuth;
+
+        $token = Yii::$app->request->get("refreshToken");
+        $payload = $token ? $jwtAuth->decode($token) : false;
+        if (!$payload) {
+            return ["error" => Yii::t("app", "Invalid token")];
+        }
+
+        $user = User::findIdentityByAccessToken($payload->accessToken);
+        return ["success" => $this->generateAuthJwtData($user->toArray(), $payload->rememberMe, $payload->useCookie)];
+    }
+
+    /**
+     * Get payload from various sources - GET, cookie, or header (in that order)
+     * @param string $getParam
+     * @return object
+     */
+    protected function getPayloadFromAllSources($getParam = "token")
+    {
+        /** @var \app\components\JwtAuth $jwtAuth */
+        $jwtAuth = Yii::$app->jwtAuth;
+
+        $token = Yii::$app->request->get($getParam);
+        if ($token) {
+            $payload = $jwtAuth->decode($token);
+        } else {
+            $payload = $jwtAuth->getCookieHeaderPayload();
+        }
+        return $payload;
+    }
+
+    /**
+     * Generate auth data (for sending back to client)
+     * @param array|object $userAttributes
+     * @param bool $rememberMe
+     * @param bool $useCookie
+     * @return boolean
+     */
+    protected function generateAuthJwtData($userAttributes, $rememberMe = true, $useCookie = true)
+    {
+        /** @var \app\components\JwtAuth $jwtAuth */
+        $jwtAuth = Yii::$app->jwtAuth;
+
+        $token = $jwtAuth->generateUserToken($userAttributes, $rememberMe, $useCookie);
+        return [
+            "user" => $userAttributes,
+            "token" => $token,
+        ];
     }
 }

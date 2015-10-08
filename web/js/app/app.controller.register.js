@@ -39,7 +39,7 @@
                 if (data.success) {
                     vm.errors = false;
                     recaptchaId = vm.sitekey ? grecaptchaObj.reset(recaptchaId) : null;
-                    User.startJwtRefreshInterval();
+                    User.startTokenRenewInterval();
                 } else if (data.errors) {
                     vm.errors = data.errors;
                 }

@@ -13,10 +13,9 @@ class LoginForm extends Model
 {
     public $email;
     public $password;
-    public $rememberMe;
-
+    public $rememberMe = true;
+    public $useCookie = true;
     private $_user = false;
-
 
     /**
      * @return array the validation rules.
@@ -27,7 +26,7 @@ class LoginForm extends Model
             // email and password are both required
             [['email', 'password'], 'required'],
             // rememberMe must be a boolean value
-            ['rememberMe', 'boolean'],
+            [['rememberMe', 'useCookie'], 'boolean'],
             // password is validated by validatePassword()
             ['password', 'validatePassword'],
         ];

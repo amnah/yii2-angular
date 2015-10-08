@@ -75,8 +75,8 @@ $min = !YII_ENV_DEV ? ".min" : "";  // use min version unless in dev
     var AppConfig = {
         apiUrl: '<?= rtrim(getenv("API_URL"), "/") . "/" ?>',
         recaptchaSitekey: '<?= getenv("RECAPTCHA_SITEKEY") ?>',
-        useCookies: true, // fallback to local storage if this is false
-        jwtRefreshTime: 60*60*1000 // 1 hr
+        useCookie: true, // fallback to local storage if this is false
+        tokenRenewInterval: 60*60*1000 // 1 hr
     };
 </script>
 

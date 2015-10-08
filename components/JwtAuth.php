@@ -44,12 +44,12 @@ class JwtAuth extends HttpBearerAuth
     /**
      * @var string Name for cookie to store jwt data in
      */
-    public $cookieName = "jwt";
+    public $cookieName = "token";
 
     /**
      * @var object Payload from cookie or header auth
      */
-    protected $payload;
+    private $payload;
 
     /**
      * @inheritdoc
@@ -73,7 +73,7 @@ class JwtAuth extends HttpBearerAuth
             return true;
         }
 
-        $payload = $this->getPayload();
+        $payload = $this->getCookieHeaderPayload();
         if (!$payload) {
             return null;
         }
@@ -84,7 +84,7 @@ class JwtAuth extends HttpBearerAuth
      * Get payload from cookie or header
      * @return object
      */
-    public function getPayload()
+    public function getCookieHeaderPayload()
     {
         if ($this->payload) {
             return $this->payload;
@@ -92,9 +92,9 @@ class JwtAuth extends HttpBearerAuth
 
         // check cookie first
         $request = Yii::$app->request;
-        $jwt = $request->cookies->getValue($this->cookieName);
-        if ($jwt) {
-            $payload = $this->decode($jwt);
+        $token = $request->cookies->getValue($this->cookieName);
+        if ($token) {
+            $payload = $this->decode($token);
             if ($payload) {
                 $this->payload = $payload;
                 return $payload;
@@ -115,67 +115,60 @@ class JwtAuth extends HttpBearerAuth
     }
 
     /**
-     * Set jwt in cookie
-     * @param string $jwt
+     * Set token in cookie
+     * @param string $token
+     * @param int $exp
      */
-    public function setCookieJwt($jwt)
+    public function setCookieToken($token, $exp)
     {
         $this->response->cookies->add(new Cookie([
             "name" => $this->cookieName,
-            "value" => $jwt,
+            "value" => $token,
             "secure" => $this->request->isSecureConnection,
-            "expire" => strtotime("+1 year"), // use exp claim in jwt instead of cookie
+            "expire" => $exp,
         ]));
     }
 
     /**
-     * Remove jwt cookie
+     * Remove token cookie
      */
-    public function removeCookieJwt()
+    public function removeCookieToken()
     {
         $this->response->cookies->remove($this->cookieName);
     }
 
     /**
-     * Encode data into jwt string
+     * Encode data into jwt token string
      * @param array|object $data
-     * @param int|string $ttl seconds from current time
      * @return string
      * @link http://websec.io/2014/08/04/Securing-Requests-with-JWT.html
      */
-    public function encode($data, $ttl = null)
+    public function encode($data)
     {
         // build token data
         $data = (array) $data;
         $token = $this->getTokenDefaults();
         $token = array_merge($token, $data);
-
-        // add in expire time if set
-        $ttl = $ttl === null ? $this->ttl : $ttl;
-        if ($ttl) {
-            $token["exp"] = is_string($ttl) ? strtotime($ttl) : $token["iat"] + $ttl;
-        }
-
         return JWT::encode($token, $this->key, $this->algorithm);
     }
 
     /**
-     * Decode jwt string
+     * Decode jwt token string
      * Check iss, aud, iat, nbt, and exp claims
-     * @param string $jwt
+     * @param string $token
      * @return object
      * @throws Exception
      */
-    public function decode($jwt)
+    public function decode($token)
     {
         JWT::$leeway = $this->leeway;
         try {
-            $payload = JWT::decode($jwt, $this->key, [$this->algorithm]);
+            $payload = JWT::decode($token, $this->key, [$this->algorithm]);
             $tokenDefaults = $this->getTokenDefaults();
             if ($payload->iss != $tokenDefaults["iss"] || $payload->aud != $tokenDefaults["aud"]) {
                 return false;
             }
-            if (!$this->request->validateCsrfToken($payload->jti)) {
+            if ($payload->useCookie && !$this->request->validateCsrfToken($payload->jti)) {
                 return false;
             }
             return $payload;
@@ -205,58 +198,57 @@ class JwtAuth extends HttpBearerAuth
      * Generate a jwt token for user
      * @param array $userAttributes
      * @param bool $rememberMe
+     * @param bool $useCookie
      * @return string
      */
-    public function generateUserToken($userAttributes, $rememberMe)
+    public function generateUserToken($userAttributes, $rememberMe = true, $useCookie = true)
     {
         $userAttributes = (array) $userAttributes;
-        $ttl = $rememberMe ? $this->ttlRememberMe : $this->ttl;
-
-        return $this->encode([
+        $data = [
             "sub" => $userAttributes["id"],
             "user" => $userAttributes,
             "rememberMe" => $rememberMe ? 1 : 0,
-        ], $ttl);
+            "useCookie" => $useCookie ? 1 : 0,
+        ];
+
+        // compute expire time and encode
+        $ttl = $rememberMe ? $this->ttlRememberMe : $this->ttl;
+        $exp = is_string($ttl) ? strtotime($ttl) : time() + $ttl;
+        if ($ttl) {
+            $data["exp"] = $exp;
+        }
+        $token = $this->encode($data);
+
+        // set cookie and return
+        if ($useCookie) {
+            $this->setCookieToken($token, $exp);
+        }
+        return $token;
     }
 
     /**
      * Generate a jwt token for user based on access token
      * Note: this token does NOT expire, so you should have some way to revoke the access token
-     * @param string $accessToken
      * @param int $id
+     * @param string $accessToken
+     * @param bool $rememberMe
+     * @param bool $useCookie
      * @return string
      */
-    public function generateRefreshToken($accessToken, $id = null)
+    public function generateRefreshToken($id, $accessToken, $rememberMe = true, $useCookie = true)
     {
-        // add sub if set. this isn't needed, but can be set if desired
-        if ($id) {
-            $data["sub"] = $id;
+        $data = [
+            "sub" => $id,
+            "accessToken" => $accessToken,
+            "rememberMe" => $rememberMe ? 1 : 0,
+            "useCookie" => $useCookie ? 1 : 0,
+        ];
+        $refreshToken = $this->encode($data);
+
+        // set cookie and return
+        if ($useCookie) {
+            $this->setCookieToken($refreshToken, strtotime("2037-12-31")); // far, far future
         }
-        $data["accessToken"] = $accessToken;
-
-        // set ttl = 0 so it won't get an exp
-        $ttl = 0;
-        return $this->encode($data, $ttl);
-    }
-
-    /**
-     * Regenerate a token (update iat, nbf, and exp)
-     * @param object $payload
-     * @return string
-     */
-    public function regenerateToken($payload)
-    {
-        // calculate ttl
-        $ttl = null;
-        if (!empty($payload->exp)) {
-            $ttl = $payload->exp - $payload->iat;
-        }
-
-        // calculate times and csrf
-        $time = time();
-        $payload->iat = $time;
-        $payload->nbf = $time;
-        $payload->jti = $this->request->getCsrfToken(true);
-        return $this->encode($payload, $ttl);
+        return $refreshToken;
     }
 }
