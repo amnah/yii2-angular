@@ -50,11 +50,14 @@ class PublicController extends BaseController
     public function actionLogin()
     {
         // notice that we set the second parameter $formName = ""
+        $request = Yii::$app->request;
         $loginForm = new LoginForm();
-        $loginForm->load(Yii::$app->request->post(), "");
+        $loginForm->load($request->post(), "");
         if ($loginForm->validate()) {
-            $user = $loginForm->getUser();
-            $authJwtData = $this->generateAuthJwtData($user->toArray(), $loginForm->rememberMe, $loginForm->useCookie);
+            $userAttributes = $loginForm->getUser()->toArray();
+            $rememberMe = $request->post("rememberMe", true);
+            $useCookie = $request->post("useCookie", true);
+            $authJwtData = $this->generateAuthJwtData($userAttributes, $rememberMe, $useCookie);
             return ["success" => $authJwtData];
         }
         return ["errors" => $loginForm->errors];
@@ -77,9 +80,14 @@ class PublicController extends BaseController
     {
         // attempt to register user
         /** @var User $user */
-        $user = User::register(Yii::$app->request->post());
+        $request = Yii::$app->request;
+        $user = User::register($request->post());
+
         if (!is_array($user)) {
-            return ["success" => $this->generateAuthJwtData($user->toArray())];
+            $userAttributes = $user->toArray();
+            $rememberMe = $request->post("rememberMe", true);
+            $useCookie = $request->post("useCookie", true);
+            return ["success" => $this->generateAuthJwtData($userAttributes, $rememberMe, $useCookie)];
         }
         return ["errors" => $user];
     }
@@ -164,7 +172,7 @@ class PublicController extends BaseController
      * @param bool $useCookie
      * @return boolean
      */
-    protected function generateAuthJwtData($userAttributes, $rememberMe = true, $useCookie = true)
+    protected function generateAuthJwtData($userAttributes, $rememberMe, $useCookie)
     {
         /** @var \app\components\JwtAuth $jwtAuth */
         $jwtAuth = Yii::$app->jwtAuth;

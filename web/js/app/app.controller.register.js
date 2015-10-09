@@ -11,7 +11,7 @@
         var vm = this;
         vm.errors = {};
         vm.sitekey = Config.recaptchaSitekey;
-        vm.RegisterForm = {};
+        vm.RegisterForm = { rememberMe: true, useCookie: Config.useCookie };
 
         // set up and store grecaptcha data
         var recaptchaId;
