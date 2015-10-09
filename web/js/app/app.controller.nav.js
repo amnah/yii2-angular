@@ -6,11 +6,11 @@
         .controller('NavCtrl', NavCtrl);
 
     // @ngInject
-    function NavCtrl(User) {
+    function NavCtrl(Auth) {
 
         var vm = this;
         vm.isCollapsed = true;
-        vm.User = User;
+        vm.Auth = Auth;
     }
 
 })();

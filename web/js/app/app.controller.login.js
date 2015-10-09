@@ -6,22 +6,22 @@
         .controller('LoginCtrl', LoginCtrl);
 
     // @ngInject
-    function LoginCtrl(Config,User) {
+    function LoginCtrl(Config,Auth) {
 
         var vm = this;
         vm.errors = {};
-        vm.loginUrl = User.getLoginUrl();
+        vm.loginUrl = Auth.getLoginUrl();
         vm.LoginForm = { rememberMe: true, useCookie: Config.useCookie };
 
         // process form submit
         vm.submit = function() {
             vm.errors = {};
             vm.submitting  = true;
-            User.login(vm.LoginForm).then(function(data) {
+            Auth.login(vm.LoginForm).then(function(data) {
                 vm.submitting  = false;
                 if (data.success) {
-                    User.startTokenRenewInterval();
-                    User.redirect(vm.loginUrl);
+                    Auth.startTokenRenewInterval();
+                    Auth.redirect(vm.loginUrl);
                 } else if (data.errors) {
                     vm.errors = data.errors;
                 }

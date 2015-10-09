@@ -3,10 +3,10 @@
 
     angular
         .module('app')
-        .factory('User', User);
+        .factory('Auth', Auth);
 
     // @ngInject
-    function User($window, $location, $interval, $q, $localStorage, Config, Api) {
+    function Auth($window, $location, $interval, $q, $localStorage, Config, Api) {
 
         var factory = {};
         var user = false;

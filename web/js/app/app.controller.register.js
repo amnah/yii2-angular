@@ -6,7 +6,7 @@
         .controller('RegisterCtrl', RegisterCtrl);
 
     // @ngInject
-    function RegisterCtrl(Config, User) {
+    function RegisterCtrl(Config, Auth) {
 
         var vm = this;
         vm.errors = {};
@@ -17,7 +17,7 @@
         var recaptchaId;
         var grecaptchaObj;
         if (vm.sitekey) {
-            User.getRecaptcha().then(function (grecaptcha) {
+            Auth.getRecaptcha().then(function (grecaptcha) {
                 grecaptchaObj = grecaptcha;
                 recaptchaId = grecaptcha.render("register-captcha", {sitekey: vm.sitekey});
             });
@@ -34,12 +34,12 @@
             }
 
             vm.submitting  = true;
-            User.register(vm.RegisterForm).then(function(data) {
+            Auth.register(vm.RegisterForm).then(function(data) {
                 vm.submitting  = false;
                 if (data.success) {
                     vm.errors = false;
                     recaptchaId = vm.sitekey ? grecaptchaObj.reset(recaptchaId) : null;
-                    User.startTokenRenewInterval();
+                    Auth.startTokenRenewInterval();
                 } else if (data.errors) {
                     vm.errors = data.errors;
                 }
