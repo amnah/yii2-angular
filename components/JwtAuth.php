@@ -42,6 +42,12 @@ class JwtAuth extends HttpBearerAuth
     public $leeway = 60;
 
     /**
+     * @var string Name for $_GET param to check
+     * Leave as null if you don't want it to check $_GET at all
+     */
+    public $getParam = "token";
+
+    /**
      * @var string Name for cookie to store jwt data in
      */
     public $cookieName = "token";
@@ -73,7 +79,7 @@ class JwtAuth extends HttpBearerAuth
             return true;
         }
 
-        $payload = $this->getCookieHeaderPayload();
+        $payload = $this->getGetCookieHeaderPayload();
         if (!$payload) {
             return null;
         }
@@ -84,14 +90,25 @@ class JwtAuth extends HttpBearerAuth
      * Get payload from cookie or header
      * @return object
      */
-    public function getCookieHeaderPayload()
+    public function getGetCookieHeaderPayload()
     {
         if ($this->payload) {
             return $this->payload;
         }
 
-        // check cookie first
-        $request = Yii::$app->request;
+        // check $_GET first
+        $request = $this->request;
+        $getParam = $this->getParam;
+        $token = $this->request->get($getParam);
+        if ($getParam && $token) {
+            $payload = $this->decode($token);
+            if ($payload) {
+                $this->payload = $payload;
+                return $payload;
+            }
+        }
+
+        // then check cookie
         $token = $request->cookies->getValue($this->cookieName);
         if ($token) {
             $payload = $this->decode($token);
@@ -163,6 +180,7 @@ class JwtAuth extends HttpBearerAuth
     {
         JWT::$leeway = $this->leeway;
         try {
+            // ensure that aud, iss, and csrf are good
             $payload = JWT::decode($token, $this->key, [$this->algorithm]);
             $tokenDefaults = $this->getTokenDefaults();
             if ($payload->iss != $tokenDefaults["iss"] || $payload->aud != $tokenDefaults["aud"]) {
@@ -184,7 +202,7 @@ class JwtAuth extends HttpBearerAuth
     protected function getTokenDefaults()
     {
         $time = time();
-        $request = Yii::$app->request;
+        $request = $this->request;
         return [
             "iss" => $request->getHostInfo(),
             "aud" => parse_url($request->getReferrer(), PHP_URL_HOST) ?: $request->getHostInfo(),

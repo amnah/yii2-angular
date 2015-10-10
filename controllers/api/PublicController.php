@@ -31,6 +31,15 @@ class PublicController extends BaseController
     }
 
     /**
+     * Get JwtAuth component
+     * @return \app\components\JwtAuth
+     */
+    protected function getJwtAuth()
+    {
+        return Yii::$app->jwtAuth;
+    }
+    
+    /**
      * Contact
      */
     public function actionContact()
@@ -68,8 +77,7 @@ class PublicController extends BaseController
      */
     public function actionLogout()
     {
-        /** @var \app\components\JwtAuth $jwtAuth */
-        $jwtAuth = Yii::$app->jwtAuth;
+        $jwtAuth = $this->getJwtAuth();
         return ["success" => $jwtAuth->removeCookieToken() && Yii::$app->user->logout()];
     }
 
@@ -97,7 +105,8 @@ class PublicController extends BaseController
      */
     public function actionRenewToken()
     {
-        $payload = $this->getPayloadFromAllSources();
+        $jwtAuth = $this->getJwtAuth();
+        $payload = $jwtAuth->getGetCookieHeaderPayload();
         if (!$payload) {
             return ["error" => Yii::t("app", "Invalid token")];
         }
@@ -112,10 +121,9 @@ class PublicController extends BaseController
     public function actionRequestRefreshToken()
     {
         /** @var User $user */
-        /** @var \app\components\JwtAuth $jwtAuth */
-        $jwtAuth = Yii::$app->jwtAuth;
-
-        $payload = $this->getPayloadFromAllSources();
+        
+        $jwtAuth = $this->getJwtAuth();
+        $payload = $jwtAuth->getGetCookieHeaderPayload();
         if (!$payload) {
             return ["error" => Yii::t("app", "Invalid token")];
         }
@@ -133,9 +141,8 @@ class PublicController extends BaseController
     public function actionRefreshToken()
     {
         /** @var User $user */
-        /** @var \app\components\JwtAuth $jwtAuth */
-        $jwtAuth = Yii::$app->jwtAuth;
-
+        
+        $jwtAuth = $this->getJwtAuth();
         $token = Yii::$app->request->get("refreshToken");
         $payload = $token ? $jwtAuth->decode($token) : false;
         if (!$payload) {
@@ -147,25 +154,6 @@ class PublicController extends BaseController
     }
 
     /**
-     * Get payload from various sources - GET, cookie, or header (in that order)
-     * @param string $getParam
-     * @return object
-     */
-    protected function getPayloadFromAllSources($getParam = "token")
-    {
-        /** @var \app\components\JwtAuth $jwtAuth */
-        $jwtAuth = Yii::$app->jwtAuth;
-
-        $token = Yii::$app->request->get($getParam);
-        if ($token) {
-            $payload = $jwtAuth->decode($token);
-        } else {
-            $payload = $jwtAuth->getCookieHeaderPayload();
-        }
-        return $payload;
-    }
-
-    /**
      * Generate auth data (for sending back to client)
      * @param array|object $userAttributes
      * @param bool $rememberMe
@@ -174,9 +162,7 @@ class PublicController extends BaseController
      */
     protected function generateAuthJwtData($userAttributes, $rememberMe, $useCookie)
     {
-        /** @var \app\components\JwtAuth $jwtAuth */
-        $jwtAuth = Yii::$app->jwtAuth;
-
+        $jwtAuth = $this->getJwtAuth();
         $token = $jwtAuth->generateUserToken($userAttributes, $rememberMe, $useCookie);
         return [
             "user" => $userAttributes,
