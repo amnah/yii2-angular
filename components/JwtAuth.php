@@ -48,9 +48,14 @@ class JwtAuth extends HttpBearerAuth
     public $getParam = "token";
 
     /**
-     * @var string Name for cookie to store jwt data in
+     * @var string Name of cookie to store token in
      */
     public $cookieName = "token";
+
+    /**
+     * @var string Name of cookie to store refresh token in
+     */
+    public $refreshCookieName = "refreshToken";
 
     /**
      * @var object Payload from cookie or header auth
@@ -133,13 +138,14 @@ class JwtAuth extends HttpBearerAuth
 
     /**
      * Set token in cookie
+     * @param string $cookieName
      * @param string $token
      * @param int $exp
      */
-    public function setCookieToken($token, $exp)
+    public function setCookieToken($cookieName, $token, $exp)
     {
         $this->response->cookies->add(new Cookie([
-            "name" => $this->cookieName,
+            "name" => $cookieName,
             "value" => $token,
             "secure" => $this->request->isSecureConnection,
             "expire" => $exp,
@@ -152,6 +158,16 @@ class JwtAuth extends HttpBearerAuth
     public function removeCookieToken()
     {
         $this->response->cookies->remove($this->cookieName);
+        return $this;
+    }
+
+    /**
+     * Remove refresh token cookie
+     */
+    public function removeRefreshCookieToken()
+    {
+        $this->response->cookies->remove($this->refreshCookieName);
+        return $this;
     }
 
     /**
@@ -239,7 +255,7 @@ class JwtAuth extends HttpBearerAuth
 
         // set cookie and return
         if ($useCookie) {
-            $this->setCookieToken($token, $exp);
+            $this->setCookieToken($this->cookieName, $token, $exp);
         }
         return $token;
     }
@@ -265,7 +281,7 @@ class JwtAuth extends HttpBearerAuth
 
         // set cookie and return
         if ($useCookie) {
-            $this->setCookieToken($refreshToken, strtotime("2037-12-31")); // far, far future
+            $this->setCookieToken($this->refreshCookieName, $refreshToken, strtotime("2037-12-31")); // far, far future
         }
         return $refreshToken;
     }

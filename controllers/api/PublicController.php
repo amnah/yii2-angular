@@ -78,7 +78,9 @@ class PublicController extends BaseController
     public function actionLogout()
     {
         $jwtAuth = $this->getJwtAuth();
-        return ["success" => $jwtAuth->removeCookieToken() && Yii::$app->user->logout()];
+        $jwtAuth->removeCookieToken();
+        $jwtAuth->removeRefreshCookieToken();
+        return ["success" => true];
     }
 
     /**
@@ -138,6 +140,19 @@ class PublicController extends BaseController
         return ["success" => $jwtAuth->generateRefreshToken($id, $token, $payload->rememberMe, $payload->useCookie)];
     }
 
+    /**
+     * Remove refresh token
+     */
+    public function actionRemoveRefreshToken()
+    {
+        $this->getJwtAuth()->removeRefreshCookieToken();
+        return ["success" => true];
+    }
+
+    /**
+     * Use refreshToken to refresh the regular token
+     * @return array
+     */
     public function actionRefreshToken()
     {
         /** @var User $user */

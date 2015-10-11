@@ -59,6 +59,37 @@
             user = $localStorage.user;
         };
 
+        factory.getRefreshToken = function() {
+            // note: this will return nothing if the frontend client is using cookies
+            return $localStorage.refreshToken;
+        };
+
+        factory.requestRefreshToken = function() {
+            return Api.get('public/request-refresh-token').then(function(data) {
+                if (!Config.useCookie) {
+                    $localStorage.refreshToken = data.success;
+                }
+                return data;
+            });
+        };
+
+        factory.removeRefreshToken = function() {
+            // remove token from local storage and cookie
+            delete $localStorage.refreshToken;
+            return Api.get('public/remove-refresh-token').then(function(data) {
+                return data;
+            });
+        };
+
+        factory.useRefreshToken = function() {
+            return Api.post('public/refresh-jwt', {refreshToken: $localStorage.refreshToken}).then(function(data) {
+                factory.setUserAndJwt(data);
+                if (!user) {
+                    factory.removeRefreshToken();
+                }
+            });
+        };
+
         factory.getAttribute = function(attribute, defaultValue) {
             return user ? user[attribute] : defaultValue;
         };
