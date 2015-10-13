@@ -6,7 +6,7 @@
         .controller('ProfileCtrl', ProfileCtrl);
 
     // @ngInject
-    function ProfileCtrl(Api, Auth) {
+    function ProfileCtrl($filter, Api, Auth) {
 
         var vm = this;
         vm.user = null;
@@ -19,22 +19,20 @@
 
         vm.requestRefreshToken = function() {
             Auth.requestRefreshToken().then(function(data) {
-                vm.message = 'Got new token - ' + data.success.substr(-43);
+                vm.message = $filter('date')(new Date(), 'mediumTime') + ' - Got new token - ' + data.success.substr(-43);
             });
         };
 
         vm.removeRefreshToken = function() {
             Auth.removeRefreshToken().then(function(data) {
-                vm.message = 'Revoked token';
+                vm.message = $filter('date')(new Date(), 'mediumTime') + ' - Removed token';
             });
         };
 
         vm.useRefreshToken = function() {
-            if (Auth.getRefreshToken()) {
-                Auth.useRefreshToken().then(function(data) {
-                    vm.message = 'Used refresh token to get new regular token';
-                });
-            }
+            Auth.useRefreshToken().then(function(data) {
+                vm.message = $filter('date')(new Date(), 'mediumTime') + ' - Used refresh token to get new regular token';
+            });
         };
     }
 

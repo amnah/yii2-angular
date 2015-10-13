@@ -26,7 +26,7 @@
             if (useCache && user !== false) {
                 userDefer.resolve(user);
             } else {
-                Api.get('public/renew-token').then(function (data) {
+                Api.get('public/renew-token').then(function(data) {
                     factory.setUserAndToken(data);
                     userDefer.resolve(user);
                 });
@@ -82,10 +82,12 @@
         };
 
         factory.useRefreshToken = function() {
-            return Api.post('public/refresh-jwt', {refreshToken: $localStorage.refreshToken}).then(function(data) {
-                factory.setUserAndJwt(data);
+            var params = $localStorage.refreshToken ? {refreshToken: $localStorage.refreshToken} : {};
+            return Api.get('public/use-refresh-token', params).then(function(data) {
+                factory.setUserAndToken(data);
                 if (!user) {
                     factory.removeRefreshToken();
+                    factory.redirect();
                 }
             });
         };

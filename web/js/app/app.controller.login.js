@@ -8,10 +8,6 @@
     // @ngInject
     function LoginCtrl(Config,Auth) {
 
-        if (Auth.isLoggedIn()) {
-            Auth.redirect();
-        }
-
         var vm = this;
         vm.errors = {};
         vm.loginUrl = Auth.getLoginUrl();

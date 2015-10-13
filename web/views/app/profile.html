@@ -10,7 +10,9 @@
 
     <p>Status: <strong>{{ vm.message }}</strong></p>
 
-    <p>Note that refresh tokens are <strong>PERMANENT</strong></p>
+    <p><strong>Note</strong> that if you remove the refresh token and then attempt to use it, you will be redirected</p>
+
+    <p><strong>Note</strong> that refresh tokens are <strong>PERMANENT</strong></p>
 
     <p>
         <a class="btn btn-primary" ng-click="vm.requestRefreshToken()">Get refresh token</a>

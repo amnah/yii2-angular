@@ -42,20 +42,14 @@ class JwtAuth extends HttpBearerAuth
     public $leeway = 60;
 
     /**
-     * @var string Name for $_GET param to check
-     * Leave as null if you don't want it to check $_GET at all
+     * @var string Refresh param name (to check in $_GET and cookies)
      */
-    public $getParam = "token";
+    public $tokenParam = "token";
 
     /**
-     * @var string Name of cookie to store token in
+     * @var string Refresh token param name (to check in $_GET and cookies)
      */
-    public $cookieName = "token";
-
-    /**
-     * @var string Name of cookie to store refresh token in
-     */
-    public $refreshCookieName = "refreshToken";
+    public $refreshTokenParam = "refreshToken";
 
     /**
      * @var object Payload from cookie or header auth
@@ -84,7 +78,7 @@ class JwtAuth extends HttpBearerAuth
             return true;
         }
 
-        $payload = $this->getGetCookieHeaderPayload();
+        $payload = $this->getTokenPayload();
         if (!$payload) {
             return null;
         }
@@ -92,29 +86,30 @@ class JwtAuth extends HttpBearerAuth
     }
 
     /**
-     * Get payload from cookie or header
+     * Get token payload from $_GET, cookie, or header (in that order)
      * @return object
      */
-    public function getGetCookieHeaderPayload()
+    public function getTokenPayload()
     {
         if ($this->payload) {
             return $this->payload;
         }
 
-        // check $_GET first
+        // check $_GET, cookie, and then header
         $request = $this->request;
-        $getParam = $this->getParam;
-        $token = $this->request->get($getParam);
-        if ($getParam && $token) {
-            $payload = $this->decode($token);
-            if ($payload) {
-                $this->payload = $payload;
-                return $payload;
+        $tokenParam = $this->tokenParam;
+        $token = $this->request->get($tokenParam);
+        if (!$token) {
+            $token = $request->cookies->getValue($this->tokenParam);
+        }
+        if (!$token) {
+            $authHeader = $request->getHeaders()->get("Authorization");
+            if ($authHeader !== null && preg_match("/^Bearer\\s+(.*?)$/", $authHeader, $matches)) {
+                $token = $matches[1];
             }
         }
 
-        // then check cookie
-        $token = $request->cookies->getValue($this->cookieName);
+        // decode and store payload
         if ($token) {
             $payload = $this->decode($token);
             if ($payload) {
@@ -122,17 +117,28 @@ class JwtAuth extends HttpBearerAuth
                 return $payload;
             }
         }
+        return false;
+    }
 
-        // then check header
-        $authHeader = $request->getHeaders()->get("Authorization");
-        if ($authHeader !== null && preg_match("/^Bearer\\s+(.*?)$/", $authHeader, $matches)) {
-            $payload = $this->decode($matches[1]);
-            if ($payload) {
-                $this->payload = $payload;
-                return $payload;
-            }
+    /**
+     * Get refresh token payload from $_GET or cookie
+     * @return object
+     */
+    public function getRefreshTokenPayload()
+    {
+        $request = $this->request;
+        $refreshTokenParam = $this->refreshTokenParam;
+
+        // check $_GET and then cookie
+        $refreshToken = $this->request->get($refreshTokenParam);
+        if (!$refreshToken) {
+            $refreshToken = $request->cookies->getValue($refreshTokenParam);
         }
 
+        // decode token
+        if ($refreshToken) {
+            return $this->decode($refreshToken);
+        }
         return false;
     }
 
@@ -157,7 +163,7 @@ class JwtAuth extends HttpBearerAuth
      */
     public function removeCookieToken()
     {
-        $this->response->cookies->remove($this->cookieName);
+        $this->response->cookies->remove($this->tokenParam);
         return $this;
     }
 
@@ -166,7 +172,7 @@ class JwtAuth extends HttpBearerAuth
      */
     public function removeRefreshCookieToken()
     {
-        $this->response->cookies->remove($this->refreshCookieName);
+        $this->response->cookies->remove($this->refreshTokenParam);
         return $this;
     }
 
@@ -255,7 +261,7 @@ class JwtAuth extends HttpBearerAuth
 
         // set cookie and return
         if ($useCookie) {
-            $this->setCookieToken($this->cookieName, $token, $exp);
+            $this->setCookieToken($this->tokenParam, $token, $exp);
         }
         return $token;
     }
@@ -281,7 +287,7 @@ class JwtAuth extends HttpBearerAuth
 
         // set cookie and return
         if ($useCookie) {
-            $this->setCookieToken($this->refreshCookieName, $refreshToken, strtotime("2037-12-31")); // far, far future
+            $this->setCookieToken($this->refreshTokenParam, $refreshToken, strtotime("2037-12-31")); // far, far future
         }
         return $refreshToken;
     }

@@ -66,7 +66,7 @@ class PublicController extends BaseController
             $userAttributes = $loginForm->getUser()->toArray();
             $rememberMe = $request->post("rememberMe", true);
             $useCookie = $request->post("useCookie", true);
-            $authJwtData = $this->generateAuthJwtData($userAttributes, $rememberMe, $useCookie);
+            $authJwtData = $this->generateAuthOutput($userAttributes, $rememberMe, $useCookie);
             return ["success" => $authJwtData];
         }
         return ["errors" => $loginForm->errors];
@@ -97,7 +97,7 @@ class PublicController extends BaseController
             $userAttributes = $user->toArray();
             $rememberMe = $request->post("rememberMe", true);
             $useCookie = $request->post("useCookie", true);
-            return ["success" => $this->generateAuthJwtData($userAttributes, $rememberMe, $useCookie)];
+            return ["success" => $this->generateAuthOutput($userAttributes, $rememberMe, $useCookie)];
         }
         return ["errors" => $user];
     }
@@ -107,13 +107,15 @@ class PublicController extends BaseController
      */
     public function actionRenewToken()
     {
+        // attempt to renew token using regular token in $_GET, cookie, or header
         $jwtAuth = $this->getJwtAuth();
-        $payload = $jwtAuth->getGetCookieHeaderPayload();
-        if (!$payload) {
-            return ["error" => Yii::t("app", "Invalid token")];
+        $payload = $jwtAuth->getTokenPayload();
+        if ($payload) {
+            return ["success" => $this->generateAuthOutput($payload->user, $payload->rememberMe, $payload->useCookie)];
         }
 
-        return ["success" => $this->generateAuthJwtData($payload->user, $payload->rememberMe, $payload->useCookie)];
+        // attempt to renew token using refresh token
+        return $this->actionUseRefreshToken();
     }
 
     /**
@@ -125,7 +127,7 @@ class PublicController extends BaseController
         /** @var User $user */
         
         $jwtAuth = $this->getJwtAuth();
-        $payload = $jwtAuth->getGetCookieHeaderPayload();
+        $payload = $jwtAuth->getTokenPayload();
         if (!$payload) {
             return ["error" => Yii::t("app", "Invalid token")];
         }
@@ -153,19 +155,20 @@ class PublicController extends BaseController
      * Use refreshToken to refresh the regular token
      * @return array
      */
-    public function actionRefreshToken()
+    public function actionUseRefreshToken()
     {
         /** @var User $user */
-        
+
+        // get token/payload
         $jwtAuth = $this->getJwtAuth();
-        $token = Yii::$app->request->get("refreshToken");
-        $payload = $token ? $jwtAuth->decode($token) : false;
+        $payload = $jwtAuth->getRefreshTokenPayload();
         if (!$payload) {
             return ["error" => Yii::t("app", "Invalid token")];
         }
 
+        // find user and generate auth data
         $user = User::findIdentityByAccessToken($payload->accessToken);
-        return ["success" => $this->generateAuthJwtData($user->toArray(), $payload->rememberMe, $payload->useCookie)];
+        return ["success" => $this->generateAuthOutput($user->toArray(), $payload->rememberMe, $payload->useCookie)];
     }
 
     /**
@@ -175,7 +178,7 @@ class PublicController extends BaseController
      * @param bool $useCookie
      * @return boolean
      */
-    protected function generateAuthJwtData($userAttributes, $rememberMe, $useCookie)
+    protected function generateAuthOutput($userAttributes, $rememberMe, $useCookie)
     {
         $jwtAuth = $this->getJwtAuth();
         $token = $jwtAuth->generateUserToken($userAttributes, $rememberMe, $useCookie);
