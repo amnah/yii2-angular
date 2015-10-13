@@ -6,7 +6,7 @@
         .controller('ProfileCtrl', ProfileCtrl);
 
     // @ngInject
-    function ProfileCtrl($filter, Api, Auth) {
+    function ProfileCtrl($filter, $localStorage, Config, Api, Auth) {
 
         var vm = this;
         vm.user = null;
@@ -30,9 +30,13 @@
         };
 
         vm.useRefreshToken = function() {
-            Auth.useRefreshToken().then(function(data) {
-                vm.message = $filter('date')(new Date(), 'mediumTime') + ' - Used refresh token to get new regular token';
-            });
+            if (!Config.useCookie && !$localStorage.refreshToken) {
+                vm.message = $filter('date')(new Date(), 'mediumTime') + ' - No refresh token (using local storage)';
+            } else {
+                Auth.useRefreshToken().then(function(data) {
+                    vm.message = $filter('date')(new Date(), 'mediumTime') + ' - Used refresh token to get new regular token';
+                });
+            }
         };
     }
 
