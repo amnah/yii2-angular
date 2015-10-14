@@ -55,7 +55,7 @@
             // otherwise just alert the error
             if (res.status == 401) {
                 var params = $localStorage.refreshToken ? {refreshToken: $localStorage.refreshToken} : {};
-                return $http.get(apiUrl + 'public/renew-token', {params: params}).then(processAjax401, processAjaxError);
+                return $http.get(apiUrl + 'public/use-refresh-token', {params: params}).then(processAjax401, processAjaxError);
             } else {
                 var error = '[ ' + res.status + ' ] ' + (res.data.message || res.statusText);
                 alert(error);
@@ -70,13 +70,14 @@
                 if (!Config.useCookie) {
                     $localStorage.token = data.success.token;
                 }
+                $window.location.reload();
             } else {
                 $localStorage.loginUrl = $location.path();
                 $location.path('/login').replace();
             }
 
             // reload so auth/user gets set properly
-            $window.location.reload();
+
         }
     }
 
