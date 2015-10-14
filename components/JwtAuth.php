@@ -271,16 +271,14 @@ class JwtAuth extends HttpBearerAuth
      * Note: this token does NOT expire, so you should have some way to revoke the access token
      * @param int $id
      * @param string $accessToken
-     * @param bool $rememberMe
      * @param bool $useCookie
      * @return string
      */
-    public function generateRefreshToken($id, $accessToken, $rememberMe = true, $useCookie = true)
+    public function generateRefreshToken($id, $accessToken, $useCookie = true)
     {
         $data = [
             "sub" => $id,
             "accessToken" => $accessToken,
-            "rememberMe" => $rememberMe ? 1 : 0,
             "useCookie" => $useCookie ? 1 : 0,
         ];
         $refreshToken = $this->encode($data);

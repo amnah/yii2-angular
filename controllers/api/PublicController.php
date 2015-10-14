@@ -139,7 +139,7 @@ class PublicController extends BaseController
         // note that we use $user->id here, but it can also be the id of your token table
         $id = $user->id;
         $token = $user->accessToken;
-        return ["success" => $jwtAuth->generateRefreshToken($id, $token, $payload->rememberMe, $payload->useCookie)];
+        return ["success" => $jwtAuth->generateRefreshToken($id, $token, $payload->useCookie)];
     }
 
     /**
@@ -167,8 +167,10 @@ class PublicController extends BaseController
         }
 
         // find user and generate auth data
+        // note: we don't need rememberMe when using refresh tokens
+        $rememberMe = false;
         $user = User::findIdentityByAccessToken($payload->accessToken);
-        return ["success" => $this->generateAuthOutput($user->toArray(), $payload->rememberMe, $payload->useCookie)];
+        return ["success" => $this->generateAuthOutput($user->toArray(), $rememberMe, $payload->useCookie)];
     }
 
     /**
