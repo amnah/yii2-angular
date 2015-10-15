@@ -12,20 +12,23 @@
         vm.user = null;
         vm.Auth = Auth;
         vm.message = '-----';
-
+        var refreshToken = Auth.getRefreshToken();
+        if (refreshToken) {
+            vm.message = $filter('date')(new Date(), 'mediumTime') + ' - Existing refresh token - ' + refreshToken.substr(-43);
+        }
         Api.get('user').then(function(data) {
             vm.user = data.success;
         });
 
         vm.requestRefreshToken = function() {
             Auth.requestRefreshToken().then(function(data) {
-                vm.message = $filter('date')(new Date(), 'mediumTime') + ' - Got new token - ' + data.success.substr(-43);
+                vm.message = $filter('date')(new Date(), 'mediumTime') + ' - Got new refresh token - ' + data.success.substr(-43);
             });
         };
 
         vm.removeRefreshToken = function() {
             Auth.removeRefreshToken().then(function(data) {
-                vm.message = $filter('date')(new Date(), 'mediumTime') + ' - Removed token';
+                vm.message = $filter('date')(new Date(), 'mediumTime') + ' - Removed refresh token';
             });
         };
 
