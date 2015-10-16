@@ -13,7 +13,8 @@
         'ngAnimate',
         // third party modules
         'ngStorage',
-        'ui.bootstrap'
+        'ui.bootstrap',
+        'http-auth-interceptor'
         // custom modules
     ]);
 

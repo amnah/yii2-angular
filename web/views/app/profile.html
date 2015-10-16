@@ -10,9 +10,11 @@
 
     <p>Status: <strong>{{ vm.message }}</strong></p>
 
-    <p><strong>Note</strong> that if you remove the refresh token and then attempt to use it, you will be redirected</p>
+    <p><strong>Note:</strong> If you remove the refresh token and then attempt to use it, you will get a white screen
+        (if using cookies)</p>
 
-    <p><strong>Note</strong> that refresh tokens are <strong>PERMANENT</strong></p>
+    <p><strong>Note:</strong> Refresh tokens are <strong>PERMANENT</strong>, typically used for mobile apps.
+        (NOT web apps)</p>
 
     <p>
         <a class="btn btn-primary" ng-click="vm.requestRefreshToken()">Get refresh token</a>

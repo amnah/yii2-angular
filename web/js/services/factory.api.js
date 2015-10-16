@@ -6,78 +6,54 @@
         .factory('Api', Api);
 
     // @ngInject
-    function Api($http, $q, $location, $window, $localStorage, Config) {
+    function Api($http, $q, $localStorage, Config) {
 
         var factory = {};
         var apiUrl = Config.apiUrl;
 
         // define REST functions
         factory.get = function(url, data) {
-            var config = getConfig();
+            var config = factory.getConfig();
             config = angular.extend(config, {params: data});
             return $http.get(apiUrl + url, config).then(processAjaxSuccess, processAjaxError);
         };
         factory.post = function(url, data) {
-            var config = getConfig();
+            var config = factory.getConfig();
             return $http.post(apiUrl + url, data, config).then(processAjaxSuccess, processAjaxError);
         };
         factory.put = function(url, data) {
-            var config = getConfig();
+            var config = factory.getConfig();
             return $http.put(apiUrl + url, data, config).then(processAjaxSuccess, processAjaxError);
         };
         // http://stackoverflow.com/questions/26479123/angularjs-http-delete-breaks-on-ie8
         factory['delete'] = function(url) {
-            var config = getConfig();
+            var config = factory.getConfig();
             return $http['delete'](apiUrl + url, config).then(processAjaxSuccess, processAjaxError);
         };
 
-        return factory;
-
         // get config
         // note: we need this as function so that it's called for every single Api call
-        function getConfig() {
+        factory.getConfig = function() {
             var config = {};
             if (Config.useCookie) {
                 config.withCredentials = true;
             } else if ($localStorage.token) {
-                config.headers = {Authorization: 'Bearer ' + $localStorage.token};
+                config.headers = config.headers || {};
+                config.headers.Authorization = 'Bearer ' + $localStorage.token;
             }
             return config;
-        }
+        };
+        
+        return factory;
 
         // process ajax success/error calls
         function processAjaxSuccess(res) {
             return res.data;
         }
         function processAjaxError(res) {
-
-            // process 401 by checking refresh token
-            // otherwise just alert the error
-            if (res.status == 401) {
-                var params = $localStorage.refreshToken ? {refreshToken: $localStorage.refreshToken} : {};
-                return $http.get(apiUrl + 'public/use-refresh-token', {params: params}).then(processAjax401, processAjaxError);
-            } else {
-                var error = '[ ' + res.status + ' ] ' + (res.data.message || res.statusText);
-                alert(error);
-            }
-
+            var error = '[ ' + res.status + ' ] ' + (res.data.message || res.statusText);
+            alert(error);
             return $q.reject(res);
-        }
-        function processAjax401(res) {
-            var data = res.data;
-            if (data && data.success && data.success.user) {
-                // set token if needed
-                if (!Config.useCookie) {
-                    $localStorage.token = data.success.token;
-                }
-                $window.location.reload();
-            } else {
-                $localStorage.loginUrl = $location.path();
-                $location.path('/login').replace();
-            }
-
-            // reload so auth/user gets set properly
-
         }
     }
 

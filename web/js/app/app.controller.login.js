@@ -21,7 +21,7 @@
                 vm.submitting  = false;
                 if (data.success) {
                     Auth.startTokenRenewInterval();
-                    Auth.redirect(vm.loginUrl);
+                    Auth.redirect(vm.loginUrl).clearLoginUrl();
                 } else if (data.errors) {
                     vm.errors = data.errors;
                 }

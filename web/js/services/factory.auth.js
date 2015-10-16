@@ -87,8 +87,8 @@
                 factory.setUserAndToken(data);
                 if (!user) {
                     factory.removeRefreshToken();
-                    factory.redirect();
                 }
+                return data;
             });
         };
 
@@ -107,22 +107,31 @@
             });
         };
 
+        factory.setLoginUrl = function(url) {
+            $localStorage.loginUrl = url;
+            return this;
+        };
+
+        factory.clearLoginUrl = function() {
+            delete $localStorage.loginUrl;
+            return this;
+        };
+
+        factory.redirect = function(url) {
+            url = url ? url : '';
+            $location.path(url).replace();
+            return this;
+        };
+
         // get login url via (1) local storage or (2) fallbackUrl
         factory.getLoginUrl = function(fallbackUrl) {
-            var loginUrl = $localStorage.loginUrl;
-            if (!loginUrl && fallbackUrl) {
-                loginUrl = fallbackUrl;
-            }
-            if (!loginUrl) {
-                loginUrl = '';
-            }
-            return loginUrl;
+            return $localStorage.loginUrl || fallbackUrl || '';
         };
 
         factory.logout = function(logoutUrl) {
-            logoutUrl = logoutUrl ? logoutUrl : '/';
             return Api.post('public/logout').then(function(data) {
                 factory.setUserAndToken(data);
+                factory.removeRefreshToken();
                 factory.redirect(logoutUrl);
                 return data;
             });
@@ -133,12 +142,6 @@
                 factory.setUserAndToken(data);
                 return data;
             });
-        };
-
-        factory.redirect = function(url) {
-            url = url ? url : '';
-            $localStorage.loginUrl = '';
-            $location.path(url).replace();
         };
 
         // set up recaptcha

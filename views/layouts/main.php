@@ -87,6 +87,7 @@ $min = !YII_ENV_DEV ? ".min" : "";  // use min version unless in dev
 <script src="/vendor/angular/1.4.6/angular-animate<?= $min ?>.js"></script>
 <script src="/vendor/angular/1.4.6/angular-route<?= $min ?>.js"></script>
 <script src="/vendor/ngStorage/0.3.9/ngStorage<?= $min ?>.js"></script>
+<script src="/vendor/angular-http-auth/fb5bd0/http-auth-interceptor.js"></script>
 <script src="/vendor/ui-bootstrap/ui-bootstrap-tpls-0.13.4<?= $min ?>.js"></script>
 <script src="<?= $assetManager->getFile("app.compiled{$min}.js") ?>"></script>
 
