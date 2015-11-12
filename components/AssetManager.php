@@ -10,6 +10,7 @@ use InvalidArgumentException;
 class AssetManager extends YiiAssetManager
 {
     /**
+     * Disable bundles so that we don't yii's built-in assets
      * @inheritdoc
      */
     public $bundles = false;
@@ -48,7 +49,7 @@ class AssetManager extends YiiAssetManager
      */
     public function getFile($file)
     {
-        // check if we should return the file
+        // check if we should return the file directly
         $webDir = rtrim($this->webDir, "/");
         if (!$this->useManifest) {
             return "{$webDir}/{$file}";
