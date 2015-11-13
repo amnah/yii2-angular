@@ -10,7 +10,6 @@
     "gulp-ng-annotate": "^1.1.0",
     "gulp-rev": "^6.0.1",
     "gulp-uglify": "^1.4.1",
-    "gulp-watch": "^4.3.5",
     "merge-stream": "^1.0.0"
   }
 }
