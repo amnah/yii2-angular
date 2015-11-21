@@ -88,10 +88,11 @@ $config = [
 // ------------------------------------------------------------------------
 // Dev
 // ------------------------------------------------------------------------
+$debugModule = 'amnah\yii2\debug\Module';
 if (YII_ENV_DEV) {
     $config['bootstrap'][] = 'debug';
     $config['modules']['debug'] = [
-        'class' => 'yii\debug\Module',
+        'class' => $debugModule,
         'allowedIPs' => ['*'],
     ];
 
@@ -125,7 +126,7 @@ if (YII_ENV_PROD) {
         $userIp = isset($_SERVER['REMOTE_ADDR']) ? $_SERVER['REMOTE_ADDR'] : '127.0.0.1';
         $config['bootstrap'][] = 'debug';
         $config['modules']['debug'] = [
-            'class' => 'yii\debug\Module',
+            'class' => $debugModule,
             'allowedIPs' => [$userIp],
         ];
     }
