@@ -115,7 +115,7 @@ class User extends \yii\base\Object implements \yii\web\IdentityInterface
     }
 
     /**
-     * Register user (note: doesn't really create any user)
+     * Register user (note: does NOT create a real user)
      * @param array $input
      * @return static|array
      */
