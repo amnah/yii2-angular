@@ -8,8 +8,8 @@ use Yii;
 use yii\base\InvalidConfigException;
 use yii\filters\auth\HttpBearerAuth;
 use yii\web\Cookie;
+use yii\web\IdentityInterface;
 use Firebase\JWT\JWT;
-use app\models\User;
 
 class JwtAuth extends HttpBearerAuth
 {
@@ -42,6 +42,11 @@ class JwtAuth extends HttpBearerAuth
     public $leeway = 60;
 
     /**
+     * @var string User identity class. Defaults to `Yii::$app->user->identityClass`
+     */
+    public $identityClass;
+
+    /**
      * @var string Refresh param name (to check in $_GET and cookies)
      */
     public $tokenParam = "token";
@@ -67,6 +72,7 @@ class JwtAuth extends HttpBearerAuth
 
         $this->request = Yii::$app->request;
         $this->response = Yii::$app->response;
+        $this->identityClass = $this->identityClass ?: Yii::$app->user->identityClass;
     }
 
     /**
@@ -82,7 +88,9 @@ class JwtAuth extends HttpBearerAuth
         if (!$payload) {
             return null;
         }
-        return User::findIdentity($payload->user->id);
+        /** @var IdentityInterface $class */
+        $class = $this->identityClass;
+        return $class::findIdentity($payload->user->id);
     }
 
     /**
