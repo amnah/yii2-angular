@@ -94,6 +94,7 @@ if (YII_ENV_DEV) {
     $config['modules']['debug'] = [
         'class' => $debugModule,
         'allowedIPs' => ['*'],
+        'limitToCurrentRequest' =>  false,
     ];
 
     $config['bootstrap'][] = 'gii';
@@ -128,6 +129,7 @@ if (YII_ENV_PROD) {
         $config['modules']['debug'] = [
             'class' => $debugModule,
             'allowedIPs' => [$userIp],
+            'limitToCurrentRequest' =>  false,
         ];
     }
 }
