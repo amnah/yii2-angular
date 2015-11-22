@@ -24,7 +24,7 @@ After creating the basic application, follow these steps to prepare for the test
 2. Install faker extension by running the following from template root directory where `composer.json` is:
 
    ```
-   composer require --dev yiisoft/yii2-faker:*
+   composer require --dev "yiisoft/yii2-faker:*"
    ```
 
 3. Create `yii2_basic_tests` database and update it by applying migrations (you may skip this step if you do not have created any migrations yet):
@@ -61,6 +61,17 @@ webserver. In the `web` directory execute the following:
    # run unit tests
    codecept run unit
    ```
+
+Fixtures Default Configuration
+------------------------------
+The `fixture` commands refer to the following `ActiveFixture` configuration by default:
+
+- Fixtures path: `@tests/unit/fixtures`
+- Fixtures data path: `@tests/unit/fixtures/data`
+- Template files path: `@tests/unit/templates/fixtures`
+- Namespace: `tests\unit\fixtures`
+
+Where `@tests` refers to `@app/tests/codeception`.
 
 Code coverage support
 ---------------------
