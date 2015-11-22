@@ -11,11 +11,11 @@
         var factory = {};
         var user = false;
 
-        var renewInterval;
-        var renewTime = Config.tokenRenewInterval;
+        var jwtInterval;
+        var jwtIntervalTime = Config.jwtIntervalTime;
         factory.startTokenRenewInterval = function(runAtStart) {
-            $interval.cancel(renewInterval);
-            renewInterval = $interval(factory.getUser, renewTime);
+            $interval.cancel(jwtInterval);
+            jwtInterval = $interval(factory.getUser, jwtIntervalTime);
             if (runAtStart) {
                 factory.getUser();
             }
