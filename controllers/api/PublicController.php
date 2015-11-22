@@ -65,8 +65,8 @@ class PublicController extends BaseController
         if ($loginForm->validate()) {
             $userAttributes = $loginForm->getUser()->toArray();
             $rememberMe = $request->post("rememberMe", true);
-            $useCookie = $request->post("useCookie", true);
-            $authJwtData = $this->generateAuthOutput($userAttributes, $rememberMe, $useCookie);
+            $jwtCookie = $request->post("jwtCookie", true);
+            $authJwtData = $this->generateAuthOutput($userAttributes, $rememberMe, $jwtCookie);
             return ["success" => $authJwtData];
         }
         return ["errors" => $loginForm->errors];
@@ -96,8 +96,8 @@ class PublicController extends BaseController
         if (!is_array($user)) {
             $userAttributes = $user->toArray();
             $rememberMe = $request->post("rememberMe", true);
-            $useCookie = $request->post("useCookie", true);
-            return ["success" => $this->generateAuthOutput($userAttributes, $rememberMe, $useCookie)];
+            $jwtCookie = $request->post("jwtCookie", true);
+            return ["success" => $this->generateAuthOutput($userAttributes, $rememberMe, $jwtCookie)];
         }
         return ["errors" => $user];
     }
@@ -111,7 +111,7 @@ class PublicController extends BaseController
         $jwtAuth = $this->getJwtAuth();
         $payload = $jwtAuth->getTokenPayload();
         if ($payload) {
-            return ["success" => $this->generateAuthOutput($payload->user, $payload->rememberMe, $payload->useCookie)];
+            return ["success" => $this->generateAuthOutput($payload->user, $payload->rememberMe, $payload->jwtCookie)];
         }
 
         // attempt to renew token using refresh token
@@ -139,7 +139,7 @@ class PublicController extends BaseController
         // note that we use $user->id here, but it can also be the id of your token table
         $id = $user->id;
         $token = $user->accessToken;
-        return ["success" => $jwtAuth->generateRefreshToken($id, $token, $payload->useCookie)];
+        return ["success" => $jwtAuth->generateRefreshToken($id, $token, $payload->jwtCookie)];
     }
 
     /**
@@ -170,20 +170,20 @@ class PublicController extends BaseController
         // note: we don't need rememberMe when using refresh tokens
         $rememberMe = false;
         $user = User::findIdentityByAccessToken($payload->accessToken);
-        return ["success" => $this->generateAuthOutput($user->toArray(), $rememberMe, $payload->useCookie)];
+        return ["success" => $this->generateAuthOutput($user->toArray(), $rememberMe, $payload->jwtCookie)];
     }
 
     /**
      * Generate auth data (for sending back to client)
      * @param array|object $userAttributes
      * @param bool $rememberMe
-     * @param bool $useCookie
+     * @param bool $jwtCookie
      * @return boolean
      */
-    protected function generateAuthOutput($userAttributes, $rememberMe, $useCookie)
+    protected function generateAuthOutput($userAttributes, $rememberMe, $jwtCookie)
     {
         $jwtAuth = $this->getJwtAuth();
-        $token = $jwtAuth->generateUserToken($userAttributes, $rememberMe, $useCookie);
+        $token = $jwtAuth->generateUserToken($userAttributes, $rememberMe, $jwtCookie);
         return [
             "user" => $userAttributes,
             "token" => $token,

@@ -216,7 +216,7 @@ class JwtAuth extends HttpBearerAuth
             if ($payload->iss != $tokenDefaults["iss"] || $payload->aud != $tokenDefaults["aud"]) {
                 return false;
             }
-            if ($payload->useCookie && !$this->request->validateCsrfToken($payload->jti)) {
+            if ($payload->jwtCookie && !$this->request->validateCsrfToken($payload->jti)) {
                 return false;
             }
             return $payload;
@@ -246,17 +246,17 @@ class JwtAuth extends HttpBearerAuth
      * Generate a jwt token for user
      * @param array $userAttributes
      * @param bool $rememberMe
-     * @param bool $useCookie
+     * @param bool $jwtCookie
      * @return string
      */
-    public function generateUserToken($userAttributes, $rememberMe = true, $useCookie = true)
+    public function generateUserToken($userAttributes, $rememberMe = true, $jwtCookie = true)
     {
         $userAttributes = (array) $userAttributes;
         $data = [
             "sub" => $userAttributes["id"],
             "user" => $userAttributes,
             "rememberMe" => $rememberMe ? 1 : 0,
-            "useCookie" => $useCookie ? 1 : 0,
+            "jwtCookie" => $jwtCookie ? 1 : 0,
         ];
 
         // compute expire time and encode
@@ -268,7 +268,7 @@ class JwtAuth extends HttpBearerAuth
         $token = $this->encode($data);
 
         // set cookie and return
-        if ($useCookie) {
+        if ($jwtCookie) {
             $this->setCookieToken($this->tokenParam, $token, $exp);
         }
         return $token;
@@ -279,20 +279,20 @@ class JwtAuth extends HttpBearerAuth
      * Note: this token does NOT expire, so you should have some way to revoke the access token
      * @param int $id
      * @param string $accessToken
-     * @param bool $useCookie
+     * @param bool $jwtCookie
      * @return string
      */
-    public function generateRefreshToken($id, $accessToken, $useCookie = true)
+    public function generateRefreshToken($id, $accessToken, $jwtCookie = true)
     {
         $data = [
             "sub" => $id,
             "accessToken" => $accessToken,
-            "useCookie" => $useCookie ? 1 : 0,
+            "jwtCookie" => $jwtCookie ? 1 : 0,
         ];
         $refreshToken = $this->encode($data);
 
         // set cookie and return
-        if ($useCookie) {
+        if ($jwtCookie) {
             $this->setCookieToken($this->refreshTokenParam, $refreshToken, strtotime("2037-12-31")); // far, far future
         }
         return $refreshToken;

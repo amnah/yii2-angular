@@ -11,7 +11,7 @@
         var vm = this;
         vm.errors = {};
         vm.loginUrl = Auth.getLoginUrl();
-        vm.LoginForm = { rememberMe: true, useCookie: Config.useCookie };
+        vm.LoginForm = { rememberMe: true, jwtCookie: Config.jwtCookie };
 
         // process form submit
         vm.submit = function() {

@@ -33,7 +33,7 @@
         };
 
         vm.useRefreshToken = function() {
-            if (!Config.useCookie && !$localStorage.refreshToken) {
+            if (!Config.jwtCookie && !$localStorage.refreshToken) {
                 vm.message = $filter('date')(new Date(), 'mediumTime') + ' - No refresh token (using local storage)';
             } else {
                 Auth.useRefreshToken().then(function(data) {

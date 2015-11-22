@@ -45,7 +45,7 @@
                 $localStorage.user = data.success.user;
 
                 // set token only if we're not using cookies
-                if (!Config.useCookie) {
+                if (!Config.jwtCookie) {
                     $localStorage.token = data.success.token;
                 }
             }
@@ -66,7 +66,7 @@
 
         factory.requestRefreshToken = function() {
             return Api.get('public/request-refresh-token').then(function(data) {
-                if (!Config.useCookie) {
+                if (!Config.jwtCookie) {
                     $localStorage.refreshToken = data.success;
                 }
                 return data;

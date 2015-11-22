@@ -35,7 +35,7 @@
         // note: we need this as function so that it's called for every single Api call
         factory.getConfig = function() {
             var config = {};
-            if (Config.useCookie) {
+            if (Config.jwtCookie) {
                 config.withCredentials = true;
             } else if ($localStorage.token) {
                 config.headers = config.headers || {};
