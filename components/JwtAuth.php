@@ -42,11 +42,6 @@ class JwtAuth extends HttpBearerAuth
     public $leeway = 60;
 
     /**
-     * @var string User identity class. Defaults to `Yii::$app->user->identityClass`
-     */
-    public $identityClass;
-
-    /**
      * @var string Refresh param name (to check in $_GET and cookies)
      */
     public $tokenParam = "token";
@@ -59,7 +54,7 @@ class JwtAuth extends HttpBearerAuth
     /**
      * @var object Payload from cookie or header auth
      */
-    private $payload;
+    protected $payload;
 
     /**
      * @inheritdoc
@@ -72,7 +67,6 @@ class JwtAuth extends HttpBearerAuth
 
         $this->request = Yii::$app->request;
         $this->response = Yii::$app->response;
-        $this->identityClass = $this->identityClass ?: Yii::$app->user->identityClass;
     }
 
     /**
@@ -80,7 +74,7 @@ class JwtAuth extends HttpBearerAuth
      */
     public function authenticate($user, $request, $response)
     {
-        if ($this->request->getMethod() == 'OPTIONS') {
+        if ($request->getIsOptions()) {
             return true;
         }
 
@@ -88,8 +82,9 @@ class JwtAuth extends HttpBearerAuth
         if (!$payload) {
             return null;
         }
+
         /** @var IdentityInterface $class */
-        $class = $this->identityClass;
+        $class = Yii::$app->user->identityClass;
         return $class::findIdentity($payload->user->id);
     }
 
@@ -99,33 +94,25 @@ class JwtAuth extends HttpBearerAuth
      */
     public function getTokenPayload()
     {
-        if ($this->payload) {
+        if ($this->payload !== null) {
             return $this->payload;
         }
 
         // check $_GET, cookie, and then header
-        $request = $this->request;
-        $tokenParam = $this->tokenParam;
-        $token = $this->request->get($tokenParam);
+        $token = $this->request->get($this->tokenParam);
         if (!$token) {
-            $token = $request->cookies->getValue($this->tokenParam);
+            $token = $this->request->cookies->getValue($this->tokenParam);
         }
         if (!$token) {
-            $authHeader = $request->getHeaders()->get("Authorization");
+            $authHeader = $this->request->getHeaders()->get("Authorization");
             if ($authHeader !== null && preg_match("/^Bearer\\s+(.*?)$/", $authHeader, $matches)) {
                 $token = $matches[1];
             }
         }
 
         // decode and store payload
-        if ($token) {
-            $payload = $this->decode($token);
-            if ($payload) {
-                $this->payload = $payload;
-                return $payload;
-            }
-        }
-        return false;
+        $this->payload = $token ? $this->decode($token) : false;
+        return $this->payload;
     }
 
     /**
@@ -134,29 +121,23 @@ class JwtAuth extends HttpBearerAuth
      */
     public function getRefreshTokenPayload()
     {
-        $request = $this->request;
-        $refreshTokenParam = $this->refreshTokenParam;
-
         // check $_GET and then cookie
-        $refreshToken = $this->request->get($refreshTokenParam);
+        $refreshToken = $this->request->get($this->refreshTokenParam);
         if (!$refreshToken) {
-            $refreshToken = $request->cookies->getValue($refreshTokenParam);
+            $refreshToken = $this->request->cookies->getValue($this->refreshTokenParam);
         }
 
         // decode token
-        if ($refreshToken) {
-            return $this->decode($refreshToken);
-        }
-        return false;
+        return $refreshToken ? $this->decode($refreshToken) : false;
     }
 
     /**
-     * Set token in cookie
+     * Add token in cookie
      * @param string $cookieName
      * @param string $token
      * @param int $exp
      */
-    public function setCookieToken($cookieName, $token, $exp)
+    public function addCookieToken($cookieName, $token, $exp)
     {
         $this->response->cookies->add(new Cookie([
             "name" => $cookieName,
@@ -188,20 +169,16 @@ class JwtAuth extends HttpBearerAuth
      * Encode data into jwt token string
      * @param array|object $data
      * @return string
-     * @link http://websec.io/2014/08/04/Securing-Requests-with-JWT.html
      */
     public function encode($data)
     {
-        // build token data
         $data = (array) $data;
-        $token = $this->getTokenDefaults();
-        $token = array_merge($token, $data);
-        return JWT::encode($token, $this->key, $this->algorithm);
+        $data = array_merge($this->getTokenDefaults(), $data);
+        return JWT::encode($data, $this->key, $this->algorithm);
     }
 
     /**
      * Decode jwt token string
-     * Check iss, aud, iat, nbt, and exp claims
      * @param string $token
      * @return object
      * @throws Exception
@@ -210,35 +187,35 @@ class JwtAuth extends HttpBearerAuth
     {
         JWT::$leeway = $this->leeway;
         try {
-            // ensure that aud, iss, and csrf are good
             $payload = JWT::decode($token, $this->key, [$this->algorithm]);
-            $tokenDefaults = $this->getTokenDefaults();
-            if ($payload->iss != $tokenDefaults["iss"] || $payload->aud != $tokenDefaults["aud"]) {
-                return false;
-            }
-            if ($payload->jwtCookie && !$this->request->validateCsrfToken($payload->jti)) {
-                return false;
-            }
-            return $payload;
         } catch (Exception $e) {
             return false;
         }
+
+        // ensure that iss, aud, and csrf are good
+        $tokenDefaults = $this->getTokenDefaults();
+        if ($payload->iss != $tokenDefaults["iss"] || $payload->aud != $tokenDefaults["aud"]) {
+            return false;
+        }
+        if (!empty($payload->csrf) && !$this->request->validateCsrfToken($payload->csrf)) {
+            return false;
+        }
+        return $payload;
     }
 
     /**
      * Get token defaults
      * @return array
+     * @link http://websec.io/2014/08/04/Securing-Requests-with-JWT.html
      */
     protected function getTokenDefaults()
     {
-        $time = time();
-        $request = $this->request;
+        $hostInfo = parse_url($this->request->getHostInfo(), PHP_URL_HOST);
+        $referrerInfo = parse_url($this->request->getReferrer(), PHP_URL_HOST);
         return [
-            "iss" => $request->getHostInfo(),
-            "aud" => parse_url($request->getReferrer(), PHP_URL_HOST) ?: $request->getHostInfo(),
-            "jti" => $request->getCsrfToken(),
-            "iat" => $time,
-            "nbf" => $time,
+            "iss" => $hostInfo,
+            "aud" => $referrerInfo ?: $hostInfo,
+            "iat" => time(),
         ];
     }
 
@@ -253,23 +230,28 @@ class JwtAuth extends HttpBearerAuth
     {
         $userAttributes = (array) $userAttributes;
         $data = [
-            "sub" => $userAttributes["id"],
+            "sub" => (int) $userAttributes["id"],
             "user" => $userAttributes,
-            "rememberMe" => $rememberMe ? 1 : 0,
-            "jwtCookie" => $jwtCookie ? 1 : 0,
+            "rememberMe" => (int) $rememberMe,
+            "jwtCookie" => (int) $jwtCookie,
         ];
 
-        // compute expire time and encode
+        // compute expire time
         $ttl = $rememberMe ? $this->ttlRememberMe : $this->ttl;
         $exp = is_string($ttl) ? strtotime($ttl) : time() + $ttl;
         if ($ttl) {
             $data["exp"] = $exp;
         }
-        $token = $this->encode($data);
 
-        // set cookie and return
+        // compute csrf if using cookie
         if ($jwtCookie) {
-            $this->setCookieToken($this->tokenParam, $token, $exp);
+            $data["csrf"] = $this->request->getCsrfToken();
+        }
+
+        // encode, add cookie, and return
+        $token = $this->encode($data);
+        if ($jwtCookie) {
+            $this->addCookieToken($this->tokenParam, $token, $exp);
         }
         return $token;
     }
@@ -285,15 +267,15 @@ class JwtAuth extends HttpBearerAuth
     public function generateRefreshToken($id, $accessToken, $jwtCookie = true)
     {
         $data = [
-            "sub" => $id,
+            "sub" => (int) $id,
             "accessToken" => $accessToken,
-            "jwtCookie" => $jwtCookie ? 1 : 0,
+            "jwtCookie" => (int) $jwtCookie,
         ];
         $refreshToken = $this->encode($data);
 
         // set cookie and return
         if ($jwtCookie) {
-            $this->setCookieToken($this->refreshTokenParam, $refreshToken, strtotime("2037-12-31")); // far, far future
+            $this->addCookieToken($this->refreshTokenParam, $refreshToken, strtotime("2037-12-31")); // far, far future
         }
         return $refreshToken;
     }
