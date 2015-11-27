@@ -33,9 +33,6 @@ $config = [
             'enableAutoLogin' => false,
             'loginUrl' => null,
         ],
-        'errorHandler' => [
-            'errorAction' => 'site/error',
-        ],
         'mailer' => [
             'class' => 'yii\swiftmailer\Mailer',
             'useFileTransport' => getenv('MAIL_FILE_TRANSPORT'),
