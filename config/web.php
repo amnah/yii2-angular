@@ -75,11 +75,7 @@ $config = [
             'passwordHashStrategy' => 'password_hash',
         ],
     ],
-    'modules' => [
-        'v1' => [
-            'class' => 'app\modules\v1\Module',
-        ],
-    ],
+    'modules' => [],
 ];
 
 // ------------------------------------------------------------------------

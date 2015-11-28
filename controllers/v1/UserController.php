@@ -1,10 +1,11 @@
 <?php
 
-namespace app\modules\v1\controllers;
+namespace app\controllers\v1;
 
 use Yii;
+use app\controllers\BaseApiController;
 
-class UserController extends \app\controllers\api\BaseController
+class UserController extends BaseApiController
 {
     public function actionIndex()
     {

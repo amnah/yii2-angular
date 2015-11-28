@@ -1,18 +1,15 @@
 <?php
 
-namespace app\controllers\api;
+namespace app\controllers;
 
 use Yii;
 use yii\filters\Cors;
 use yii\rest\Controller;
 
-class BaseController extends Controller
+class BaseApiController extends Controller
 {
     /**
      * @inheritdoc
-     *
-     * @link https://github.com/yiisoft/yii2/pull/8626/files
-     * @link https://github.com/yiisoft/yii2/issues/6254
      */
     public function beforeAction($action)
     {
@@ -20,8 +17,11 @@ class BaseController extends Controller
             return false;
         }
 
-        // check for CORS preflight options
-        if (Yii::$app->request->method == "OPTIONS") {
+        // check for CORS preflight OPTIONS. if so, then return false so that it doesn't run
+        // the controller action
+        // @link https://github.com/yiisoft/yii2/pull/8626/files
+        // @link https://github.com/yiisoft/yii2/issues/6254
+        if (Yii::$app->request->isOptions) {
             return false;
         }
 

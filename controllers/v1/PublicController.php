@@ -1,11 +1,11 @@
 <?php
 
-namespace app\controllers\api;
+namespace app\controllers\v1;
 
 use Yii;
-use yii\filters\VerbFilter;
+use app\controllers\BaseApiController;
 
-class PublicController extends BaseController
+class PublicController extends BaseApiController
 {
     /**
      * @var \app\components\JwtAuth
@@ -35,7 +35,6 @@ class PublicController extends BaseController
     /**
      * @inheritdoc
      */
-
     public function behaviors()
     {
         $behaviors = parent::behaviors();
@@ -176,7 +175,7 @@ class PublicController extends BaseController
         }
 
         // find user and generate auth data
-        // note: we don't need rememberMe when using refresh tokens
+        // note: use $rememberMe = false for refresh tokens. faster expiration = more security
         $rememberMe = false;
         $user = Yii::$app->user->identityClass;
         $user = $user::findIdentityByAccessToken($payload->accessToken);
