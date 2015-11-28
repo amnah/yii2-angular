@@ -27,7 +27,7 @@
         };
 
         vm.removeRefreshToken = function() {
-            Auth.removeRefreshToken().then(function(data) {
+            Auth.removeRefreshToken(true).then(function(data) {
                 vm.message = $filter('date')(new Date(), 'mediumTime') + ' - Removed refresh token';
             });
         };

@@ -73,12 +73,14 @@
             });
         };
 
-        factory.removeRefreshToken = function() {
+        factory.removeRefreshToken = function(callApi) {
             // remove token from local storage and cookie
             delete $localStorage.refreshToken;
-            return Api.get('public/remove-refresh-token').then(function(data) {
-                return data;
-            });
+            if (callApi) {
+                return Api.get('public/remove-refresh-token').then(function(data) {
+                    return data;
+                });
+            }
         };
 
         factory.useRefreshToken = function() {
