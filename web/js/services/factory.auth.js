@@ -49,6 +49,9 @@
                     $localStorage.token = data.success.token;
                 }
             }
+
+            // return user so we know if successful or not
+            return user;
         };
 
         factory.setUser = function(userData) {
@@ -141,7 +144,10 @@
 
         factory.register = function(data) {
             return Api.post('public/register', data).then(function(data) {
-                factory.setUserAndToken(data);
+                var userCheck = factory.setUserAndToken(data);
+                if (userCheck) {
+                    factory.startTokenRenewInterval();
+                }
                 return data;
             });
         };
