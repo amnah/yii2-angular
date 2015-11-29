@@ -8,11 +8,6 @@ use app\controllers\BaseApiController;
 class PublicController extends BaseApiController
 {
     /**
-     * @var \app\components\JwtAuth
-     */
-    public $jwtAuth;
-
-    /**
      * @var string
      */
     public $loginFormClass = "app\\models\\forms\\LoginForm";
@@ -22,16 +17,6 @@ class PublicController extends BaseApiController
      */
     public $contactFormClass = "app\\models\\forms\\ContactForm";
 
-    /**
-     * @inheritdoc
-     */
-    public function init()
-    {
-        if (!$this->jwtAuth) {
-            $this->jwtAuth = Yii::$app->jwtAuth;
-        }
-    }
-    
     /**
      * @inheritdoc
      */

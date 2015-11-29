@@ -9,6 +9,21 @@ use yii\rest\Controller;
 class BaseApiController extends Controller
 {
     /**
+     * @var \app\components\JwtAuth
+     */
+    public $jwtAuth;
+
+    /**
+     * @inheritdoc
+     */
+    public function init()
+    {
+        if (!$this->jwtAuth) {
+            $this->jwtAuth = Yii::$app->jwtAuth;
+        }
+    }
+
+    /**
      * @inheritdoc
      */
     public function beforeAction($action)
@@ -45,7 +60,7 @@ class BaseApiController extends Controller
                 'Access-Control-Expose-Headers' => [],
             ],
         ];
-        $behaviors["jwtAuth"] = Yii::$app->jwtAuth;
+        $behaviors["jwtAuth"] = $this->jwtAuth;
         return $behaviors;
     }
 }
