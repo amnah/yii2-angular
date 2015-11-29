@@ -8,12 +8,13 @@ use yii\web\UrlManager as YiiUrlManager;
 class UrlManager extends YiiUrlManager
 {
     /**
-     * @var array Regex routes that should be processed through Yii 2 instead of angular
+     * @var array Routes that should be processed through Yii 2 instead of angular
+     *            These must appear at the beginning of the string
      */
     public $yiiRoutes = [
-        'v\d*\/',       // api calls - v1, v2, etc
-        'debug\/*',     // debug module
-        'gii\/*',       // gii module
+        'v1/',      // api v1
+        'debug/',   // debug module
+        'gii/',     // gii module
     ];
 
     /**
@@ -35,9 +36,9 @@ class UrlManager extends YiiUrlManager
             return [$this->defaultRoute, []];
         }
 
-        // check if we're calling a yii route
+        // check if we're calling a route that should be processed by yii (and not angular)
         foreach ($this->yiiRoutes as $yiiRoute) {
-            if (preg_match("/{$yiiRoute}/i", $pathInfo)) {
+            if (strpos($pathInfo, $yiiRoute) === 0) {
                 return [$pathInfo, $params];
             }
         }
