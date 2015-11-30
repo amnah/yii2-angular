@@ -11,7 +11,7 @@
         var vm = this;
         vm.errors = {};
         vm.sitekey = Config.recaptchaSitekey;
-        vm.ContactForm = { email: Auth.getAttribute('email') };
+        vm.ContactForm = { name: Auth.getAttribute('username'), email: Auth.getAttribute('email') };
 
         // set up and store grecaptcha data
         var recaptchaId;
