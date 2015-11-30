@@ -121,7 +121,7 @@ class PublicController extends BaseApiController
         // generate refresh token
         // note that we use $user->id here, but it can also be the id of your token table
         $id = $user->id;
-        $token = $user->accessToken;
+        $token = $user->access_token;
         return ["success" => $jwtAuth->generateRefreshToken($id, $token, $payload->jwtCookie)];
     }
 

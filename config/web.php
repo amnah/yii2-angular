@@ -28,6 +28,7 @@ $config = [
             'class' => 'yii\redis\Cache',
         ],
         'user' => [
+            'class' => 'amnah\yii2\user\components\User',
             'identityClass' => 'app\models\User',
             'enableSession' => false,
             'enableAutoLogin' => false,
@@ -75,7 +76,11 @@ $config = [
             'passwordHashStrategy' => 'password_hash',
         ],
     ],
-    'modules' => [],
+    'modules' => [
+        'user' => [
+            'class' => 'amnah\yii2\user\Module',
+        ],
+    ],
 ];
 
 // ------------------------------------------------------------------------
