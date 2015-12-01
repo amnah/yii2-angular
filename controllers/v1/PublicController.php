@@ -4,6 +4,10 @@ namespace app\controllers\v1;
 
 use Yii;
 use app\controllers\BaseApiController;
+use app\models\Profile;
+use app\models\Role;
+use app\models\User;
+use app\models\UserToken;
 use app\models\forms\ContactForm;
 use app\models\forms\LoginForm;
 
@@ -68,20 +72,75 @@ class PublicController extends BaseApiController
      */
     public function actionRegister()
     {
-        /** @var \app\models\User $user */
-
-        // attempt to register user
+        // load post data and validate
         $request = Yii::$app->request;
-        $user = Yii::$app->user->identityClass;
-        $user = $user::register($request->post());
+        $user = new User(["scenario" => "register"]);
+        $profile = new Profile();
+        $user->load($request->post(), "");
+        $profile->load($request->post(), "");
+        if (!$user->validate() || !$profile->validate()) {
+            return ["errors" => array_merge($user->errors, $profile->errors)];
+        }
 
-        if (!is_array($user)) {
+        // create user/profile
+        $user->setRegisterAttributes(Role::ROLE_USER)->save(false);
+        $profile->setUser($user->id)->save(false);
+
+        // determine userToken type to see if we need to send email
+        $userTokenType = null;
+        if ($user->status == $user::STATUS_INACTIVE) {
+            $userTokenType = UserToken::TYPE_EMAIL_ACTIVATE;
+        } elseif ($user->status == $user::STATUS_UNCONFIRMED_EMAIL) {
+            $userTokenType = UserToken::TYPE_EMAIL_CHANGE;
+        }
+
+        // check if we have a userToken type to process, or just generate jwt data
+        if ($userTokenType) {
+            $userToken = UserToken::generate($user->id, $userTokenType);
+            $user->sendEmailConfirmation($userToken);
+            return ["success" => ["userToken" => 1]];
+        } else {
             $userAttributes = $user->toArray();
             $rememberMe = $request->post("rememberMe", true);
             $jwtCookie = $request->post("jwtCookie", true);
             return ["success" => $this->generateAuthOutput($userAttributes, $rememberMe, $jwtCookie)];
         }
-        return ["errors" => $user];
+    }
+
+    /**
+     * Confirm email
+     */
+    public function actionConfirm()
+    {
+        /** @var User $user */
+
+        // search for userToken
+        $success = false;
+        $email = "";
+        $token = Yii::$app->request->get("token");
+        $userToken = UserToken::findByToken($token, [UserToken::TYPE_EMAIL_ACTIVATE, UserToken::TYPE_EMAIL_CHANGE]);
+        if ($userToken) {
+
+            // find user and ensure that another user doesn't have that email
+            //   for example, user registered another account before confirming change of email
+            $user = User::findOne($userToken->user_id);
+            $newEmail = $userToken->data;
+            if ($user->confirm($newEmail)) {
+                $success = true;
+            }
+
+            // set email and delete token
+            $email = $newEmail ?: $user->email;
+            $userToken->delete();
+        }
+
+        if ($success) {
+            return ["success" => $email];
+        } elseif ($email) {
+            return ["error" => "Email is already active"];
+        } else {
+            return ["error" => "Invalid token"];
+        }
     }
 
     /**

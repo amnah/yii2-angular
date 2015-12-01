@@ -1,0 +1,11 @@
+
+<div class="site-confirm ng-cloak" ng-controller="ConfirmCtrl as vm">
+
+    <div class="alert alert-success" ng-show="vm.success">
+        <p>Email [ {{ vm.success }} ] confirmed</p>
+        <p>Log in <a href="/login">here</a></p>
+    </div>
+
+    <div class="alert alert-danger" ng-show="vm.error">{{ vm.error }}</div>
+
+</div>
