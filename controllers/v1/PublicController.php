@@ -4,19 +4,11 @@ namespace app\controllers\v1;
 
 use Yii;
 use app\controllers\BaseApiController;
+use app\models\forms\ContactForm;
+use app\models\forms\LoginForm;
 
 class PublicController extends BaseApiController
 {
-    /**
-     * @var string
-     */
-    public $loginFormClass = "app\\models\\forms\\LoginForm";
-
-    /**
-     * @var string
-     */
-    public $contactFormClass = "app\\models\\forms\\ContactForm";
-
     /**
      * @inheritdoc
      */
@@ -32,8 +24,7 @@ class PublicController extends BaseApiController
      */
     public function actionContact()
     {
-        /** @var \app\models\forms\ContactForm $model */
-        $model = Yii::createObject($this->contactFormClass);
+        $model = new ContactForm();
         $toEmail = Yii::$app->params["adminEmail"];
         $model->load(Yii::$app->request->post(), "");
         if ($model->contact($toEmail)) {
@@ -47,10 +38,9 @@ class PublicController extends BaseApiController
      */
     public function actionLogin()
     {
-        /** @var \app\models\forms\LoginForm $model */
         // notice that we set the second parameter $formName = ""
         $request = Yii::$app->request;
-        $model = Yii::createObject($this->loginFormClass);
+        $model = new LoginForm();
         $model->load($request->post(), "");
         if ($model->validate()) {
             $userAttributes = $model->getUser()->toArray();
