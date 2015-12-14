@@ -8,8 +8,9 @@
     // @ngInject
     function appInit(Auth) {
         // attempt to set up user from local storage. this is faster than waiting for the automatic refresh
-        Auth.setUserFromLocalStorage();
-        Auth.startTokenRenewInterval(true);
+        var user = Auth.setUserFromLocalStorage();
+        var runAtStart = user ? true : false;
+        Auth.startTokenRenewInterval(runAtStart);
     }
 
 })();

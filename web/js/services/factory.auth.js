@@ -60,6 +60,7 @@
 
         factory.setUserFromLocalStorage = function() {
             user = $localStorage.user;
+            return user;
         };
 
         factory.getRefreshToken = function() {
