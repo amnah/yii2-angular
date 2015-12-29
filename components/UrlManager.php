@@ -22,7 +22,8 @@ class UrlManager extends YiiUrlManager
      * @var array Routes that are invalid. Will return 404 error
      */
     public $invalidRoutes = [
-      "views/",     // angular view files
+        "compiled/",  // compiled asset files
+        "views/",     // angular .html view files
     ];
 
     /**

@@ -85,5 +85,5 @@ gulp.task('clean', function() {
 // Watch task
 // -------------------------------------------------------------
 gulp.task('watch', function () {
-    gulp.watch('web/js/**/*.js', ['build'])
+    gulp.watch([cssDir, jsDir], ['build'])
 });

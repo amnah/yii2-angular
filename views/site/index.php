@@ -17,10 +17,7 @@ $min = !YII_ENV_DEV ? ".min" : "";  // use min version unless in dev
     <title><?= $appName ?></title>
     <?php $this->head() ?>
 
-    <!-- add the asset files individually or use the compiled one built from gulp -->
-    <!--<link rel="stylesheet" type="text/css" href="<?= $assetManager->getFile("vendor.compiled{$min}.css") ?>">-->
-
-    <link rel="stylesheet" type="text/css" href="/vendor/bootstrap/3.3.5/bootstrap<?= $min ?>.css">
+    <link rel="stylesheet" type="text/css" href="<?= $assetManager->getFile("vendor.compiled{$min}.css") ?>">
     <link rel="stylesheet" type="text/css" href="<?= $assetManager->getFile("site.compiled{$min}.css") ?>">
 
     <base href="/">
@@ -79,15 +76,7 @@ $min = !YII_ENV_DEV ? ".min" : "";  // use min version unless in dev
     };
 </script>
 
-<!-- add the asset files individually or use the compiled one built from gulp -->
-<!--<script src="<?= $assetManager->getFile("vendor.compiled{$min}.js") ?>"></script>-->
-
-<script src="/vendor/angular/1.4.6/angular<?= $min ?>.js"></script>
-<script src="/vendor/angular/1.4.6/angular-animate<?= $min ?>.js"></script>
-<script src="/vendor/angular/1.4.6/angular-route<?= $min ?>.js"></script>
-<script src="/vendor/ngStorage/0.3.9/ngStorage<?= $min ?>.js"></script>
-<script src="/vendor/angular-http-auth/fb5bd0/http-auth-interceptor.js"></script>
-<script src="/vendor/ui-bootstrap/ui-bootstrap-tpls-0.13.4<?= $min ?>.js"></script>
+<script src="<?= $assetManager->getFile("vendor.compiled{$min}.js") ?>"></script>
 <script src="<?= $assetManager->getFile("app.compiled{$min}.js") ?>"></script>
 
 <?php if (getenv("RECAPTCHA_SITEKEY")): ?>
