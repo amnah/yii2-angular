@@ -8,12 +8,15 @@
     // @ngInject
     function routeConfig($routeProvider) {
 
+        $routeProvider.when('/', {templateUrl: '/views/app/index.html'});
+        $routeProvider.otherwise({templateUrl: '/views/app/404.html'});
+
+        // handle static root paths
         var staticPaths = ['about', 'contact', 'register', 'login', 'profile'];
         for (var i=0; i<staticPaths.length; i++) {
             var path = staticPaths[i];
             $routeProvider.when('/' + path, {templateUrl: '/views/app/' + path + '.html'});
         }
-        $routeProvider.otherwise({templateUrl: '/views/app/index.html'});
     }
 
 })();
