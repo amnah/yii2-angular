@@ -6,7 +6,7 @@
         .controller('ConfirmCtrl', ConfirmCtrl);
 
     // @ngInject
-    function ConfirmCtrl($routeParams, Api, Auth) {
+    function ConfirmCtrl($routeParams, Api) {
 
         var vm = this;
         vm.success = false;
