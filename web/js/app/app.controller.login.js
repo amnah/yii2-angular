@@ -6,7 +6,7 @@
         .controller('LoginCtrl', LoginCtrl);
 
     // @ngInject
-    function LoginCtrl(Config,Auth) {
+    function LoginCtrl(Config, Auth) {
 
         var vm = this;
         vm.errors = {};

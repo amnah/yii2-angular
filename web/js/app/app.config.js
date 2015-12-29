@@ -14,7 +14,7 @@
 
         // set up ajax requests
         // http://www.yiiframework.com/forum/index.php/topic/62721-yii2-and-angularjs-post/
-        $httpProvider.defaults.headers.common["X-Requested-With"] = 'XMLHttpRequest';
+        $httpProvider.defaults.headers.common['X-Requested-With'] = 'XMLHttpRequest';
     }
 
 })();

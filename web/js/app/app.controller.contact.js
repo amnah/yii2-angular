@@ -19,7 +19,7 @@
         if (vm.sitekey) {
             Auth.getRecaptcha().then(function (grecaptcha) {
                 grecaptchaObj = grecaptcha;
-                recaptchaId = grecaptcha.render("contact-captcha", {sitekey: vm.sitekey});
+                recaptchaId = grecaptcha.render('contact-captcha', {sitekey: vm.sitekey});
             });
         }
 
