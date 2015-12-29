@@ -4,6 +4,7 @@ var concat = require('gulp-concat');
 var uglify = require('gulp-uglify');
 var ngAnnotate = require('gulp-ng-annotate');
 var minifyCss = require('gulp-minify-css');
+var flatten = require('gulp-flatten');
 var rev = require('gulp-rev');
 var merge = require('merge-stream');
 var del = require('del');
@@ -33,6 +34,11 @@ gulp.task('build', ['buildAssets', 'buildVendor'], function() {
         .pipe(rev())
         .pipe(gulp.dest(dest))
         .pipe(rev.manifest())
+        .pipe(gulp.dest(dest));
+
+    // copy map files
+    gulp.src(`${vendorDir}/**/*.map`)
+        .pipe(flatten())
         .pipe(gulp.dest(dest));
 });
 
