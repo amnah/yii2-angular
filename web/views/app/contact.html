@@ -2,7 +2,7 @@
 <div class="site-contact ng-cloak" ng-controller="ContactCtrl as vm">
     <h1>Contact</h1>
 
-    <div class="success" ng-show="vm.errors === false">
+    <div ng-if="vm.errors === false">
         <div class="alert alert-success">
             Thank you for contacting us [ {{ vm.ContactForm.name }} ]. We will respond to you as soon as possible.
         </div>
@@ -50,7 +50,7 @@
                     <textarea id="contactform-body" class="form-control" rows="6" ng-model="vm.ContactForm.body"></textarea>
                     <p class="help-block help-block-error">{{ vm.errors.body[0] }}</p>
                 </div>
-                <div class="form-group" ng-class="{'has-error': vm.errors.captcha}" ng-show="vm.sitekey">
+                <div class="form-group" ng-class="{'has-error': vm.errors.captcha}" ng-if="vm.sitekey">
                     <label class="control-label">Captcha</label>
                     <div id="contact-captcha"></div>
                     <p class="help-block help-block-error">{{ vm.errors.captcha[0] }}</p>

@@ -1,25 +1,30 @@
 
-<div class="site-profile ng-cloak" ng-controller="ProfileCtrl as vm" ng-show="vm.Auth.isLoggedIn()">
-    <h1>Profile</h1>
+<div class="site-profile ng-cloak" ng-controller="ProfileCtrl as vm">
 
-    <p>This is the Profile page. Note that you need to be logged in to view this.</p>
+    <div ng-if="vm.Auth.isLoggedIn()">
 
-    <p>Your email is [ <strong>{{ vm.Auth.getAttribute('email') }}</strong> ]</p>
+        <h1>Profile</h1>
 
-    <h3>Refresh tokens</h3>
+        <p>This is the Profile page. Note that you need to be logged in to view this.</p>
 
-    <p>Status: <strong>{{ vm.message }}</strong></p>
+        <p>Your email is [ <strong>{{ vm.Auth.getAttribute('email') }}</strong> ]</p>
 
-    <p><strong>Note:</strong> If you remove the refresh token and then attempt to use it, you will get a white screen
-        (if using cookies)</p>
+        <h3>Refresh tokens</h3>
 
-    <p><strong>Note:</strong> Refresh tokens are <strong>PERMANENT</strong>, typically used for mobile apps.
-        (NOT web apps)</p>
+        <p>Status: <strong>{{ vm.message }}</strong></p>
 
-    <p>
-        <a class="btn btn-primary" ng-click="vm.requestRefreshToken()">Get refresh token</a>
-        <a class="btn btn-danger" ng-click="vm.removeRefreshToken()">Remove refresh token</a>
-        <a class="btn btn-success" ng-click="vm.useRefreshToken()">Use refresh token to get regular token</a>
-    </p>
+        <p><strong>Note:</strong> If you remove the refresh token and then attempt to use it, you will get a white screen
+            (if using cookies)</p>
+
+        <p><strong>Note:</strong> Refresh tokens are <strong>PERMANENT</strong>, typically used for mobile apps.
+            (NOT web apps)</p>
+
+        <p>
+            <a class="btn btn-primary" ng-click="vm.requestRefreshToken()">Get refresh token</a>
+            <a class="btn btn-danger" ng-click="vm.removeRefreshToken()">Remove refresh token</a>
+            <a class="btn btn-success" ng-click="vm.useRefreshToken()">Use refresh token to get regular token</a>
+        </p>
+        
+    </div>
 
 </div>
