@@ -12,7 +12,7 @@
         $routeProvider.otherwise({templateUrl: '/views/app/404.html'});
 
         // handle static root paths
-        var staticPaths = ['about', 'contact', 'register', 'login', 'profile', 'confirm'];
+        var staticPaths = ['about', 'contact', 'register', 'login', 'login-email', 'login-callback', 'profile', 'confirm'];
         for (var i=0; i<staticPaths.length; i++) {
             var path = staticPaths[i];
             $routeProvider.when('/' + path, {templateUrl: '/views/app/' + path + '.html'});

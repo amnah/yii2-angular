@@ -11,4 +11,4 @@ use yii\helpers\Url;
 
 <h3><?= $subject ?></h3>
 
-<p><?= Url::toRoute(["/user/login-callback", "token" => $userToken->token], true); ?></p>
+<p><?= Url::toRoute(["/login-callback", "token" => $userToken->token], true); ?></p>

@@ -10,6 +10,7 @@ use app\models\User;
 use app\models\UserToken;
 use app\models\forms\ContactForm;
 use app\models\forms\LoginForm;
+use amnah\yii2\user\models\forms\LoginEmailForm;
 
 class PublicController extends BaseApiController
 {
@@ -231,5 +232,67 @@ class PublicController extends BaseApiController
             "user" => $userAttributes,
             "token" => $token,
         ];
+    }
+
+    /**
+     * Login via email
+     */
+    public function actionLoginEmail()
+    {
+        $post = Yii::$app->request->post();
+        $loginEmailForm = new LoginEmailForm();
+        if ($loginEmailForm->load($post, "") && $loginEmailForm->sendEmail()) {
+            return [
+                "success" => true,
+                "user" => $loginEmailForm->getUser(),
+            ];
+        }
+
+        return ["errors" => $loginEmailForm->errors];
+    }
+
+    /**
+     * Login/register callback via email
+     */
+    public function actionLoginCallback($token)
+    {
+        // check token and log user in directly
+        $userToken = UserToken::findByToken($token, UserToken::TYPE_EMAIL_LOGIN);
+        $rememberMe = $userToken ? $userToken->data : false;
+        $jwtCookie = 1;
+        if ($userToken && $userToken->user) {
+            $userToken->delete();
+            return ["success" => $this->generateAuthOutput($userToken->user->toArray(), $rememberMe, $jwtCookie)];
+        }
+
+        // load post data
+        $user = new User();
+        $profile = new Profile();
+        $post = Yii::$app->request->post();
+        if ($userToken && $user->load($post, "")) {
+
+            // ensure that email is taken from the $userToken (and not from user input)
+            $user->email = $userToken->data;
+
+            // validate and register
+            $profile->load($post);
+            $userValidate = $user->validate();
+            $profileValidate = $profile->validate();
+            if ($userValidate && $profileValidate) {
+                $user->setRegisterAttributes(Role::ROLE_USER, User::STATUS_ACTIVE)->save();
+                $profile->setUser($user->id)->save();
+
+                // log user in and delete token
+                $userToken->delete();
+                return ["success" => $this->generateAuthOutput($user->toArray(), $rememberMe, $jwtCookie)];
+            } else {
+                $errors = array_merge($user->errors, $profile->errors);
+                return ["errors" => $errors];
+            }
+        }
+
+        return $userToken
+            ? ["success" => true, "email" => $userToken->data]
+            : ["error" => "Invalid token"];
     }
 }
