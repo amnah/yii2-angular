@@ -2,20 +2,20 @@
 <div class="site-register ng-cloak" ng-controller="RegisterCtrl as vm">
     <h1>Register</h1>
 
-    <div class="success" ng-show="vm.status === 1">
+    <div class="success" ng-if="vm.status === 1">
         <div class="alert alert-success">
             <p>User [ {{ vm.User.email }} ] registered</p>
             <p>Please check your email for an activation link</p>
         </div>
     </div>
-    <div class="success" ng-show="vm.status === 2">
+    <div class="success" ng-if="vm.status === 2">
         <div class="alert alert-success">
             <p>User [ {{ vm.User.email }} ] registered</p>
             <p>Please login <a href="/login">here</a></p>
         </div>
     </div>
 
-    <div ng-show="vm.status === 0">
+    <div ng-if="vm.status === 0">
         <p>Please fill out the following fields to register:</p>
 
         <form id="register-form" class="form-horizontal" role="form" ng-submit="vm.submit()">
@@ -38,7 +38,7 @@
                     <p class="help-block help-block-error">{{ vm.errors.newPassword[0] }}</p>
                 </div>
             </div>
-            <div class="form-group" ng-class="{'has-error': vm.errors.captcha}" ng-show="vm.sitekey">
+            <div class="form-group" ng-class="{'has-error': vm.errors.captcha}" ng-if="vm.sitekey">
                 <label class="col-lg-1 control-label">Captcha</label>
                 <div class="col-lg-3">
                     <div id="register-captcha"></div>
