@@ -3,10 +3,10 @@
 
     angular
         .module('app')
-        .run(appInit);
+        .run(initConfig);
 
     // @ngInject
-    function appInit(Auth) {
+    function initConfig(Auth) {
         // attempt to set up user from local storage. this is faster than waiting for the automatic refresh
         var user = Auth.setUserFromLocalStorage();
         var runAtStart = user ? true : false;
