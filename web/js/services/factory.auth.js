@@ -124,7 +124,12 @@
         };
 
         factory.redirect = function(url) {
+
+            // clear get params, change path, and replace record
+            // @link http://stackoverflow.com/a/26336011
+            // @link http://stackoverflow.com/questions/17376416/angularjs-how-to-clear-query-parameters-in-the-url
             url = url ? url : '';
+            $location.search({});
             $location.path(url).replace();
             return this;
         };
