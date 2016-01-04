@@ -26,7 +26,7 @@
             if (useCache && user !== false) {
                 userDefer.resolve(user);
             } else {
-                Api.get('public/renew-token').then(function(data) {
+                Api.get('auth/renew-token').then(function(data) {
                     factory.setUserAndToken(data);
                     userDefer.resolve(user);
                 });
@@ -71,7 +71,7 @@
         };
 
         factory.requestRefreshToken = function() {
-            return Api.get('public/request-refresh-token').then(function(data) {
+            return Api.get('auth/request-refresh-token').then(function(data) {
                 if (!Config.jwtCookie) {
                     $localStorage.refreshToken = data.success;
                 }
@@ -83,7 +83,7 @@
             // remove token from local storage and cookie
             delete $localStorage.refreshToken;
             if (callApi) {
-                return Api.get('public/remove-refresh-token').then(function(data) {
+                return Api.get('auth/remove-refresh-token').then(function(data) {
                     return data;
                 });
             }
@@ -91,7 +91,7 @@
 
         factory.useRefreshToken = function() {
             var params = $localStorage.refreshToken ? {refreshToken: $localStorage.refreshToken} : {};
-            return Api.get('public/use-refresh-token', params).then(function(data) {
+            return Api.get('auth/use-refresh-token', params).then(function(data) {
                 factory.setUserAndToken(data);
                 if (!user) {
                     factory.removeRefreshToken();
@@ -109,17 +109,17 @@
         };
 
         factory.login = function(data) {
-            return Api.post('public/login', data);
+            return Api.post('auth/login', data);
         };
 
         factory.loginEmail = function(data) {
-            return Api.post('public/login-email', data);
+            return Api.post('auth/login-email', data);
         };
 
         factory.loginCallback = function(userData) {
             var token = $routeParams.token;
             var jwtCookie = Config.jwtCookie;
-            var url = 'public/login-callback?token=' + token + '&jwtCookie=' + jwtCookie;
+            var url = 'auth/login-callback?token=' + token + '&jwtCookie=' + jwtCookie;
             if (userData) {
                 return Api.post(url, userData);
             } else {
@@ -128,12 +128,12 @@
         };
 
         factory.register = function(data) {
-            return Api.post('public/register', data);
+            return Api.post('auth/register', data);
         };
 
         factory.confirm = function() {
             var token = $routeParams.token;
-            return Api.get('public/confirm', {token: token});
+            return Api.get('auth/confirm', {token: token});
         };
 
         factory.setLoginUrl = function(url) {
@@ -163,7 +163,7 @@
         };
 
         factory.logout = function(logoutUrl) {
-            return Api.post('public/logout').then(function(data) {
+            return Api.post('auth/logout').then(function(data) {
                 factory.setUserAndToken(data);
                 factory.removeRefreshToken();
                 factory.redirect(logoutUrl);
