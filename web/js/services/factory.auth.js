@@ -137,7 +137,7 @@
         };
 
         factory.setLoginUrl = function(url) {
-            $localStorage.loginUrl = url;
+            $localStorage.loginUrl = url || $location.path();
             return this;
         };
 

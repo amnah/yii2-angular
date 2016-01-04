@@ -6,7 +6,7 @@
         .controller('NavCtrl', NavCtrl);
 
     // @ngInject
-    function NavCtrl($scope, $localStorage, $location, Api, Auth, authService) {
+    function NavCtrl($scope, Api, Auth, authService) {
 
         var vm = this;
         vm.isCollapsed = true;
@@ -22,7 +22,7 @@
                        return angular.extend(config, Api.getConfig());
                    });
                } else {
-                   Auth.setLoginUrl($location.path()).redirect('/login');
+                   Auth.setLoginUrl().redirect('/login');
                }
             });
         });
