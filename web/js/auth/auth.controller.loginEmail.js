@@ -6,7 +6,7 @@
         .controller('LoginEmailCtrl', LoginEmailCtrl);
 
     // @ngInject
-    function LoginEmailCtrl($routeParams, Config, Api) {
+    function LoginEmailCtrl(Auth) {
 
         var vm = this;
         vm.errors = {};
@@ -17,7 +17,7 @@
         vm.submit = function() {
             vm.errors = {};
             vm.submitting  = true;
-            Api.post('public/login-email', vm.LoginEmailForm).then(function(data) {
+            Auth.loginEmail(vm.LoginEmailForm).then(function(data) {
                 vm.submitting  = false;
                 if (data.success) {
                     vm.errors = false;

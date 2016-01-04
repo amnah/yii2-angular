@@ -6,7 +6,7 @@
         .factory('Auth', Auth);
 
     // @ngInject
-    function Auth($window, $location, $interval, $q, $localStorage, Config, Api) {
+    function Auth($window, $location, $routeParams, $interval, $q, $localStorage, Config, Api) {
 
         var factory = {};
         var user = false;
@@ -42,9 +42,11 @@
             // set data if valid
             if (data && data.success && data.success.user) {
                 user = data.success.user;
-                $localStorage.user = data.success.user;
+                factory.startTokenRenewInterval();
 
-                // set token only if we're not using cookies
+                // set local storage data
+                //   note: set token only if we're not using cookies
+                $localStorage.user = data.success.user;
                 if (!Config.jwtCookie) {
                     $localStorage.token = data.success.token;
                 }
@@ -107,10 +109,31 @@
         };
 
         factory.login = function(data) {
-            return Api.post('public/login', data).then(function(data) {
-                factory.setUserAndToken(data);
-                return data;
-            });
+            return Api.post('public/login', data);
+        };
+
+        factory.loginEmail = function(data) {
+            return Api.post('public/login-email', data);
+        };
+
+        factory.loginCallback = function(userData) {
+            var token = $routeParams.token;
+            var jwtCookie = Config.jwtCookie;
+            var url = 'public/login-callback?token=' + token + '&jwtCookie=' + jwtCookie;
+            if (userData) {
+                return Api.post(url, userData);
+            } else {
+                return Api.get(url);
+            }
+        };
+
+        factory.register = function(data) {
+            return Api.post('public/register', data);
+        };
+
+        factory.confirm = function() {
+            var token = $routeParams.token;
+            return Api.get('public/confirm', {token: token});
         };
 
         factory.setLoginUrl = function(url) {
@@ -124,13 +147,13 @@
         };
 
         factory.redirect = function(url) {
-
-            // clear get params, change path, and replace record
-            // @link http://stackoverflow.com/a/26336011
-            // @link http://stackoverflow.com/questions/17376416/angularjs-how-to-clear-query-parameters-in-the-url
             url = url ? url : '';
-            $location.search({});
             $location.path(url).replace();
+
+            // clear get params and login url
+            // @link http://stackoverflow.com/a/26336011
+            $location.search({});
+            factory.clearLoginUrl();
             return this;
         };
 
@@ -144,16 +167,6 @@
                 factory.setUserAndToken(data);
                 factory.removeRefreshToken();
                 factory.redirect(logoutUrl);
-                return data;
-            });
-        };
-
-        factory.register = function(data) {
-            return Api.post('public/register', data).then(function(data) {
-                var userCheck = factory.setUserAndToken(data);
-                if (userCheck) {
-                    factory.startTokenRenewInterval();
-                }
                 return data;
             });
         };

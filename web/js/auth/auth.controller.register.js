@@ -42,8 +42,8 @@
                 vm.submitting  = false;
                 if (data.success) {
                     vm.errors = false;
-                    recaptchaId = vm.sitekey ? grecaptchaObj.reset(recaptchaId) : null;
                     vm.status = data.success.userToken ? 1 : 2;
+                    recaptchaId = vm.sitekey ? grecaptchaObj.reset(recaptchaId) : null;
                 } else if (data.errors) {
                     vm.errors = data.errors;
                 }

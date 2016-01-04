@@ -6,14 +6,13 @@
         .controller('ConfirmCtrl', ConfirmCtrl);
 
     // @ngInject
-    function ConfirmCtrl($routeParams, Api) {
+    function ConfirmCtrl(Auth) {
 
         var vm = this;
         vm.success = false;
         vm.error = false;
 
-        var token = $routeParams.token;
-        Api.get('public/confirm', {token: token}).then(function(data) {
+        Auth.confirm().then(function(data) {
             if (data.success) {
                 vm.success = data.success;
             } else if (data.error) {

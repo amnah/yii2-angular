@@ -19,9 +19,8 @@
             vm.submitting  = true;
             Auth.login(vm.LoginForm).then(function(data) {
                 vm.submitting  = false;
-                if (data.success) {
-                    Auth.startTokenRenewInterval();
-                    Auth.redirect(vm.loginUrl).clearLoginUrl();
+                if (data.success && Auth.setUserAndToken(data)) {
+                    Auth.redirect(vm.loginUrl);
                 } else if (data.errors) {
                     vm.errors = data.errors;
                 }

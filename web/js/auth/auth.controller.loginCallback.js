@@ -6,21 +6,17 @@
         .controller('LoginCallbackCtrl', LoginCallbackCtrl);
 
     // @ngInject
-    function LoginCallbackCtrl($routeParams, Config, Auth, Api) {
+    function LoginCallbackCtrl(Auth) {
 
         var vm = this;
         vm.errors = {};
-        vm.showInvalidToken = false;
         vm.showRegister = false;
         vm.loginUrl = Auth.getLoginUrl();
-        vm.User = { rememberMe: true, jwtCookie: Config.jwtCookie };
+        vm.User = {};
 
-        var token = $routeParams.token;
-        var jwtCookie = Config.jwtCookie ? 1 : 0;
-        var url = 'public/login-callback?token=' + token + '&jwtCookie=' + jwtCookie;
-        Api.get(url).then(function(data) {
+        Auth.loginCallback().then(function(data) {
             if (data.success && Auth.setUserAndToken(data)) {
-                Auth.redirect(vm.loginUrl).clearLoginUrl();
+                Auth.redirect(vm.loginUrl);
             } else if (data.error) {
                 vm.error = data.error;
             } else if (data.email) {
@@ -35,10 +31,10 @@
             // check captcha before making POST request
             vm.errors = {};
             vm.submitting  = true;
-            Api.post(url, vm.User).then(function(data) {
+            Auth.loginCallback(vm.User).then(function(data) {
                 vm.submitting  = false;
                 if (data.success && Auth.setUserAndToken(data)) {
-                    Auth.redirect(vm.loginUrl).clearLoginUrl();
+                    Auth.redirect(vm.loginUrl);
                 } else if (data.errors) {
                     vm.errors = data.errors;
                 }

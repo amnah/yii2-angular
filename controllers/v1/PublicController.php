@@ -254,12 +254,11 @@ class PublicController extends BaseApiController
     /**
      * Login/register callback via email
      */
-    public function actionLoginCallback($token)
+    public function actionLoginCallback($token, $jwtCookie = true)
     {
         // check token and log user in directly
         $userToken = UserToken::findByToken($token, UserToken::TYPE_EMAIL_LOGIN);
         $rememberMe = $userToken ? $userToken->data : false;
-        $jwtCookie = 1;
         if ($userToken && $userToken->user) {
             $userToken->delete();
             return ["success" => $this->generateAuthOutput($userToken->user->toArray(), $rememberMe, $jwtCookie)];
@@ -281,8 +280,6 @@ class PublicController extends BaseApiController
             if ($userValidate && $profileValidate) {
                 $user->setRegisterAttributes(Role::ROLE_USER, User::STATUS_ACTIVE)->save();
                 $profile->setUser($user->id)->save();
-
-                // log user in and delete token
                 $userToken->delete();
                 return ["success" => $this->generateAuthOutput($user->toArray(), $rememberMe, $jwtCookie)];
             } else {
