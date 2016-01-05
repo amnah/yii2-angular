@@ -3,7 +3,7 @@ var gulp = require('gulp');
 var concat = require('gulp-concat');
 var uglify = require('gulp-uglify');
 var ngAnnotate = require('gulp-ng-annotate');
-var minifyCss = require('gulp-minify-css');
+var cssnano = require('gulp-cssnano');
 var flatten = require('gulp-flatten');
 var rev = require('gulp-rev');
 var merge = require('merge-stream');
@@ -50,7 +50,7 @@ gulp.task('buildAssets', ['clean'], function() {
         .pipe(gulp.dest(dest))
         // compiled min
         .pipe(concat(`site.compiled.min.css`))
-        .pipe(minifyCss())
+        .pipe(cssnano())
         .pipe(gulp.dest(dest));
 
     var js = gulp.src(jsDir)
