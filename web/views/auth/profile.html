@@ -1,13 +1,36 @@
 
 <div class="site-profile ng-cloak" ng-controller="ProfileCtrl as vm">
 
-    <div ng-if="vm.Auth.isLoggedIn()">
+    <div ng-if="vm.Profile">
 
         <h1>Profile</h1>
 
+        <div class="success" ng-if="vm.errors === false">
+            <div class="alert alert-success">
+                <p>Profile saved</p>
+            </div>
+        </div>
+
         <p>This is the Profile page. Note that you need to be logged in to view this.</p>
 
-        <p>Your email is [ <strong>{{ vm.Auth.getAttribute('email') }}</strong> ]</p>
+        <form id="profile-form" class="form-horizontal" role="form" ng-submit="vm.submit()">
+
+            <div class="form-group" ng-class="{'has-error': vm.errors.full_name}">
+                <label class="col-lg-1 control-label" for="profileform-full_name">Full name</label>
+                <div class="col-lg-3">
+                    <input type="text" id="profileform-full_name" class="form-control" ng-model="vm.Profile.full_name">
+                </div>
+                <div class="col-lg-8">
+                    <p class="help-block help-block-error">{{ vm.errors.full_name[0] }}</p>
+                </div>
+            </div>
+            <div class="form-group">
+                <div class="col-lg-offset-1 col-lg-11">
+                    <button type="submit" class="btn btn-primary" ng-disabled="vm.submitting">Save</button>
+                </div>
+            </div>
+
+        </form>
 
         <h3>Refresh tokens</h3>
 

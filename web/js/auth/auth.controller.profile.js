@@ -9,16 +9,30 @@
     function ProfileCtrl($filter, $localStorage, Config, Api, Auth) {
 
         var vm = this;
-        vm.user = null;
         vm.Auth = Auth;
+        vm.Profile = null;
         vm.message = '-----';
+        vm.submitting = false;
+        vm.errors = {};
         var refreshToken = Auth.getRefreshToken();
         if (refreshToken) {
             vm.message = $filter('date')(new Date(), 'mediumTime') + ' - Existing refresh token - ' + refreshToken.substr(-43);
         }
-        Api.get('user').then(function(data) {
-            vm.user = data.success;
+
+        var apiUrl = 'user/profile';
+        Api.get(apiUrl).then(function(data) {
+            vm.Profile = data.success;
         });
+
+        vm.submit = function() {
+            vm.submitting = true;
+            vm.errors = {};
+            Api.post(apiUrl, vm.Profile).then(function(data) {
+                vm.submitting = false;
+                vm.Profile = data.success ? data.success : vm.Profile;
+                vm.errors = data.errors ? data.errors : false;
+            });
+        };
 
         vm.requestRefreshToken = function() {
             Auth.requestRefreshToken().then(function(data) {
