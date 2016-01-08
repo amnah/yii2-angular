@@ -146,14 +146,17 @@
             return this;
         };
 
-        factory.redirect = function(url) {
+        factory.redirect = function(url, keepLoginUrl) {
             url = url ? url : '';
             $location.path(url).replace();
 
-            // clear get params and login url
+            // clear get params and loginUrl
             // @link http://stackoverflow.com/a/26336011
             $location.search({});
-            factory.clearLoginUrl();
+            if (!keepLoginUrl) {
+                factory.clearLoginUrl();
+            }
+
             return this;
         };
 

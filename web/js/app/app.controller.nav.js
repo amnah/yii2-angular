@@ -22,7 +22,7 @@
                        return angular.extend(config, Api.getConfig());
                    });
                } else {
-                   Auth.setLoginUrl().redirect('/login');
+                   Auth.setLoginUrl().redirect('/login', true);
                }
             });
         });
