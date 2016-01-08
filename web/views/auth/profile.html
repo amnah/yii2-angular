@@ -32,22 +32,6 @@
 
         </form>
 
-        <h3>Refresh tokens</h3>
-
-        <p>Status: <strong>{{ vm.message }}</strong></p>
-
-        <p><strong>Note:</strong> If you remove the refresh token and then attempt to use it, you will get a white screen
-            (if using cookies)</p>
-
-        <p><strong>Note:</strong> Refresh tokens are <strong>PERMANENT</strong>, typically used for mobile apps.
-            (NOT web apps)</p>
-
-        <p>
-            <a class="btn btn-primary" ng-click="vm.requestRefreshToken()">Get refresh token</a>
-            <a class="btn btn-danger" ng-click="vm.removeRefreshToken()">Remove refresh token</a>
-            <a class="btn btn-success" ng-click="vm.useRefreshToken()">Use refresh token to get regular token</a>
-        </p>
-        
     </div>
 
 </div>
