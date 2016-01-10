@@ -41,6 +41,7 @@ $min = !YII_ENV_DEV ? ".min" : "";  // use min version unless in dev
                 <ul id="w1" class="navbar-nav navbar-right ng-cloak nav">
                     <li><a href="/about" ng-click="vm.isCollapsed=true">About</a></li>
                     <li><a href="/contact" ng-click="vm.isCollapsed=true">Contact</a></li>
+                    <li><a href="/account" ng-click="vm.isCollapsed=true">Account</a></li>
                     <li><a href="/profile" ng-click="vm.isCollapsed=true">Profile</a></li>
                     <li ng-show="!vm.Auth.isLoggedIn()"><a href="/login" ng-click="vm.isCollapsed=true">Login</a></li>
                     <li ng-show="!vm.Auth.isLoggedIn()"><a href="/login-email" ng-click="vm.isCollapsed=true">Login via Email</a></li>

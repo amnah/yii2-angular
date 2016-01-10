@@ -9,7 +9,7 @@
     function routeConfig($routeProvider) {
 
         var viewDir = 'auth';
-        var paths = ['register', 'login', 'login-email', 'login-callback', 'profile', 'confirm'];
+        var paths = ['register', 'confirm', 'login', 'login-email', 'login-callback', 'account', 'profile'];
         for (var i=0; i<paths.length; i++) {
             var path = paths[i];
             $routeProvider.when('/' + path, {templateUrl: '/views/' + viewDir + '/' + path + '.html'});

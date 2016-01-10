@@ -9,13 +9,12 @@
     function ProfileCtrl(Api) {
 
         var vm = this;
-        vm.Profile = null;
         vm.submitting = false;
         vm.errors = {};
 
         var apiUrl = 'user/profile';
         Api.get(apiUrl).then(function(data) {
-            vm.Profile = data.success;
+            vm.Profile = data.success ? data.success.profile : null;
         });
 
         vm.submit = function() {
@@ -23,7 +22,7 @@
             vm.errors = {};
             Api.post(apiUrl, vm.Profile).then(function(data) {
                 vm.submitting = false;
-                vm.Profile = data.success ? data.success : vm.Profile;
+                vm.Profile = data.success ? data.success.profile : vm.Profile;
                 vm.errors = data.errors ? data.errors : false;
             });
         };
