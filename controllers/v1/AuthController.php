@@ -13,19 +13,39 @@ use amnah\yii2\user\models\forms\LoginEmailForm;
 class AuthController extends PublicController
 {
     /**
+     * Generate auth data (for sending back to client)
+     * @param User $user
+     * @param bool $rememberMe
+     * @param bool $jwtCookie
+     * @return boolean
+     */
+    protected function generateAuthOutput($user, $rememberMe, $jwtCookie)
+    {
+        $jwtAuth = $this->jwtAuth;
+        $userAttributes = is_callable([$user, "toArray"]) ? $user->toArray() : $user;
+        $token = $jwtAuth->generateUserToken($userAttributes, $rememberMe, $jwtCookie);
+        return [
+            "user" => $user,
+            "token" => $token,
+        ];
+    }
+
+    /**
      * Login
      */
     public function actionLogin()
     {
+        /** @var User $user */
+
         // notice that we set the second parameter $formName = ""
         $request = Yii::$app->request;
         $model = new LoginForm();
         $model->load($request->post(), "");
         if ($model->validate()) {
-            $userAttributes = $model->getUser()->toArray();
+            $user = $model->getUser();
             $rememberMe = $request->post("rememberMe", true);
             $jwtCookie = $request->post("jwtCookie", true);
-            $authJwtData = $this->generateAuthOutput($userAttributes, $rememberMe, $jwtCookie);
+            $authJwtData = $this->generateAuthOutput($user, $rememberMe, $jwtCookie);
             return ["success" => $authJwtData];
         }
         return ["errors" => $model->errors];
@@ -75,10 +95,9 @@ class AuthController extends PublicController
             $user->sendEmailConfirmation($userToken);
             return ["success" => ["userToken" => 1]];
         } else {
-            $userAttributes = $user->toArray();
             $rememberMe = $request->post("rememberMe", true);
             $jwtCookie = $request->post("jwtCookie", true);
-            return ["success" => $this->generateAuthOutput($userAttributes, $rememberMe, $jwtCookie)];
+            return ["success" => $this->generateAuthOutput($user, $rememberMe, $jwtCookie)];
         }
     }
 
@@ -174,7 +193,7 @@ class AuthController extends PublicController
      */
     public function actionUseRefreshToken()
     {
-        /** @var \app\models\User $user */
+        /** @var User $user */
 
         // get token/payload
         $jwtAuth = $this->jwtAuth;
@@ -188,24 +207,7 @@ class AuthController extends PublicController
         $rememberMe = false;
         $user = Yii::$app->user->identityClass;
         $user = $user::findIdentityByAccessToken($payload->accessToken);
-        return ["success" => $this->generateAuthOutput($user->toArray(), $rememberMe, $payload->jwtCookie)];
-    }
-
-    /**
-     * Generate auth data (for sending back to client)
-     * @param array|object $userAttributes
-     * @param bool $rememberMe
-     * @param bool $jwtCookie
-     * @return boolean
-     */
-    protected function generateAuthOutput($userAttributes, $rememberMe, $jwtCookie)
-    {
-        $jwtAuth = $this->jwtAuth;
-        $token = $jwtAuth->generateUserToken($userAttributes, $rememberMe, $jwtCookie);
-        return [
-            "user" => $userAttributes,
-            "token" => $token,
-        ];
+        return ["success" => $this->generateAuthOutput($user, $rememberMe, $payload->jwtCookie)];
     }
 
     /**
@@ -230,12 +232,15 @@ class AuthController extends PublicController
      */
     public function actionLoginCallback($token, $jwtCookie = true)
     {
+        /** @var User $user */
+
         // check token and log user in directly
         $userToken = UserToken::findByToken($token, UserToken::TYPE_EMAIL_LOGIN);
         $rememberMe = $userToken ? $userToken->data : false;
-        if ($userToken && $userToken->user) {
+        $user = $userToken ? $userToken->user : null;
+        if ($user) {
             $userToken->delete();
-            return ["success" => $this->generateAuthOutput($userToken->user->toArray(), $rememberMe, $jwtCookie)];
+            return ["success" => $this->generateAuthOutput($user, $rememberMe, $jwtCookie)];
         }
 
         // load post data
@@ -255,7 +260,7 @@ class AuthController extends PublicController
                 $user->setRegisterAttributes(Role::ROLE_USER, User::STATUS_ACTIVE)->save();
                 $profile->setUser($user->id)->save();
                 $userToken->delete();
-                return ["success" => $this->generateAuthOutput($user->toArray(), $rememberMe, $jwtCookie)];
+                return ["success" => $this->generateAuthOutput($user, $rememberMe, $jwtCookie)];
             } else {
                 $errors = array_merge($user->errors, $profile->errors);
                 return ["errors" => $errors];
