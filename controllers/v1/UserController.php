@@ -10,22 +10,12 @@ use app\models\Profile;
 
 class UserController extends BaseApiController
 {
+    /**
+     * User account
+     */
     public function actionIndex()
     {
-        $payload = $this->jwtAuth->getTokenPayload();
-        if (!$payload) {
-            return ["error" => true];
-        }
-        return ["success" => $payload->user];
-    }
-
-    /**
-     * Account
-     */
-    public function actionAccount()
-    {
         /** @var User $user */
-        /** @var UserToken $userToken */
 
         // get user
         $payload = $this->jwtAuth->getTokenPayload();
@@ -57,6 +47,40 @@ class UserController extends BaseApiController
         return ["success" => ["user" => $user, "userToken" => $userToken, "hasPassword" => $hasPassword]];
     }
 
+    /**
+     * Resend email change
+     */
+    public function actionChangeResend()
+    {
+        /** @var User $user */
+
+        $payload = $this->jwtAuth->getTokenPayload();
+        $user = User::findOne($payload->user->id);
+        $userToken = UserToken::findByUser($user->id, UserToken::TYPE_EMAIL_CHANGE);
+        if ($userToken) {
+            $user->sendEmailConfirmation($userToken);
+            return ["success" => true];
+        }
+        return ["error" => true];
+    }
+
+    /**
+     * Cancel email change
+     */
+    public function actionChangeCancel()
+    {
+        $payload = $this->jwtAuth->getTokenPayload();
+        $userToken = UserToken::findByUser($payload->user->id, UserToken::TYPE_EMAIL_CHANGE);
+        if ($userToken) {
+            $userToken->delete();
+            return ["success" => true];
+        }
+        return ["error" => true];
+    }
+
+    /**
+     * Profile
+     */
     public function actionProfile()
     {
         /** @var User $user */

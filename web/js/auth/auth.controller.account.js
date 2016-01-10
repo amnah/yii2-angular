@@ -10,9 +10,10 @@
 
         var vm = this;
         vm.submitting = false;
+        vm.message = null;
         vm.errors = {};
 
-        var apiUrl = 'user/account';
+        var apiUrl = 'user';
         Api.get(apiUrl).then(function(data) {
             vm.User = data.success ? data.success.user : null;
             vm.UserToken = data.success ? data.success.userToken : null;
@@ -20,8 +21,7 @@
         });
 
         vm.submit = function() {
-            vm.submitting = true;
-            vm.errors = {};
+            resetSubmit();
             Api.post(apiUrl, vm.User).then(function(data) {
                 var currentPassword = vm.User.currentPassword;
                 vm.submitting = false;
@@ -33,10 +33,29 @@
         };
 
         vm.resend = function() {
-            alert('resending');
-        }
+            resetSubmit();
+            Api.post('user/change-resend').then(function(data) {
+                vm.submitting = false;
+                if (data.success) {
+                    vm.message = 'Email resent';
+                }
+            });
+        };
         vm.cancel = function() {
-            alert('canceling');
+            resetSubmit();
+            Api.post('user/change-cancel').then(function(data) {
+                vm.submitting = false;
+                if (data.success) {
+                    vm.UserToken = null;
+                    vm.message = 'Email change cancelled'
+                }
+            });
+        };
+
+        function resetSubmit() {
+            vm.submitting = true;
+            vm.message = null;
+            vm.errors = {};
         }
     }
 
