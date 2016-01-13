@@ -1,0 +1,69 @@
+
+<div class="site-reset ng-cloak" ng-controller="ResetCtrl as vm">
+
+    <div class="alert alert-success" ng-if="vm.successForgot">
+        <p>Please check your email for a reset password link</p>
+    </div>
+    <div class="alert alert-success" ng-if="vm.successReset">
+        <p>Password updated</p>
+        <p><a href="/login">Log in here</a></p>
+    </div>
+    <div class="alert alert-danger" ng-if="vm.error">{{ vm.error }}</div>
+
+    <form id="forgot-form" class="form-horizontal" role="form" ng-if="vm.showForgot && !vm.successForgot" ng-submit="vm.submitForgot()">
+
+        <h1>Forgot password</h1>
+        <p>We'll send you a link to reset your password</p>
+        <div class="form-group" ng-class="{'has-error': vm.errors.email}">
+            <label class="col-lg-1 control-label" for="forgotform-email">Email</label>
+            <div class="col-lg-4">
+                <input type="text" id="forgotform-email" class="form-control" ng-model="vm.ForgotForm.email">
+            </div>
+            <div class="col-lg-7">
+                <p class="help-block help-block-error">{{ vm.errors.email[0] }}</p>
+            </div>
+        </div>
+        <div class="form-group">
+            <div class="col-lg-offset-1 col-lg-11">
+                <button type="submit" class="btn btn-primary" ng-disabled="vm.submitting">Submit</button>
+            </div>
+        </div>
+
+    </form>
+
+    <form id="reset-form" class="form-horizontal" role="form" ng-if="vm.showReset && !vm.successReset" ng-submit="vm.submitReset()">
+
+        <h1>Reset password</h1>
+        <div class="form-group">
+            <label class="col-lg-2 control-label" for="resetform-email">Email</label>
+            <div class="col-lg-3">
+                <input type="text" id="resetform-email" class="form-control" disabled ng-model="vm.User.email">
+            </div>
+        </div>
+        <div class="form-group" ng-class="{'has-error': vm.errors.newPassword}">
+            <label class="col-lg-2 control-label" for="resetform-newPassword">New Password</label>
+            <div class="col-lg-3">
+                <input type="password" id="resetform-newPassword" class="form-control" ng-model="vm.User.newPassword">
+            </div>
+            <div class="col-lg-7">
+                <p class="help-block help-block-error">{{ vm.errors.newPassword[0] }}</p>
+            </div>
+        </div>
+        <div class="form-group" ng-class="{'has-error': vm.errors.newPasswordConfirm}">
+            <label class="col-lg-2 control-label" for="resetform-newPasswordConfirm">New Password Confirm</label>
+            <div class="col-lg-3">
+                <input type="password" id="resetform-newPasswordConfirm" class="form-control" ng-model="vm.User.newPasswordConfirm">
+            </div>
+            <div class="col-lg-7">
+                <p class="help-block help-block-error">{{ vm.errors.newPasswordConfirm[0] }}</p>
+            </div>
+        </div>
+        <div class="form-group">
+            <div class="col-lg-offset-1 col-lg-11">
+                <button type="submit" class="btn btn-primary" ng-disabled="vm.submitting">Submit</button>
+            </div>
+        </div>
+
+    </form>
+
+</div>

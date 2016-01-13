@@ -8,6 +8,7 @@ use app\models\Role;
 use app\models\User;
 use app\models\UserToken;
 use app\models\forms\LoginForm;
+use amnah\yii2\user\models\forms\ForgotForm;
 use amnah\yii2\user\models\forms\LoginEmailForm;
 
 class AuthController extends PublicController
@@ -272,5 +273,49 @@ class AuthController extends PublicController
             $errors = array_merge($user->errors, $profile->errors);
             return ["errors" => $errors];
         }
+    }
+
+    /**
+     * Forgot
+     */
+    public function actionForgot()
+    {
+        $model = new ForgotForm();
+        $model->load(Yii::$app->request->post(), "");
+        if ($model->sendForgotEmail()) {
+            return ["success" => true];
+        }
+        return ["errors" => $model->errors];
+
+    }
+
+    /**
+     * Reset
+     */
+    public function actionReset($token)
+    {
+        /** @var User $user */
+
+        // get user token and check expiration
+        $userToken = UserToken::findByToken($token, UserToken::TYPE_PASSWORD_RESET);
+        if (!$userToken) {
+            return ["error" => "Invalid token"];
+        }
+
+        // get user and load post
+        // return user email if user hasn't submitted yet
+        $user = User::findOne($userToken->user_id);
+        $loadedPost = $user->load(Yii::$app->request->post(), "");
+        if (!$loadedPost) {
+            return ["success" => $user->email];
+        }
+
+        // set scenario and save new password
+        $user->setScenario("reset");
+        if ($user->save(true, ["password", "newPassword", "newPasswordConfirm"])) {
+            $userToken->delete();
+            return ["success" => true];
+        }
+        return ["errors" => $user->errors];
     }
 }
