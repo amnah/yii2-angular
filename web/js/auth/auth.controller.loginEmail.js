@@ -9,7 +9,6 @@
     function LoginEmailCtrl(Auth) {
 
         var vm = this;
-        vm.errors = {};
         vm.user = null;
         vm.LoginEmailForm = { rememberMe: true };
 

@@ -9,7 +9,6 @@
     function RegisterCtrl(Config, Auth) {
 
         var vm = this;
-        vm.errors = {};
         vm.sitekey = Config.recaptchaSitekey;
         vm.User = { rememberMe: true, jwtCookie: Config.jwtCookie };
 

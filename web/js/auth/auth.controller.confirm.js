@@ -9,8 +9,6 @@
     function ConfirmCtrl(Auth) {
 
         var vm = this;
-        vm.success = false;
-        vm.error = false;
         vm.Auth = Auth;
 
         Auth.confirm().then(function(data) {

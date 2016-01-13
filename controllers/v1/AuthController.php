@@ -236,39 +236,41 @@ class AuthController extends PublicController
 
         // check token and log user in directly
         $userToken = UserToken::findByToken($token, UserToken::TYPE_EMAIL_LOGIN);
-        $rememberMe = $userToken ? $userToken->data : false;
-        $user = $userToken ? $userToken->user : null;
+        if (!$userToken) {
+            return ["error" => "Invalid token"];
+        }
+
+        // log user in directly
+        $rememberMe = $userToken->data;
+        $user = $userToken->user;
         if ($user) {
             $userToken->delete();
             return ["success" => $this->generateAuthOutput($user, $rememberMe, $jwtCookie)];
         }
 
-        // load post data
+        // check for post data
         $user = new User();
         $profile = new Profile();
         $post = Yii::$app->request->post();
-        if ($userToken && $user->load($post, "")) {
-
-            // ensure that email is taken from the $userToken (and not from user input)
-            $user->email = $userToken->data;
-
-            // validate and register
-            $profile->load($post);
-            $userValidate = $user->validate();
-            $profileValidate = $profile->validate();
-            if ($userValidate && $profileValidate) {
-                $user->setRegisterAttributes(Role::ROLE_USER, User::STATUS_ACTIVE)->save();
-                $profile->setUser($user->id)->save();
-                $userToken->delete();
-                return ["success" => $this->generateAuthOutput($user, $rememberMe, $jwtCookie)];
-            } else {
-                $errors = array_merge($user->errors, $profile->errors);
-                return ["errors" => $errors];
-            }
+        if (!$user->load($post, "")) {
+            return ["success" => true, "email" => $userToken->data];
         }
 
-        return $userToken
-            ? ["success" => true, "email" => $userToken->data]
-            : ["error" => "Invalid token"];
+        // ensure that email is taken from the $userToken (and not from user input)
+        $user->email = $userToken->data;
+
+        // load profile, validate, and register
+        $profile->load($post);
+        $userValidate = $user->validate();
+        $profileValidate = $profile->validate();
+        if ($userValidate && $profileValidate) {
+            $user->setRegisterAttributes(Role::ROLE_USER, User::STATUS_ACTIVE)->save();
+            $profile->setUser($user->id)->save();
+            $userToken->delete();
+            return ["success" => $this->generateAuthOutput($user, $rememberMe, $jwtCookie)];
+        } else {
+            $errors = array_merge($user->errors, $profile->errors);
+            return ["errors" => $errors];
+        }
     }
 }

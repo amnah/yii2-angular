@@ -9,7 +9,6 @@
     function LoginCallbackCtrl(Auth) {
 
         var vm = this;
-        vm.errors = {};
         vm.showRegister = false;
         vm.loginUrl = Auth.getLoginUrl();
         vm.User = {};

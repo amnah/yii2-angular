@@ -9,7 +9,6 @@
     function LoginCtrl(Config, Auth) {
 
         var vm = this;
-        vm.errors = {};
         vm.loginUrl = Auth.getLoginUrl();
         vm.LoginForm = { rememberMe: true, jwtCookie: Config.jwtCookie };
 

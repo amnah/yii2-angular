@@ -9,7 +9,6 @@
     function ContactCtrl(Config, Api, Auth) {
 
         var vm = this;
-        vm.errors = {};
         vm.sitekey = Config.recaptchaSitekey;
         vm.ContactForm = { name: Auth.getAttribute('username'), email: Auth.getAttribute('email') };
 

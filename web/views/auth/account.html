@@ -13,7 +13,7 @@
 
         <form id="account-form" class="form-horizontal" role="form" ng-submit="vm.submit()">
 
-            <div class="form-group" ng-class="{'has-error': vm.errors.currentPassword}" ngif="vm.hasPassword">
+            <div class="form-group" ng-class="{'has-error': vm.errors.currentPassword}" ng-if="vm.hasPassword">
                 <label class="col-lg-2 control-label" for="accountform-currentPassword">Current Password</label>
                 <div class="col-lg-3">
                     <input type="password" id="accountform-currentPassword" class="form-control" ng-model="vm.User.currentPassword">
@@ -21,9 +21,8 @@
                 <div class="col-log-7">
                     <p class="help-block help-block-error">{{ vm.errors.currentPassword[0] }}</p>
                 </div>
-
             </div>
-            <hr ngif="vm.hasPassword">
+            <hr ng-if="vm.hasPassword">
             <div class="form-group" ng-class="{'has-error': vm.errors.email}">
                 <label class="col-lg-2 control-label" for="accountform-email">Email</label>
                 <div class="col-lg-3">
@@ -54,7 +53,7 @@
             <div class="form-group" ng-class="{'has-error': vm.errors.newPassword}">
                 <label class="col-lg-2 control-label" for="accountform-newPassword">New Password</label>
                 <div class="col-lg-3">
-                    <input type="text" id="accountform-newPassword" class="form-control" placeholder="(may be left empty)" ng-model="vm.User.newPassword">
+                    <input type="password" id="accountform-newPassword" class="form-control" placeholder="(may be left empty)" ng-model="vm.User.newPassword">
                 </div>
                 <div class="col-log-7">
                     <p class="help-block help-block-error">{{ vm.errors.username[0] }}</p>

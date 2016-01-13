@@ -11,7 +11,6 @@
         var vm = this;
         vm.submitting = false;
         vm.message = null;
-        vm.errors = {};
 
         var apiUrl = 'user';
         Api.get(apiUrl).then(function(data) {
@@ -26,8 +25,8 @@
                 var currentPassword = vm.User.currentPassword;
                 vm.submitting = false;
                 vm.User = data.success ? data.success.user : vm.User;
-                vm.User.currentPassword = currentPassword;
                 vm.UserToken = data.success ? data.success.userToken : vm.UserToken;
+                vm.hasPassword = data.success ? data.success.hasPassword : false;
                 vm.errors = data.errors ? data.errors : false;
             });
         };

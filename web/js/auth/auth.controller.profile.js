@@ -10,7 +10,6 @@
 
         var vm = this;
         vm.submitting = false;
-        vm.errors = {};
 
         var apiUrl = 'user/profile';
         Api.get(apiUrl).then(function(data) {
