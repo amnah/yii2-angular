@@ -9,8 +9,6 @@
     function ProfileCtrl(Api) {
 
         var vm = this;
-        vm.submitting = false;
-
         var apiUrl = 'user/profile';
         Api.get(apiUrl).then(function(data) {
             vm.Profile = data.success ? data.success.profile : null;

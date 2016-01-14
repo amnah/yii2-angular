@@ -54,8 +54,8 @@
 
         function resetSubmit() {
             vm.submitting = true;
-            vm.message = null;
-            vm.success = null;
+            vm.successForgot = null;
+            vm.successReset = null;
             vm.error = null;
             vm.errors = {};
         }
