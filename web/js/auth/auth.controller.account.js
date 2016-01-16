@@ -6,7 +6,7 @@
         .controller('AccountCtrl', AccountCtrl);
 
     // @ngInject
-    function AccountCtrl(Api) {
+    function AccountCtrl(AjaxHelper, Api, Auth) {
 
         var vm = this;
         var apiUrl = 'user';
@@ -17,40 +17,36 @@
         });
 
         vm.submit = function() {
-            resetSubmit();
+            AjaxHelper.reset(vm);
             Api.post(apiUrl, vm.User).then(function(data) {
-                vm.submitting = false;
-                vm.User = data.success ? data.success.user : vm.User;
-                vm.UserToken = data.success ? data.success.userToken : vm.UserToken;
-                vm.errors = data.errors ? data.errors : false;
+                AjaxHelper.process(vm, data);
+                if (data.success) {
+                    vm.successMsg = 'Account saved';
+                    vm.User = data.success.user;
+                    vm.UserToken = data.success.userToken;
+                }
             });
         };
 
         vm.resend = function() {
-            resetSubmit();
+            AjaxHelper.reset(vm);
             Api.post('user/change-resend').then(function(data) {
-                vm.submitting = false;
+                AjaxHelper.process(vm, data);
                 if (data.success) {
-                    vm.success = 'Email resent';
+                    vm.successMsg = 'Email resent';
                 }
             });
         };
         vm.cancel = function() {
-            resetSubmit();
+            AjaxHelper.reset(vm);
             Api.post('user/change-cancel').then(function(data) {
-                vm.submitting = false;
+                AjaxHelper.process(vm, data);
                 if (data.success) {
                     vm.UserToken = null;
-                    vm.success = 'Email change cancelled'
+                    vm.successMsg = 'Email change cancelled'
                 }
             });
         };
-
-        function resetSubmit() {
-            vm.submitting = true;
-            vm.success = null;
-            vm.errors = {};
-        }
     }
 
 })();

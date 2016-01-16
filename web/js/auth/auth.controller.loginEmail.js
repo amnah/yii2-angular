@@ -6,7 +6,7 @@
         .controller('LoginEmailCtrl', LoginEmailCtrl);
 
     // @ngInject
-    function LoginEmailCtrl(Auth) {
+    function LoginEmailCtrl(AjaxHelper, Auth) {
 
         var vm = this;
         vm.user = null;
@@ -14,15 +14,12 @@
 
         // process form submit
         vm.submit = function() {
-            vm.errors = {};
-            vm.submitting  = true;
+            AjaxHelper.reset(vm);
             Auth.loginEmail(vm.LoginEmailForm).then(function(data) {
-                vm.submitting  = false;
+                AjaxHelper.process(vm, data);
                 if (data.success) {
                     vm.errors = false;
                     vm.user = data.user;
-                } else if (data.errors) {
-                    vm.errors = data.errors;
                 }
             });
         };

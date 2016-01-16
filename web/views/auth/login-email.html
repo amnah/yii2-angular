@@ -2,7 +2,7 @@
 <div class="site-login-email ng-cloak" ng-controller="LoginEmailCtrl as vm">
     <h1>Login</h1>
 
-    <div class="alert alert-success" ng-if="vm.errors === false">
+    <div class="alert alert-success" ng-if="vm.success">
         <p ng-if="vm.user">Login link sent - Please check your email</p>
         <p ng-if="!vm.user">Registration link sent - Please check your email</p>
     </div>

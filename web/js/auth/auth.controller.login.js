@@ -6,7 +6,7 @@
         .controller('LoginCtrl', LoginCtrl);
 
     // @ngInject
-    function LoginCtrl(Config, Auth) {
+    function LoginCtrl(Config, AjaxHelper, Auth) {
 
         var vm = this;
         vm.loginUrl = Auth.getLoginUrl();
@@ -14,14 +14,11 @@
 
         // process form submit
         vm.submit = function() {
-            vm.errors = {};
-            vm.submitting  = true;
+            AjaxHelper.reset(vm);
             Auth.login(vm.LoginForm).then(function(data) {
-                vm.submitting  = false;
+                AjaxHelper.process(vm, data);
                 if (data.success && Auth.setUserAndToken(data)) {
                     Auth.redirect(vm.loginUrl);
-                } else if (data.errors) {
-                    vm.errors = data.errors;
                 }
             });
         };

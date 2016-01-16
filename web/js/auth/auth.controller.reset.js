@@ -6,7 +6,7 @@
         .controller('ResetCtrl', ResetCtrl);
 
     // @ngInject
-    function ResetCtrl($routeParams, Api) {
+    function ResetCtrl($routeParams, AjaxHelper, Api) {
 
         var vm = this;
         vm.User = {};
@@ -29,11 +29,9 @@
         vm.submitForgot = function() {
             resetSubmit();
             Api.post(forgotUrl, vm.ForgotForm).then(function(data) {
-                vm.submitting = false;
+                AjaxHelper.process(vm, data);
                 if (data.success) {
                     vm.successForgot = true;
-                } else if (data.errors) {
-                    vm.errors = data.errors;
                 }
             });
         };
@@ -41,23 +39,17 @@
         vm.submitReset = function() {
             resetSubmit();
             Api.post(resetUrl, vm.User).then(function(data) {
-                vm.submitting = false;
+                AjaxHelper.process(vm, data);
                 if (data.success) {
                     vm.successReset = true;
-                } else if (data.errors) {
-                    vm.errors = data.errors;
-                } else if (data.error) {
-                    vm.error = data.error;
                 }
             });
         };
 
         function resetSubmit() {
-            vm.submitting = true;
+            AjaxHelper.reset(vm);
             vm.successForgot = null;
             vm.successReset = null;
-            vm.error = null;
-            vm.errors = {};
         }
     }
 

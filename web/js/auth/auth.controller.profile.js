@@ -6,7 +6,7 @@
         .controller('ProfileCtrl', ProfileCtrl);
 
     // @ngInject
-    function ProfileCtrl(Api) {
+    function ProfileCtrl(AjaxHelper, Api) {
 
         var vm = this;
         var apiUrl = 'user/profile';
@@ -15,12 +15,12 @@
         });
 
         vm.submit = function() {
-            vm.submitting = true;
-            vm.errors = {};
+            AjaxHelper.reset(vm);
             Api.post(apiUrl, vm.Profile).then(function(data) {
-                vm.submitting = false;
-                vm.Profile = data.success ? data.success.profile : vm.Profile;
-                vm.errors = data.errors ? data.errors : false;
+                AjaxHelper.process(vm, data);
+                if (data.success) {
+                    vm.Profile = data.success.profile;
+                }
             });
         };
     }

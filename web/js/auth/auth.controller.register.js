@@ -6,7 +6,7 @@
         .controller('RegisterCtrl', RegisterCtrl);
 
     // @ngInject
-    function RegisterCtrl(Config, Auth) {
+    function RegisterCtrl(Config, AjaxHelper, Auth) {
 
         var vm = this;
         vm.sitekey = Config.recaptchaSitekey;
@@ -36,15 +36,12 @@
                 return false;
             }
 
-            vm.submitting  = true;
+            AjaxHelper.reset(vm);
             Auth.register(vm.User).then(function(data) {
-                vm.submitting  = false;
+                AjaxHelper.process(vm, data);
                 if (data.success) {
-                    vm.errors = false;
                     vm.status = data.success.userToken ? 1 : 2;
                     recaptchaId = vm.sitekey ? grecaptchaObj.reset(recaptchaId) : null;
-                } else if (data.errors) {
-                    vm.errors = data.errors;
                 }
             });
         };
