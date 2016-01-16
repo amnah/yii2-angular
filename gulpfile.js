@@ -30,7 +30,7 @@ gulp.task('default', ['watch', 'build']);
 gulp.task('build', ['buildAssets', 'buildVendor'], function() {
 
     // make revision
-    gulp.src([`${dest}/*`])
+    gulp.src([`${dest}/*.+(css|js)`])
         .pipe(rev())
         .pipe(gulp.dest(dest))
         .pipe(rev.manifest())
