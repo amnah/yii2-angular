@@ -21,6 +21,8 @@
             Api.post(apiUrl, vm.User).then(function(data) {
                 AjaxHelper.process(vm, data);
                 if (data.success) {
+                    // refresh Auth user with latest data
+                    Auth.getUser(true);
                     vm.successMsg = 'Account saved';
                     vm.User = data.success.user;
                     vm.UserToken = data.success.userToken;
