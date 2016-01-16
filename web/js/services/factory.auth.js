@@ -21,17 +21,11 @@
             }
         };
 
-        factory.getUser = function(useCache) {
-            var userDefer = $q.defer();
-            if (useCache && user !== false) {
-                userDefer.resolve(user);
-            } else {
-                Api.get('auth/renew-token').then(function(data) {
-                    factory.setUserAndToken(data);
-                    userDefer.resolve(user);
-                });
-            }
-            return userDefer.promise;
+        factory.getUser = function(refreshDb) {
+            var params = refreshDb ? {refreshDb: 1} : {};
+            Api.get('auth/renew-token', params).then(function(data) {
+                factory.setUserAndToken(data);
+            });
         };
 
         factory.setUserAndToken = function(data) {

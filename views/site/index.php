@@ -73,7 +73,7 @@ $min = !YII_ENV_DEV ? ".min" : "";  // use min version unless in dev
     var AppConfig = {
         apiUrl: '<?= getenv("API_URL") ?>',
         jwtCookie: <?= (int) getenv("JWT_COOKIE") ?>,
-        jwtIntervalTime: 60*90*1000, // 90 minutes. make sure this is less than JwtAuth::$ttl
+        jwtIntervalTime: 60*110*1000, // 110 minutes. make sure this is less than JwtAuth::$ttl (2 hrs by default)
         recaptchaSitekey: '<?= getenv("RECAPTCHA_SITEKEY") ?>'
     };
 </script>
