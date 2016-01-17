@@ -60,6 +60,7 @@ $config = [
             'dsn' => getenv('DB_DSN'),
             'username' => getenv('DB_USER'),
             'password' => getenv('DB_PASS'),
+            'tablePrefix' => getenv('DB_PREFIX'),
             'charset' => 'utf8',
         ],
         'urlManager' => [
