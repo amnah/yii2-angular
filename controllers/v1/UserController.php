@@ -23,14 +23,14 @@ class UserController extends BaseApiController
         $user->setScenario("account");
 
         // check for post input errors
-        $loadedPost = $user->load(Yii::$app->request->post(), "");
-        if ($loadedPost && !$user->validate()) {
+        $loadedAndValidated = $user->loadPostAndValidate();
+        if ($loadedAndValidated === false) {
             return ["errors" => $user->errors];
         }
 
         // process account update or find a $userToken (for pending email confirmation)
         $userToken = null;
-        if ($loadedPost) {
+        if ($loadedAndValidated) {
 
             // check if user changed his email
             $newEmail = $user->checkEmailChange();
@@ -92,8 +92,7 @@ class UserController extends BaseApiController
         $profile = Profile::findOne(["user_id" => $user->id]);
 
         // update profile
-        $loadedPost = $profile->load(Yii::$app->request->post(), "");
-        if ($loadedPost && !$profile->save()) {
+        if ($profile->loadPostAndSave() === false) {
             return ["errors" => $profile->errors];
         }
 

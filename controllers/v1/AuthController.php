@@ -8,8 +8,8 @@ use app\models\Role;
 use app\models\User;
 use app\models\UserToken;
 use app\models\forms\LoginForm;
-use amnah\yii2\user\models\forms\ForgotForm;
-use amnah\yii2\user\models\forms\LoginEmailForm;
+use app\models\forms\ForgotForm;
+use app\models\forms\LoginEmailForm;
 
 class AuthController extends PublicController
 {
@@ -41,8 +41,7 @@ class AuthController extends PublicController
         // notice that we set the second parameter $formName = ""
         $request = Yii::$app->request;
         $model = new LoginForm();
-        $model->load($request->post(), "");
-        if ($model->validate()) {
+        if ($model->loadPostAndValidate()) {
             $user = $model->getUser();
             $rememberMe = $request->post("rememberMe", true);
             $jwtCookie = $request->post("jwtCookie", true);
@@ -57,9 +56,7 @@ class AuthController extends PublicController
      */
     public function actionLogout()
     {
-        $jwtAuth = $this->jwtAuth;
-        $jwtAuth->removeCookieToken();
-        $jwtAuth->removeRefreshCookieToken();
+        $this->jwtAuth->removeCookieToken()->removeRefreshCookieToken();
         return ["success" => true];
     }
 
@@ -68,13 +65,13 @@ class AuthController extends PublicController
      */
     public function actionRegister()
     {
-        // load post data and validate
-        $request = Yii::$app->request;
         $user = new User(["scenario" => "register"]);
         $profile = new Profile();
-        $user->load($request->post(), "");
-        $profile->load($request->post(), "");
-        if (!$user->validate() || !$profile->validate()) {
+
+        // ensure that both models get validated for errors
+        $userValidate = $user->loadPostAndValidate();
+        $profileValidate = $profile->loadPostAndValidate();
+        if (!$userValidate || !$profileValidate) {
             return ["errors" => array_merge($user->errors, $profile->errors)];
         }
 
@@ -96,6 +93,7 @@ class AuthController extends PublicController
             $user->sendEmailConfirmation($userToken);
             return ["success" => ["userToken" => 1]];
         } else {
+            $request = Yii::$app->request;
             $rememberMe = $request->post("rememberMe", true);
             $jwtCookie = $request->post("jwtCookie", true);
             return ["success" => $this->generateAuthOutput($user, $rememberMe, $jwtCookie)];
@@ -153,7 +151,7 @@ class AuthController extends PublicController
             $user = $payload->user;
         } elseif ($payload && $refreshDb) {
             $user = Yii::$app->user->identityClass;
-            $user = $user::findIdentity($payload->sub);
+            $user = $user::findIdentity($payload->user->id);
         }
 
         // renew token using user if it's set
@@ -180,7 +178,7 @@ class AuthController extends PublicController
 
         // get user based off of id and get access token
         $user = Yii::$app->user->identityClass;
-        $user = $user::findIdentity($payload->sub);
+        $user = $user::findIdentity($payload->user->id);
 
         // generate refresh token
         // note that we use $user->id here, but it can also be the id of your token table
@@ -225,9 +223,8 @@ class AuthController extends PublicController
      */
     public function actionLoginEmail()
     {
-        $post = Yii::$app->request->post();
         $loginEmailForm = new LoginEmailForm();
-        if ($loginEmailForm->load($post, "") && $loginEmailForm->sendEmail()) {
+        if ($loginEmailForm->loadPost() && $loginEmailForm->sendEmail()) {
             return [
                 "success" => true,
                 "user" => $loginEmailForm->getUser(),
@@ -258,11 +255,10 @@ class AuthController extends PublicController
             return ["success" => $this->generateAuthOutput($user, $rememberMe, $jwtCookie)];
         }
 
-        // check for post data
+        // check for post data (for registering)
         $user = new User();
         $profile = new Profile();
-        $post = Yii::$app->request->post();
-        if (!$user->load($post, "")) {
+        if (!$user->loadPost()) {
             return ["success" => true, "email" => $userToken->data];
         }
 
@@ -270,9 +266,8 @@ class AuthController extends PublicController
         $user->email = $userToken->data;
 
         // load profile, validate, and register
-        $profile->load($post);
         $userValidate = $user->validate();
-        $profileValidate = $profile->validate();
+        $profileValidate = $profile->loadPostAndValidate();
         if ($userValidate && $profileValidate) {
             $user->setRegisterAttributes(Role::ROLE_USER, User::STATUS_ACTIVE)->save();
             $profile->setUser($user->id)->save();
@@ -290,8 +285,7 @@ class AuthController extends PublicController
     public function actionForgot()
     {
         $model = new ForgotForm();
-        $model->load(Yii::$app->request->post(), "");
-        if ($model->sendForgotEmail()) {
+        if ($model->loadPost() && $model->sendForgotEmail()) {
             return ["success" => true];
         }
         return ["errors" => $model->errors];
@@ -314,8 +308,7 @@ class AuthController extends PublicController
         // get user and load post
         // return user email if user hasn't submitted yet
         $user = User::findOne($userToken->user_id);
-        $loadedPost = $user->load(Yii::$app->request->post(), "");
-        if (!$loadedPost) {
+        if (!$user->loadPost()) {
             return ["success" => $user->email];
         }
 
