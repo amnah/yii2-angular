@@ -6,13 +6,14 @@
         .config(routeConfig);
 
     // @ngInject
-    function routeConfig($routeProvider) {
+    function routeConfig($routeProvider, Config) {
 
         var viewDir = 'auth';
+        var pathPrefix = Config.html5Mode ? '/' : '';
         var paths = ['register', 'confirm', 'login', 'login-email', 'login-callback', 'reset', 'account', 'profile'];
         for (var i=0; i<paths.length; i++) {
             var path = paths[i];
-            $routeProvider.when('/' + path, {templateUrl: '/views/' + viewDir + '/' + path + '.html'});
+            $routeProvider.when('/' + path, {templateUrl: pathPrefix + 'views/' + viewDir + '/' + path + '.html'});
         }
     }
 
