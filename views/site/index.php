@@ -7,9 +7,17 @@
 $appName = "Yii 2 Angular";
 $assetManager = Yii::$app->assetManager;
 $min = !YII_ENV_DEV ? ".min" : "";  // use min version unless in dev
-$html5Mode = !empty($html5Mode);
-$linkPrefix = $html5Mode ? "/" : "#/";
 
+// set specific configuration for mobile app mode
+$mobileAppMode = !empty($mobileAppMode);
+$html5Mode = !$mobileAppMode;
+$linkPrefix = $html5Mode ? "/" : "#/";
+if ($mobileAppMode) {
+    $min = ".min";
+    if (substr($assetManager->webDir, 0, 1) == "/") {
+        $assetManager->webDir = substr($assetManager->webDir, 1);
+    }
+}
 ?>
 <!DOCTYPE html>
 <html lang="<?= Yii::$app->language ?>">
@@ -75,15 +83,19 @@ $linkPrefix = $html5Mode ? "/" : "#/";
 
 <script type="text/javascript">
     var AppConfig = {
-        apiUrl: '<?= getenv("API_URL") ?>',
+        apiUrl: '<?= $mobileAppMode ? getenv("MOBILE_APP_API_URL") : getenv("API_URL") ?>',
         jwtCookie: <?= (int) getenv("JWT_COOKIE") ?>,
         jwtIntervalTime: 60*110*1000, // 110 minutes. make sure this is less than JwtAuth::$ttl (2 hrs by default)
         recaptchaSitekey: '<?= getenv("RECAPTCHA_SITEKEY") ?>',
-        html5Mode: <?= $html5Mode ? 1 : 0 ?>
+        html5Mode: <?= $html5Mode ? 1 : 0 ?>,
+        linkPrefix: '<?= $html5Mode ? "/" : "#" ?>'
     };
 </script>
 
 <script src="<?= $assetManager->getFile("vendor.compiled{$min}.js") ?>"></script>
+<?php if ($mobileAppMode): ?>
+    <script src="cordova.js"></script>
+<?php endif; ?>
 <script src="<?= $assetManager->getFile("app.compiled{$min}.js") ?>"></script>
 
 <?php if (getenv("RECAPTCHA_SITEKEY")): ?>
