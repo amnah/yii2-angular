@@ -10,12 +10,13 @@
 
         var vm = this;
         vm.Auth = Auth;
-        vm.message = getMsgDate() + ' - ?????';
 
         // check for existing refresh token (local storage only. it won't work for cookies!)
         vm.refreshToken = Auth.getRefreshToken();
         if (vm.refreshToken) {
             vm.message = getMsgDate() + ' - Has refresh token';
+        } else if (!vm.refreshToken && !Config.jwtCookie) {
+            vm.message = getMsgDate() + ' - No refresh token (using local storage)';
         }
 
         vm.requestRefreshToken = function() {
@@ -33,7 +34,7 @@
         };
 
         vm.useRefreshToken = function() {
-            if (!Config.jwtCookie && !$localStorage.refreshToken) {
+            if (!vm.refreshToken && !Config.jwtCookie) {
                 vm.message = getMsgDate() + ' - No refresh token (using local storage)';
             } else if (!vm.refreshToken) {
                 vm.message = getMsgDate() + ' - No refresh token (using cookies)';
