@@ -9,32 +9,28 @@ namespace app\commands;
 
 use Yii;
 use yii\console\Controller;
+use yii\helpers\Console;
 use yii\helpers\FileHelper;
 use yii\web\View;
 use amnah\yii2\debug\Module as DebugModule;
 
 /**
- * This command echoes the first argument that you have entered.
- *
- * This command is provided as an example for you to learn how to create console commands.
- *
- * @author Qiang Xue <qiang.xue@gmail.com>
- * @since 2.0
+ * This command builds files for mobile app
+ * (removing debug module, setting mobile variables, etc)
  */
 class BuildController extends Controller
 {
     public $layout = false;
 
-    public function actionIndex()
+    public function actionIndex($outputDir = "")
     {
         // get web path
         $webPath = Yii::getAlias('@app/web');
         Yii::setAlias('@web', $webPath);
         Yii::setAlias('@webroot', $webPath);
 
-        // set compiled dir and output dir
-        $compiledDir = "$webPath/compiled";
-        $outputDir = "$webPath/build";
+        // compute output dir
+        $outputDir = $outputDir ?: "$webPath/build";
 
         // disable debug module from view
         // @link http://stackoverflow.com/a/28903986
@@ -61,9 +57,13 @@ class BuildController extends Controller
                 return true;
             },
         ];
-        FileHelper::copyDirectory("$webPath/compiled", "$webPath/build/compiled", $compiledOptions);
-        FileHelper::copyDirectory("$webPath/views", "$webPath/build/views");
-        //FileHelper::copyDirectory("$webPath/img", "$webPath/build/img");
+        FileHelper::copyDirectory("$webPath/compiled", "$outputDir/compiled", $compiledOptions);
+        FileHelper::copyDirectory("$webPath/views", "$outputDir/views");
+        //FileHelper::copyDirectory("$webPath/img", "$outputDir/img");
+
+        $this->stdout("----------------------------------------------\n", Console::FG_YELLOW);
+        $this->stdout("Success - Files built to [ $outputDir ]\n", Console::FG_YELLOW);
+        $this->stdout("----------------------------------------------\n", Console::FG_YELLOW);
     }
 
     /**
