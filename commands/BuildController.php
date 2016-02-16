@@ -1,9 +1,4 @@
 <?php
-/**
- * @link http://www.yiiframework.com/
- * @copyright Copyright (c) 2008 Yii Software LLC
- * @license http://www.yiiframework.com/license/
- */
 
 namespace app\commands;
 
@@ -78,9 +73,7 @@ class BuildController extends Controller
             $filename = pathinfo($file, PATHINFO_BASENAME);
             $firstChar = substr($filename, 0, 1);
 
-            // remove child dirs completely
-            // remove files that don't begin with "."
-            // this is to
+            // remove 1) child dirs completely and 2) files that don't begin with "."
             if (is_dir($file)) {
                 FileHelper::removeDirectory($file);
             } elseif ($firstChar != ".") {
