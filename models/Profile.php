@@ -4,14 +4,14 @@ namespace app\models;
 
 use Yii;
 use app\components\ModelTrait;
-use amnah\yii2\user\models\User as BaseUser;
+use amnah\yii2\user\models\Profile as BaseProfile;
 
-class User extends BaseUser
+class Profile extends BaseProfile
 {
     use ModelTrait;
 
     public function fields()
     {
-        return ["id", "email", "username"];
+        return ["id", "user_id", "full_name"];
     }
 }

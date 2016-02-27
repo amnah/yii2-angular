@@ -8,17 +8,13 @@
     // @ngInject
     function routeConfig($routeProvider, Config) {
 
-        var viewDir = 'app';
+        var viewDir = 'auth';
         var pathPrefix = Config.html5Mode ? '/' : '';
-        var paths = ['about', 'contact'];
+        var paths = ['register', 'confirm', 'login', 'login-email', 'login-callback', 'reset', 'account', 'profile'];
         for (var i=0; i<paths.length; i++) {
             var path = paths[i];
             $routeProvider.when('/' + path, {templateUrl: pathPrefix + 'views/' + viewDir + '/' + path + '.html'});
         }
-
-        // set home and 404 pages
-        $routeProvider.when('/', {templateUrl: pathPrefix + 'views/app/index.html'});
-        $routeProvider.otherwise({templateUrl: pathPrefix + 'views/app/404.html'});
     }
 
 })();

@@ -6,12 +6,11 @@
         .controller('ContactCtrl', ContactCtrl);
 
     // @ngInject
-    function ContactCtrl(Config, Api, Auth) {
+    function ContactCtrl(Config, AjaxHelper, Api, Auth) {
 
         var vm = this;
-        vm.errors = {};
         vm.sitekey = Config.recaptchaSitekey;
-        vm.ContactForm = { email: Auth.getAttribute('email') };
+        vm.ContactForm = { name: Auth.getAttribute('username'), email: Auth.getAttribute('email') };
 
         // set up and store grecaptcha data
         var recaptchaId;
@@ -33,14 +32,11 @@
                 return false;
             }
 
-            vm.submitting  = true;
+            AjaxHelper.reset(vm);
             Api.post('public/contact', vm.ContactForm).then(function(data) {
-                vm.submitting  = false;
+                AjaxHelper.process(vm, data);
                 if (data.success) {
-                    vm.errors = false;
                     recaptchaId = vm.sitekey ? grecaptchaObj.reset(recaptchaId) : null;
-                } else if (data.errors) {
-                    vm.errors = data.errors;
                 }
             });
         };

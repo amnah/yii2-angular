@@ -6,12 +6,15 @@
         .controller('RegisterCtrl', RegisterCtrl);
 
     // @ngInject
-    function RegisterCtrl(Config, Auth) {
+    function RegisterCtrl(Config, AjaxHelper, Auth) {
 
         var vm = this;
-        vm.errors = {};
         vm.sitekey = Config.recaptchaSitekey;
-        vm.RegisterForm = { rememberMe: true, jwtCookie: Config.jwtCookie };
+        vm.User = { rememberMe: true, jwtCookie: Config.jwtCookie };
+
+        vm.status = 0; // 0 = not registered
+                       // 1 = registered but needs email confirmation
+                       // 2 = registered and ready to login
 
         // set up and store grecaptcha data
         var recaptchaId;
@@ -27,20 +30,18 @@
         vm.submit = function() {
             // check captcha before making POST request
             vm.errors = {};
-            vm.RegisterForm.captcha = vm.sitekey ? grecaptchaObj.getResponse(recaptchaId) : '';
-            if (vm.sitekey && !vm.RegisterForm.captcha) {
+            vm.User.captcha = vm.sitekey ? grecaptchaObj.getResponse(recaptchaId) : '';
+            if (vm.sitekey && !vm.User.captcha) {
                 vm.errors.captcha = ['Invalid captcha'];
                 return false;
             }
 
-            vm.submitting  = true;
-            Auth.register(vm.RegisterForm).then(function(data) {
-                vm.submitting  = false;
+            AjaxHelper.reset(vm);
+            Auth.register(vm.User).then(function(data) {
+                AjaxHelper.process(vm, data);
                 if (data.success) {
-                    vm.errors = false;
+                    vm.status = data.success.userToken ? 1 : 2;
                     recaptchaId = vm.sitekey ? grecaptchaObj.reset(recaptchaId) : null;
-                } else if (data.errors) {
-                    vm.errors = data.errors;
                 }
             });
         };

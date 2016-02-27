@@ -28,6 +28,7 @@ $config = [
             'class' => 'yii\redis\Cache',
         ],
         'user' => [
+            'class' => 'amnah\yii2\user\components\User',
             'identityClass' => 'app\models\User',
             'enableSession' => false,
             'enableAutoLogin' => false,
@@ -59,6 +60,7 @@ $config = [
             'dsn' => getenv('DB_DSN'),
             'username' => getenv('DB_USER'),
             'password' => getenv('DB_PASS'),
+            'tablePrefix' => getenv('DB_PREFIX'),
             'charset' => 'utf8',
         ],
         'urlManager' => [
@@ -75,7 +77,13 @@ $config = [
             'passwordHashStrategy' => 'password_hash',
         ],
     ],
-    'modules' => [],
+    'modules' => [
+        'user' => [
+            'class' => 'amnah\yii2\user\Module',
+            'emailViewPath' => '@app/mail/user', // example: @app/mail/user/confirmEmail.php
+            'emailConfirmation' => true,
+        ],
+    ],
 ];
 
 // ------------------------------------------------------------------------

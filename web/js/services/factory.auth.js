@@ -6,7 +6,7 @@
         .factory('Auth', Auth);
 
     // @ngInject
-    function Auth($window, $location, $interval, $q, $localStorage, Config, Api) {
+    function Auth($window, $location, $routeParams, $interval, $q, $localStorage, Config, Api) {
 
         var factory = {};
         var user = false;
@@ -21,17 +21,11 @@
             }
         };
 
-        factory.getUser = function(useCache) {
-            var userDefer = $q.defer();
-            if (useCache && user !== false) {
-                userDefer.resolve(user);
-            } else {
-                Api.get('public/renew-token').then(function(data) {
-                    factory.setUserAndToken(data);
-                    userDefer.resolve(user);
-                });
-            }
-            return userDefer.promise;
+        factory.getUser = function(refreshDb) {
+            var params = refreshDb ? {refreshDb: 1} : {};
+            Api.get('auth/renew-token', params).then(function(data) {
+                factory.setUserAndToken(data);
+            });
         };
 
         factory.setUserAndToken = function(data) {
@@ -42,9 +36,11 @@
             // set data if valid
             if (data && data.success && data.success.user) {
                 user = data.success.user;
-                $localStorage.user = data.success.user;
+                factory.startTokenRenewInterval();
 
-                // set token only if we're not using cookies
+                // set local storage data
+                //   note: set token only if we're not using cookies
+                $localStorage.user = data.success.user;
                 if (!Config.jwtCookie) {
                     $localStorage.token = data.success.token;
                 }
@@ -69,7 +65,7 @@
         };
 
         factory.requestRefreshToken = function() {
-            return Api.get('public/request-refresh-token').then(function(data) {
+            return Api.get('auth/request-refresh-token').then(function(data) {
                 if (!Config.jwtCookie) {
                     $localStorage.refreshToken = data.success;
                 }
@@ -81,7 +77,7 @@
             // remove token from local storage and cookie
             delete $localStorage.refreshToken;
             if (callApi) {
-                return Api.get('public/remove-refresh-token').then(function(data) {
+                return Api.get('auth/remove-refresh-token').then(function(data) {
                     return data;
                 });
             }
@@ -89,7 +85,7 @@
 
         factory.useRefreshToken = function() {
             var params = $localStorage.refreshToken ? {refreshToken: $localStorage.refreshToken} : {};
-            return Api.get('public/use-refresh-token', params).then(function(data) {
+            return Api.get('auth/use-refresh-token', params).then(function(data) {
                 factory.setUserAndToken(data);
                 if (!user) {
                     factory.removeRefreshToken();
@@ -107,14 +103,35 @@
         };
 
         factory.login = function(data) {
-            return Api.post('public/login', data).then(function(data) {
-                factory.setUserAndToken(data);
-                return data;
-            });
+            return Api.post('auth/login', data);
+        };
+
+        factory.loginEmail = function(data) {
+            return Api.post('auth/login-email', data);
+        };
+
+        factory.loginCallback = function(userData) {
+            var token = $routeParams.token;
+            var jwtCookie = Config.jwtCookie;
+            var url = 'auth/login-callback?token=' + token + '&jwtCookie=' + jwtCookie;
+            if (userData) {
+                return Api.post(url, userData);
+            } else {
+                return Api.get(url);
+            }
+        };
+
+        factory.register = function(data) {
+            return Api.post('auth/register', data);
+        };
+
+        factory.confirm = function() {
+            var token = $routeParams.token;
+            return Api.get('auth/confirm', {token: token});
         };
 
         factory.setLoginUrl = function(url) {
-            $localStorage.loginUrl = url;
+            $localStorage.loginUrl = url || $location.path();
             return this;
         };
 
@@ -123,9 +140,17 @@
             return this;
         };
 
-        factory.redirect = function(url) {
+        factory.redirect = function(url, keepLoginUrl) {
             url = url ? url : '';
             $location.path(url).replace();
+
+            // clear get params and loginUrl
+            // @link http://stackoverflow.com/a/26336011
+            $location.search({});
+            if (!keepLoginUrl) {
+                factory.clearLoginUrl();
+            }
+
             return this;
         };
 
@@ -135,20 +160,10 @@
         };
 
         factory.logout = function(logoutUrl) {
-            return Api.post('public/logout').then(function(data) {
+            return Api.post('auth/logout').then(function(data) {
                 factory.setUserAndToken(data);
                 factory.removeRefreshToken();
                 factory.redirect(logoutUrl);
-                return data;
-            });
-        };
-
-        factory.register = function(data) {
-            return Api.post('public/register', data).then(function(data) {
-                var userCheck = factory.setUserAndToken(data);
-                if (userCheck) {
-                    factory.startTokenRenewInterval();
-                }
                 return data;
             });
         };

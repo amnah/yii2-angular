@@ -8,6 +8,16 @@ $appName = "Yii 2 Angular";
 $assetManager = Yii::$app->assetManager;
 $min = !YII_ENV_DEV ? ".min" : "";  // use min version unless in dev
 
+// set specific configuration for mobile app mode
+$mobileAppMode = !empty($mobileAppMode);
+$html5Mode = !$mobileAppMode;
+$linkPrefix = $html5Mode ? "/" : "#/";
+if ($mobileAppMode) {
+    $min = ".min";
+    if (substr($assetManager->webDir, 0, 1) == "/") {
+        $assetManager->webDir = substr($assetManager->webDir, 1);
+    }
+}
 ?>
 <!DOCTYPE html>
 <html lang="<?= Yii::$app->language ?>">
@@ -20,7 +30,9 @@ $min = !YII_ENV_DEV ? ".min" : "";  // use min version unless in dev
     <link rel="stylesheet" type="text/css" href="<?= $assetManager->getFile("vendor.compiled{$min}.css") ?>">
     <link rel="stylesheet" type="text/css" href="<?= $assetManager->getFile("site.compiled{$min}.css") ?>">
 
+    <?php if ($html5Mode): ?>
     <base href="/">
+    <?php endif; ?>
 </head>
 <body ng-app="app" ng-strict-di>
 <?php $this->beginBody() ?>
@@ -35,15 +47,17 @@ $min = !YII_ENV_DEV ? ".min" : "";  // use min version unless in dev
                     <span class="icon-bar"></span>
                     <span class="icon-bar"></span>
                 </button>
-                <a class="navbar-brand" href="/" ng-click="vm.isCollapsed=true"><?= $appName ?></a>
+                <a class="navbar-brand" href="<?= $linkPrefix ?>" ng-click="vm.isCollapsed=true"><?= $appName ?></a>
             </div>
             <div class="collapse navbar-collapse" collapse="vm.isCollapsed">
                 <ul id="w1" class="navbar-nav navbar-right ng-cloak nav">
-                    <li><a href="/about" ng-click="vm.isCollapsed=true">About</a></li>
-                    <li><a href="/contact" ng-click="vm.isCollapsed=true">Contact</a></li>
-                    <li><a href="/profile" ng-click="vm.isCollapsed=true">Profile</a></li>
-                    <li ng-show="!vm.Auth.isLoggedIn()"><a href="/login" ng-click="vm.isCollapsed=true">Login</a></li>
-                    <li ng-show="!vm.Auth.isLoggedIn()"><a href="/register" ng-click="vm.isCollapsed=true">Register</a></li>
+                    <li><a href="<?= $linkPrefix ?>about" ng-click="vm.isCollapsed=true">About</a></li>
+                    <li><a href="<?= $linkPrefix ?>contact" ng-click="vm.isCollapsed=true">Contact</a></li>
+                    <li><a href="<?= $linkPrefix ?>account" ng-click="vm.isCollapsed=true">Account</a></li>
+                    <li><a href="<?= $linkPrefix ?>profile" ng-click="vm.isCollapsed=true">Profile</a></li>
+                    <li ng-show="!vm.Auth.isLoggedIn()"><a href="<?= $linkPrefix ?>login" ng-click="vm.isCollapsed=true">Login</a></li>
+                    <li ng-show="!vm.Auth.isLoggedIn()"><a href="<?= $linkPrefix ?>login-email" ng-click="vm.isCollapsed=true">Login via Email</a></li>
+                    <li ng-show="!vm.Auth.isLoggedIn()"><a href="<?= $linkPrefix ?>register" ng-click="vm.isCollapsed=true">Register</a></li>
                     <li ng-show="vm.Auth.isLoggedIn()">
                         <a ng-click="vm.Auth.logout()">
                             Logout ({{ vm.Auth.getAttribute('email') }})
@@ -69,14 +83,19 @@ $min = !YII_ENV_DEV ? ".min" : "";  // use min version unless in dev
 
 <script type="text/javascript">
     var AppConfig = {
-        apiUrl: '<?= getenv("API_URL") ?>',
+        apiUrl: '<?= $mobileAppMode ? getenv("MOBILE_APP_API_URL") : getenv("API_URL") ?>',
         jwtCookie: <?= (int) getenv("JWT_COOKIE") ?>,
-        jwtIntervalTime: 60*90*1000, // 90 minutes. make sure this is less than JwtAuth::$ttl
-        recaptchaSitekey: '<?= getenv("RECAPTCHA_SITEKEY") ?>'
+        jwtIntervalTime: 60*110*1000, // 110 minutes. make sure this is less than JwtAuth::$ttl (2 hrs by default)
+        recaptchaSitekey: '<?= getenv("RECAPTCHA_SITEKEY") ?>',
+        html5Mode: <?= $html5Mode ? 1 : 0 ?>,
+        linkPrefix: '<?= $html5Mode ? "/" : "#" ?>'
     };
 </script>
 
 <script src="<?= $assetManager->getFile("vendor.compiled{$min}.js") ?>"></script>
+<?php if ($mobileAppMode): ?>
+    <script src="cordova.js"></script>
+<?php endif; ?>
 <script src="<?= $assetManager->getFile("app.compiled{$min}.js") ?>"></script>
 
 <?php if (getenv("RECAPTCHA_SITEKEY")): ?>

@@ -2,7 +2,7 @@
 <div class="site-contact ng-cloak" ng-controller="ContactCtrl as vm">
     <h1>Contact</h1>
 
-    <div ng-if="vm.errors === false">
+    <div ng-if="vm.success">
         <div class="alert alert-success">
             Thank you for contacting us [ {{ vm.ContactForm.name }} ]. We will respond to you as soon as possible.
         </div>

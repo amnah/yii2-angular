@@ -6,24 +6,19 @@
         .controller('LoginCtrl', LoginCtrl);
 
     // @ngInject
-    function LoginCtrl(Config, Auth) {
+    function LoginCtrl(Config, AjaxHelper, Auth) {
 
         var vm = this;
-        vm.errors = {};
         vm.loginUrl = Auth.getLoginUrl();
         vm.LoginForm = { rememberMe: true, jwtCookie: Config.jwtCookie };
 
         // process form submit
         vm.submit = function() {
-            vm.errors = {};
-            vm.submitting  = true;
+            AjaxHelper.reset(vm);
             Auth.login(vm.LoginForm).then(function(data) {
-                vm.submitting  = false;
-                if (data.success) {
-                    Auth.startTokenRenewInterval();
-                    Auth.redirect(vm.loginUrl).clearLoginUrl();
-                } else if (data.errors) {
-                    vm.errors = data.errors;
+                AjaxHelper.process(vm, data);
+                if (data.success && Auth.setUserAndToken(data)) {
+                    Auth.redirect(vm.loginUrl);
                 }
             });
         };
