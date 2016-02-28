@@ -17,7 +17,7 @@
             vm.errors = {};
         };
 
-            factory.process = function(vm, data) {
+        factory.process = function(vm, data) {
             vm.submitting = false;
             if (data.success) {
                 vm.success = data.success;
