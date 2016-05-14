@@ -119,7 +119,7 @@ if (YII_ENV_PROD) {
     // check $_GET and $_COOKIE
     $isGetSet = isset($_GET[$debugPassword]);
     $isCookieSet = (isset($_COOKIE[$cookieName]) && $_COOKIE[$cookieName] === $debugPassword);
-    if ($isGetSet || $isCookieSet) {
+    if ($debugPassword && ($isGetSet || $isCookieSet)) {
 
         // set/refresh cookie
         setcookie($cookieName, $debugPassword, time() + $cookieExpire);
