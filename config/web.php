@@ -73,9 +73,6 @@ $config = [
             'class' => 'app\components\AssetManager',
             'useManifest' => !YII_ENV_DEV,
         ],
-        'security' => [
-            'passwordHashStrategy' => 'password_hash',
-        ],
     ],
     'modules' => [
         'user' => [
