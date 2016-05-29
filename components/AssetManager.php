@@ -63,13 +63,13 @@ class AssetManager extends YiiAssetManager
             if (!is_file($manifestPath)) {
                 throw new InvalidConfigException("Manifest file {$manifestPath} does not exist.");
             }
-            $manifest = json_decode(file_get_contents("$assetDir/rev-manifest.json"), true);
+            $this->manifest = json_decode(file_get_contents("$assetDir/rev-manifest.json"), true);
         }
 
-        if (isset($manifest[$file])) {
-            return "{$webDir}/{$manifest[$file]}";
+        if (isset($this->manifest[$file])) {
+            return "{$webDir}/{$this->manifest[$file]}";
         }
 
-        throw new InvalidArgumentException("File {$file} not defined in asset manifest.");
+        throw new InvalidArgumentException("File [ {$file} ] is not defined in asset manifest.");
     }
 }
