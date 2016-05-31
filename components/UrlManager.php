@@ -3,7 +3,6 @@
 namespace app\components;
 
 use Yii;
-use yii\web\NotFoundHttpException;
 use yii\web\UrlManager as YiiUrlManager;
 
 class UrlManager extends YiiUrlManager
@@ -16,14 +15,6 @@ class UrlManager extends YiiUrlManager
         "v1/",      // api v1
         "debug/",   // debug module
         "gii/",     // gii module
-    ];
-
-    /**
-     * @var array Routes that are invalid. Will return 404 error
-     */
-    public $invalidRoutes = [
-        "compiled/",  // compiled asset files
-        "views/",     // angular .html view files
     ];
 
     /**
@@ -52,16 +43,7 @@ class UrlManager extends YiiUrlManager
             }
         }
 
-        // check if we're calling an invalid route
-        // this is used for handling angular 404 errors properly
-        foreach ($this->invalidRoutes as $route) {
-            if (strpos($pathInfo, $route) === 0) {
-                throw new NotFoundHttpException();
-            }
-        }
-
         // use default route
         return [$this->defaultRoute, []];
     }
-
 }
