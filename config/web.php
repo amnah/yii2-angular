@@ -62,6 +62,7 @@ $config = [
             'password' => getenv('DB_PASS'),
             'tablePrefix' => getenv('DB_PREFIX'),
             'charset' => 'utf8',
+            'enableSchemaCache' => YII_ENV_PROD,
         ],
         'urlManager' => [
             'class' => 'app\components\UrlManager',
