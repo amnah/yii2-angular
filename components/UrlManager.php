@@ -31,14 +31,9 @@ class UrlManager extends YiiUrlManager
         $pathInfo = $request->getPathInfo();
         $params = $request->getQueryParams();
 
-        // check for empty
-        if (!$pathInfo) {
-            return [$this->defaultRoute, []];
-        }
-
         // check if we're calling a route that should be processed by yii (and not angular)
-        foreach ($this->yiiRoutes as $route) {
-            if (strpos($pathInfo, $route) === 0) {
+        foreach ($this->yiiRoutes as $yiiRoute) {
+            if (strpos($pathInfo, $yiiRoute) === 0) {
                 return [$pathInfo, $params];
             }
         }
