@@ -87,8 +87,7 @@ if ($mobileAppMode) {
         jwtCookie: <?= (int) getenv("JWT_COOKIE") ?>,
         jwtIntervalTime: 60*110*1000, // 110 minutes. make sure this is less than JwtAuth::$ttl (2 hrs by default)
         recaptchaSitekey: '<?= getenv("RECAPTCHA_SITEKEY") ?>',
-        html5Mode: <?= $html5Mode ? 1 : 0 ?>,
-        linkPrefix: '<?= $html5Mode ? "/" : "#" ?>'
+        html5Mode: <?= $html5Mode ? 1 : 0 ?>
     };
 </script>
 
