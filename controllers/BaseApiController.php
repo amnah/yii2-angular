@@ -4,7 +4,10 @@ namespace app\controllers;
 
 use Yii;
 use yii\filters\Cors;
+use yii\filters\ContentNegotiator;
+use yii\filters\RateLimiter;
 use yii\rest\Controller;
+use yii\web\Response;
 
 class BaseApiController extends Controller
 {
@@ -48,19 +51,29 @@ class BaseApiController extends Controller
      */
     public function behaviors()
     {
-        $behaviors = parent::behaviors();
-        $behaviors["corsFilter"] = [
-            "class" => Cors::className(),
-            "cors" => [
-                'Origin' => ['*'],
-                'Access-Control-Request-Method' => ['GET', 'POST', 'PUT', 'PATCH', 'DELETE', 'HEAD', 'OPTIONS'],
-                'Access-Control-Request-Headers' => ['*'],
-                'Access-Control-Allow-Credentials' => true, // allow cookies
-                'Access-Control-Max-Age' => 1800, // 30 minutes
-                'Access-Control-Expose-Headers' => [],
+        return [
+            'corsFilter' => [
+                "class" => Cors::className(),
+                "cors" => [
+                    'Origin' => ['*'],
+                    'Access-Control-Request-Method' => ['GET', 'POST', 'PUT', 'PATCH', 'DELETE', 'HEAD', 'OPTIONS'],
+                    'Access-Control-Request-Headers' => ['*'],
+                    'Access-Control-Allow-Credentials' => true, // allow cookies
+                    'Access-Control-Max-Age' => 1800, // 30 minutes
+                    'Access-Control-Expose-Headers' => [],
+                ],
+            ],
+            'jwtAuth' => $this->jwtAuth,
+            'contentNegotiator' => [
+                'class' => ContentNegotiator::className(),
+                'formats' => [
+                    'application/json' => Response::FORMAT_JSON,
+                    'application/xml' => Response::FORMAT_XML, // easier to view if you visit page in browser
+                ],
+            ],
+            'rateLimiter' => [
+                'class' => RateLimiter::className(),
             ],
         ];
-        $behaviors["jwtAuth"] = $this->jwtAuth;
-        return $behaviors;
     }
 }

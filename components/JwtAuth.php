@@ -85,7 +85,12 @@ class JwtAuth extends HttpBearerAuth
 
         /** @var IdentityInterface $class */
         $class = Yii::$app->user->identityClass;
-        return $class::findIdentity($payload->user->id);
+        $user = $class::findIdentity($payload->user->id);
+
+        // set identity for this one request
+        // this is needed for other filters to work properly, eg, \yii\filters\RateLimiter
+        Yii::$app->user->setIdentity($user);
+        return $user;
     }
 
     /**
