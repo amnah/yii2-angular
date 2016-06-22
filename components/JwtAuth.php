@@ -31,7 +31,7 @@ class JwtAuth extends HttpBearerAuth
 
     /**
      * @var int|string Token expiration when user sets "remember me"
-     * @link http://stackoverflow.com/a/26834685
+     * @link http://stackoverflow.com/questions/26739167/jwt-json-web-token-automatic-prolongation-of-expiration/26834685#26834685
      */
     public $ttlRememberMe = "+1 week";
 
@@ -50,6 +50,11 @@ class JwtAuth extends HttpBearerAuth
      * @var string Refresh token param name (to check in $_GET and cookies)
      */
     public $refreshTokenParam = "refreshToken";
+
+    /**
+     * @var IdentityInterface Authenticated user
+     */
+    protected $authenticatedUser;
 
     /**
      * @var object Payload from cookie or header auth
@@ -90,7 +95,16 @@ class JwtAuth extends HttpBearerAuth
         // set identity for this one request
         // this is needed for other filters to work properly, eg, \yii\filters\RateLimiter
         Yii::$app->user->setIdentity($user);
-        return $user;
+        return $this->authenticatedUser = $user;
+    }
+
+    /**
+     * Get the authenticated user
+     * @return IdentityInterface
+     */
+    public function getAuthenticatedUser()
+    {
+        return $this->authenticatedUser;
     }
 
     /**

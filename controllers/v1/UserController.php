@@ -18,8 +18,7 @@ class UserController extends BaseApiController
         /** @var User $user */
 
         // get user
-        $payload = $this->jwtAuth->getTokenPayload();
-        $user = User::findOne($payload->user->id);
+        $user = $this->jwtAuth->getAuthenticatedUser();
         $user->setScenario("account");
 
         // check for post input errors
@@ -54,8 +53,7 @@ class UserController extends BaseApiController
     {
         /** @var User $user */
 
-        $payload = $this->jwtAuth->getTokenPayload();
-        $user = User::findOne($payload->user->id);
+        $user = $this->jwtAuth->getAuthenticatedUser();
         $userToken = UserToken::findByUser($user->id, UserToken::TYPE_EMAIL_CHANGE);
         if ($userToken) {
             $user->sendEmailConfirmation($userToken);
@@ -69,8 +67,10 @@ class UserController extends BaseApiController
      */
     public function actionChangeCancel()
     {
-        $payload = $this->jwtAuth->getTokenPayload();
-        $userToken = UserToken::findByUser($payload->user->id, UserToken::TYPE_EMAIL_CHANGE);
+        /** @var User $user */
+
+        $user = $this->jwtAuth->getAuthenticatedUser();
+        $userToken = UserToken::findByUser($user->id, UserToken::TYPE_EMAIL_CHANGE);
         if ($userToken) {
             $userToken->delete();
             return ["success" => true];
@@ -87,8 +87,7 @@ class UserController extends BaseApiController
         /** @var Profile $profile */
 
         // get user and profile
-        $payload = $this->jwtAuth->getTokenPayload();
-        $user = User::findOne($payload->user->id);
+        $user = $this->jwtAuth->getAuthenticatedUser();
         $profile = Profile::findOne(["user_id" => $user->id]);
 
         // update profile

@@ -141,7 +141,7 @@ class AuthController extends PublicController
      */
     public function actionRenewToken($refreshDb = 0)
     {
-        /** @var \app\models\User $user */
+        /** @var User $user */
 
         // check payload for user data
         $user = null;
@@ -168,7 +168,7 @@ class AuthController extends PublicController
      */
     public function actionRequestRefreshToken()
     {
-        /** @var \app\models\User $user */
+        /** @var User $user */
 
         $jwtAuth = $this->jwtAuth;
         $payload = $jwtAuth->getTokenPayload();
