@@ -13,7 +13,7 @@ INSTALLATION
 ------------
 
 * Download/clone this repo ```git clone https://github.com/amnah/yii2-angular.git```
-* Copy *.env.example* file to *.env* and modify as needed 
+* Copy *env.php.example* file to *env.php* and modify as needed 
 * Install packages and run migration
 
 ```
