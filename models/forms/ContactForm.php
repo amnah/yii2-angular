@@ -29,7 +29,7 @@ class ContactForm extends Model
         ];
 
         // captcha
-        $recaptchaSecret = getenv("RECAPTCHA_SECRET");
+        $recaptchaSecret = env("RECAPTCHA_SECRET");
         if ($recaptchaSecret) {
             $rules[] = [
                 'captcha', ReCaptchaValidator::className(),

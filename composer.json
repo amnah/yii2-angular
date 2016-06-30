@@ -19,7 +19,6 @@
         "yiisoft/yii2-bootstrap": "*",
         "yiisoft/yii2-swiftmailer": "*",
         "yiisoft/yii2-redis": "*",
-        "josegonzalez/dotenv": "*",
         "himiklab/yii2-recaptcha-widget": "*",
         "firebase/php-jwt": "*",
         "amnah/yii2-user": "*"

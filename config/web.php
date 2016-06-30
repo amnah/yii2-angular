@@ -12,14 +12,14 @@ $config = [
     'bootstrap' => ['log'],
     'components' => [
         'request' => [
-            'cookieValidationKey' => getenv('YII_KEY'),
+            'cookieValidationKey' => env('YII_KEY'),
             'parsers' => [
                 'application/json' => 'yii\web\JsonParser', // required for POST input via `php://input`
             ]
         ],
         'jwtAuth' => [
             'class' => 'app\components\JwtAuth',
-            'key' => getenv('YII_KEY'),
+            'key' => env('YII_KEY'),
         ],
         'redis' => [
             'class' => 'yii\redis\Connection',
@@ -36,14 +36,14 @@ $config = [
         ],
         'mailer' => [
             'class' => 'yii\swiftmailer\Mailer',
-            'useFileTransport' => getenv('MAIL_FILE_TRANSPORT'),
+            'useFileTransport' => env('MAIL_FILE_TRANSPORT'),
             'transport' => [
                 'class' => 'Swift_SmtpTransport',
-                'host' => getenv('MAIL_HOST'),
-                'port' => getenv('MAIL_PORT'),
-                'username' => getenv('MAIL_USER'),
-                'password' => getenv('MAIL_PASS'),
-                'encryption' => getenv('MAIL_ENCRYPTION'),
+                'host' => env('MAIL_HOST'),
+                'port' => env('MAIL_PORT'),
+                'username' => env('MAIL_USER'),
+                'password' => env('MAIL_PASS'),
+                'encryption' => env('MAIL_ENCRYPTION'),
             ],
         ],
         'log' => [
@@ -57,10 +57,10 @@ $config = [
         ],
         'db' => [
             'class' => 'yii\db\Connection',
-            'dsn' => getenv('DB_DSN'),
-            'username' => getenv('DB_USER'),
-            'password' => getenv('DB_PASS'),
-            'tablePrefix' => getenv('DB_PREFIX'),
+            'dsn' => env('DB_DSN'),
+            'username' => env('DB_USER'),
+            'password' => env('DB_PASS'),
+            'tablePrefix' => env('DB_PREFIX'),
             'charset' => 'utf8',
             'enableSchemaCache' => YII_ENV_PROD,
         ],
@@ -107,21 +107,7 @@ if (YII_ENV_DEV) {
 // Prod
 // ------------------------------------------------------------------------
 if (YII_ENV_PROD) {
-
-    // force debug module using $_GET param
-    // enable this by manually entering the url "http://example.com?qwe"
-    $debugPassword = getenv('DEBUG_PASSWORD');
-    $cookieName    = '_forceDebug';
-    $cookieExpire  = 60*5; // 5 minutes
-
-    // check $_GET and $_COOKIE
-    $isGetSet = isset($_GET[$debugPassword]);
-    $isCookieSet = (isset($_COOKIE[$cookieName]) && $_COOKIE[$cookieName] === $debugPassword);
-    if ($debugPassword && ($isGetSet || $isCookieSet)) {
-
-        // set/refresh cookie
-        setcookie($cookieName, $debugPassword, time() + $cookieExpire);
-
+    if (isForceDebug()) {
         // enable debug for current ip
         $userIp = isset($_SERVER['REMOTE_ADDR']) ? $_SERVER['REMOTE_ADDR'] : '127.0.0.1';
         $config['bootstrap'][] = 'debug';

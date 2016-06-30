@@ -9,9 +9,9 @@
  */
 
 require(__DIR__ . '/vendor/autoload.php');
-(new josegonzalez\Dotenv\Loader(__DIR__ . "/.env"))->parse()->putenv();
+require(__DIR__ . '/functions.php');
 
-defined("YII_ENV") or define("YII_ENV", getenv("YII_ENV"));
+defined("YII_ENV") or define("YII_ENV", env("YII_ENV"));
 defined("YII_DEBUG") or define("YII_DEBUG", true);
 
 require(__DIR__ . '/vendor/yiisoft/yii2/Yii.php');

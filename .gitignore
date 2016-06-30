@@ -26,8 +26,8 @@ phpunit.phar
 # local phpunit config
 /phpunit.xml
 
-# dotenv file
-.env
+# env file
+env.php
 
 # node
 node_modules

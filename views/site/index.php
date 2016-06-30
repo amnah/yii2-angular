@@ -83,10 +83,10 @@ if ($mobileAppMode) {
 
 <script type="text/javascript">
     var AppConfig = {
-        apiUrl: '<?= $mobileAppMode ? getenv("MOBILE_APP_API_URL") : getenv("API_URL") ?>',
-        jwtCookie: <?= (int) getenv("JWT_COOKIE") ?>,
+        apiUrl: '<?= $mobileAppMode ? env("MOBILE_APP_API_URL") : env("API_URL") ?>',
+        jwtCookie: <?= (int) env("JWT_COOKIE") ?>,
         jwtIntervalTime: 60*110*1000, // 110 minutes. make sure this is less than JwtAuth::$ttl (2 hrs by default)
-        recaptchaSitekey: '<?= getenv("RECAPTCHA_SITEKEY") ?>',
+        recaptchaSitekey: '<?= env("RECAPTCHA_SITEKEY") ?>',
         html5Mode: <?= $html5Mode ? 1 : 0 ?>
     };
 </script>
@@ -97,7 +97,7 @@ if ($mobileAppMode) {
 <?php endif; ?>
 <script src="<?= $assetManager->getFile("app.compiled{$min}.js") ?>"></script>
 
-<?php if (getenv("RECAPTCHA_SITEKEY")): ?>
+<?php if (env("RECAPTCHA_SITEKEY")): ?>
     <script src="https://www.google.com/recaptcha/api.js?onload=recaptchaLoaded&render=explicit" async defer></script>
 <?php endif; ?>
 
