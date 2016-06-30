@@ -2,10 +2,7 @@
 
 namespace app\components;
 
-use Yii;
-use yii\web\UrlManager as YiiUrlManager;
-
-class UrlManager extends YiiUrlManager
+class UrlManager extends \yii\web\UrlManager
 {
     /**
      * @var array Routes that should be processed through Yii 2 instead of angular

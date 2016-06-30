@@ -11,6 +11,10 @@ return [
     // leave empty to disable
     "DEBUG_PASSWORD" => "qwe",
 
+    // view cache - load the site/index page without going through yii (eg, in production)
+    "VIEW_CACHE" => false,
+    "VIEW_CACHE_EXPIRE" => 3, // seconds
+
     // api
     "API_URL" => "/v1/",
     "MOBILE_APP_API_URL" => "",     // api url for mobile apps, eg, "http://domain.com/v1/"
