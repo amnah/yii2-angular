@@ -84,7 +84,7 @@
         };
 
         factory.useRefreshToken = function() {
-            var params = $localStorage.refreshToken ? {refreshToken: $localStorage.refreshToken} : {};
+            var params = $localStorage.refreshToken ? {_refreshToken: $localStorage.refreshToken} : {};
             return Api.get('auth/use-refresh-token', params).then(function(data) {
                 factory.setUserAndToken(data);
                 if (!user) {

@@ -8,8 +8,8 @@ use Yii;
 use yii\base\InvalidConfigException;
 use yii\filters\auth\HttpBearerAuth;
 use yii\web\Cookie;
-use yii\web\IdentityInterface;
 use Firebase\JWT\JWT;
+use app\models\User;
 
 class JwtAuth extends HttpBearerAuth
 {
@@ -57,7 +57,7 @@ class JwtAuth extends HttpBearerAuth
     public $fromJwtCookie;
 
     /**
-     * @var IdentityInterface Authenticated user
+     * @var User Authenticated user
      */
     protected $authenticatedUser;
 
@@ -93,9 +93,13 @@ class JwtAuth extends HttpBearerAuth
             return null;
         }
 
-        /** @var IdentityInterface $class */
+        // check for valid auth hash
+        /** @var User $class */
         $class = Yii::$app->user->identityClass;
         $user = $class::findIdentity($payload->user->id);
+        if (!$this->checkUserAuthHash($user, $payload->auth)) {
+            return null;
+        }
 
         // set identity for this one request
         // this is needed for other filters to work properly, eg, \yii\filters\RateLimiter
@@ -105,11 +109,33 @@ class JwtAuth extends HttpBearerAuth
 
     /**
      * Get the authenticated user
-     * @return IdentityInterface
+     * @return User
      */
     public function getAuthenticatedUser()
     {
         return $this->authenticatedUser;
+    }
+
+    /**
+     * Calculate auth hash for "auth" claim in jwt
+     * This is used to invalidate all existing tokens when the user changes his password or auth_key
+     * @param User $user
+     * @return string
+     */
+    protected function calculateAuthHash($user)
+    {
+        return sha1($user->password . $user->getAuthKey());
+    }
+
+    /**
+     * Check if auth claim matches hash
+     * @param User $user
+     * @param string $hash
+     * @return bool
+     */
+    public function checkUserAuthHash($user, $hash)
+    {
+        return $this->calculateAuthHash($user) == $hash;
     }
 
     /**
@@ -251,25 +277,23 @@ class JwtAuth extends HttpBearerAuth
 
     /**
      * Generate a jwt token for user
-     * @param array $userAttributes
+     * @param User $user
      * @param bool $rememberMe
      * @param bool $jwtCookie
      * @return string
      */
-    public function generateUserToken($userAttributes, $rememberMe = false, $jwtCookie = false)
+    public function generateUserToken($user, $rememberMe = false, $jwtCookie = false)
     {
-        $userAttributes = (array) $userAttributes;
         $data = [
-            "sub" => (int) $userAttributes["id"],
-            "user" => $userAttributes,
+            "sub" => (int) $user->id,
+            "user" => $user->toArray(),
             "rememberMe" => (int) $rememberMe,
+            "auth" => $this->calculateAuthHash($user),
         ];
 
+        // compute exp
         $ttl = $rememberMe ? $this->ttlRememberMe : $this->ttl;
-        $exp = is_string($ttl) ? strtotime($ttl) : time() + $ttl;
-        if ($ttl) {
-            $data["exp"] = $exp;
-        }
+        $data["exp"] = is_string($ttl) ? strtotime($ttl) : time() + $ttl;
 
         // compute csrf if using cookie
         if ($jwtCookie) {
@@ -278,7 +302,7 @@ class JwtAuth extends HttpBearerAuth
 
         $token = $this->encode($data);
         if ($jwtCookie) {
-            $this->addCookieToken($this->tokenParam, $token, $exp);
+            $this->addCookieToken($this->tokenParam, $token, $data["exp"]);
         }
         return $token;
     }
@@ -286,15 +310,16 @@ class JwtAuth extends HttpBearerAuth
     /**
      * Generate a jwt token for user based on access token
      * Note: this token does NOT expire, so you should have some way to revoke the access token
-     * @param int $id
+     * @param User $user
      * @param string $accessToken
      * @param bool $jwtCookie
      * @return string
      */
-    public function generateRefreshToken($id, $accessToken, $jwtCookie = true)
+    public function generateRefreshToken($user, $accessToken, $jwtCookie = false)
     {
         $data = [
-            "sub" => (int) $id,
+            "sub" => (int) $user->id,
+            "auth" => $this->calculateAuthHash($user),
             "accessToken" => $accessToken,
         ];
 
@@ -303,5 +328,29 @@ class JwtAuth extends HttpBearerAuth
             $this->addCookieToken($this->refreshTokenParam, $refreshToken, strtotime("2037-12-31")); // far, far future
         }
         return $refreshToken;
+    }
+
+    /**
+     * Renew token
+     * @param object $payload
+     * @return bool|string
+     */
+    public function renewToken($payload)
+    {
+        // update exp, and csrf
+        // iat will be handled in [[getTokenDefaults()]]
+        if (!empty($payload->exp)) {
+            $duration = $payload->exp - $payload->iat;
+            $payload->exp = time() + $duration;
+        }
+        if (!empty($payload->csrf)) {
+            $payload->csrf = $this->request->getCsrfToken();
+        }
+
+        $token = $this->encode($payload);
+        if (!empty($payload->csrf)) {
+            $this->addCookieToken($this->tokenParam, $token, $payload->exp);
+        }
+        return $token;
     }
 }
