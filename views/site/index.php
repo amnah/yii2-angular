@@ -85,7 +85,7 @@ if ($mobileAppMode) {
     var AppConfig = {
         apiUrl: '<?= $mobileAppMode ? env("MOBILE_APP_API_URL") : env("API_URL") ?>',
         jwtCookie: <?= (int) env("JWT_COOKIE") ?>,
-        jwtIntervalTime: 60*110*1000, // 110 minutes. make sure this is less than JwtAuth::$ttl (2 hrs by default)
+        jwtIntervalTime: 60*1000*25, // 25 minutes. make sure this is less than JwtAuth::$ttl (30 min by default)
         recaptchaSitekey: '<?= env("RECAPTCHA_SITEKEY") ?>',
         html5Mode: <?= $html5Mode ? 1 : 0 ?>
     };

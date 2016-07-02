@@ -25,9 +25,9 @@ class JwtAuth extends HttpBearerAuth
 
     /**
      * @var int|string Default token expiration. Integer = seconds, string = strtotime()
-     *                 Example: 300 = "+5 minutes"
+     *                 Example: 1800 = "+30 minutes"
      */
-    public $ttl = "+2 hours";
+    public $ttl = "+30 minutes";
 
     /**
      * @var int|string Token expiration when user sets "remember me"
