@@ -139,7 +139,7 @@ class JwtAuth extends HttpBearerAuth
     }
 
     /**
-     * Get token payload from $_GET, cookie, or header (in that order)
+     * Get token payload from $_GET, header, and cookie (in that order)
      * @return object
      */
     public function getTokenPayload()
@@ -148,18 +148,18 @@ class JwtAuth extends HttpBearerAuth
             return $this->payload;
         }
 
-        // check $_GET, cookie, and header
+        // check $_GET, header, and cookie
         $token = $this->request->get($this->tokenParam);
-        if (!$token) {
-            $token = $this->request->cookies->getValue($this->tokenParam);
-            if ($token) {
-                $this->fromJwtCookie = true;
-            }
-        }
         if (!$token) {
             $authHeader = $this->request->getHeaders()->get("Authorization");
             if ($authHeader !== null && preg_match("/^Bearer\\s+(.*?)$/", $authHeader, $matches)) {
                 $token = $matches[1];
+            }
+        }
+        if (!$token) {
+            $token = $this->request->cookies->getValue($this->tokenParam);
+            if ($token) {
+                $this->fromJwtCookie = true;
             }
         }
 
