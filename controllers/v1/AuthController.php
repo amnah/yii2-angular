@@ -155,7 +155,7 @@ class AuthController extends PublicController
         // renew token using user if it's set
         // otherwise attempt to renew token using refresh token
         if ($user) {
-            return ["success" => $this->generateAuthOutput($user, $payload->rememberMe, $payload->jwtCookie)];
+            return ["success" => $this->generateAuthOutput($user, $payload->rememberMe, $jwtAuth->fromJwtCookie)];
         }
         return $this->actionUseRefreshToken();
     }
@@ -182,7 +182,7 @@ class AuthController extends PublicController
         // note that we use $user->id here, but it can also be the id of your token table
         $id = $user->id;
         $token = $user->access_token;
-        return ["success" => $jwtAuth->generateRefreshToken($id, $token, $payload->jwtCookie)];
+        return ["success" => $jwtAuth->generateRefreshToken($id, $token, $jwtAuth->fromJwtCookie)];
     }
 
     /**
@@ -213,7 +213,7 @@ class AuthController extends PublicController
         $rememberMe = false;
         $user = Yii::$app->user->identityClass;
         $user = $user::findIdentityByAccessToken($payload->accessToken);
-        return ["success" => $this->generateAuthOutput($user, $rememberMe, $payload->jwtCookie)];
+        return ["success" => $this->generateAuthOutput($user, $rememberMe, $jwtAuth->fromJwtCookie)];
     }
 
     /**

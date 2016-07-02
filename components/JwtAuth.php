@@ -42,7 +42,7 @@ class JwtAuth extends HttpBearerAuth
     public $leeway = 60;
 
     /**
-     * @var string Refresh param name (to check in $_GET and cookies)
+     * @var string Token param name (to check in $_GET and cookies)
      */
     public $tokenParam = "_token";
 
@@ -50,6 +50,11 @@ class JwtAuth extends HttpBearerAuth
      * @var string Refresh token param name (to check in $_GET and cookies)
      */
     public $refreshTokenParam = "_refreshToken";
+
+    /**
+     * @var bool Flag for if payload is from cookie
+     */
+    public $fromJwtCookie;
 
     /**
      * @var IdentityInterface Authenticated user
@@ -121,6 +126,9 @@ class JwtAuth extends HttpBearerAuth
         $token = $this->request->get($this->tokenParam);
         if (!$token) {
             $token = $this->request->cookies->getValue($this->tokenParam);
+            if ($token) {
+                $this->fromJwtCookie = true;
+            }
         }
         if (!$token) {
             $authHeader = $this->request->getHeaders()->get("Authorization");
@@ -144,6 +152,9 @@ class JwtAuth extends HttpBearerAuth
         $refreshToken = $this->request->get($this->refreshTokenParam);
         if (!$refreshToken) {
             $refreshToken = $this->request->cookies->getValue($this->refreshTokenParam);
+            if ($refreshToken) {
+                $this->fromJwtCookie = true;
+            }
         }
 
         // decode token
@@ -245,17 +256,15 @@ class JwtAuth extends HttpBearerAuth
      * @param bool $jwtCookie
      * @return string
      */
-    public function generateUserToken($userAttributes, $rememberMe = true, $jwtCookie = true)
+    public function generateUserToken($userAttributes, $rememberMe = false, $jwtCookie = false)
     {
         $userAttributes = (array) $userAttributes;
         $data = [
             "sub" => (int) $userAttributes["id"],
             "user" => $userAttributes,
             "rememberMe" => (int) $rememberMe,
-            "jwtCookie" => (int) $jwtCookie,
         ];
 
-        // compute expire time
         $ttl = $rememberMe ? $this->ttlRememberMe : $this->ttl;
         $exp = is_string($ttl) ? strtotime($ttl) : time() + $ttl;
         if ($ttl) {
@@ -267,7 +276,6 @@ class JwtAuth extends HttpBearerAuth
             $data["csrf"] = $this->request->getCsrfToken();
         }
 
-        // encode, add cookie, and return
         $token = $this->encode($data);
         if ($jwtCookie) {
             $this->addCookieToken($this->tokenParam, $token, $exp);
@@ -288,11 +296,9 @@ class JwtAuth extends HttpBearerAuth
         $data = [
             "sub" => (int) $id,
             "accessToken" => $accessToken,
-            "jwtCookie" => (int) $jwtCookie,
         ];
-        $refreshToken = $this->encode($data);
 
-        // set cookie and return
+        $refreshToken = $this->encode($data);
         if ($jwtCookie) {
             $this->addCookieToken($this->refreshTokenParam, $refreshToken, strtotime("2037-12-31")); // far, far future
         }
