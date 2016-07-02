@@ -63,7 +63,7 @@ class AssetManager extends YiiAssetManager
             if (!is_file($manifestPath)) {
                 throw new InvalidConfigException("Manifest file {$manifestPath} does not exist.");
             }
-            $this->manifest = json_decode(file_get_contents("$assetDir/rev-manifest.json"), true);
+            $this->manifest = json_decode(file_get_contents($manifestPath), true);
         }
 
         if (isset($this->manifest[$file])) {

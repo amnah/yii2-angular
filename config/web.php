@@ -79,7 +79,6 @@ $config = [
         'user' => [
             'class' => 'amnah\yii2\user\Module',
             'emailViewPath' => '@app/mail/user', // example: @app/mail/user/confirmEmail.php
-            'emailConfirmation' => true,
         ],
     ],
 ];

@@ -44,12 +44,12 @@ class JwtAuth extends HttpBearerAuth
     /**
      * @var string Refresh param name (to check in $_GET and cookies)
      */
-    public $tokenParam = "token";
+    public $tokenParam = "_token";
 
     /**
      * @var string Refresh token param name (to check in $_GET and cookies)
      */
-    public $refreshTokenParam = "refreshToken";
+    public $refreshTokenParam = "_refreshToken";
 
     /**
      * @var IdentityInterface Authenticated user
@@ -117,7 +117,7 @@ class JwtAuth extends HttpBearerAuth
             return $this->payload;
         }
 
-        // check $_GET, cookie, and then header
+        // check $_GET, cookie, and header
         $token = $this->request->get($this->tokenParam);
         if (!$token) {
             $token = $this->request->cookies->getValue($this->tokenParam);
@@ -199,7 +199,7 @@ class JwtAuth extends HttpBearerAuth
     /**
      * Decode jwt token string
      * @param string $token
-     * @return object
+     * @return object|bool
      * @throws Exception
      */
     public function decode($token)

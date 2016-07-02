@@ -18,7 +18,7 @@ class AuthController extends PublicController
      * @param User $user
      * @param bool $rememberMe
      * @param bool $jwtCookie
-     * @return boolean
+     * @return array
      */
     protected function generateAuthOutput($user, $rememberMe, $jwtCookie)
     {
@@ -38,15 +38,13 @@ class AuthController extends PublicController
     {
         /** @var User $user */
 
-        // notice that we set the second parameter $formName = ""
         $request = Yii::$app->request;
         $model = new LoginForm();
         if ($model->loadPostAndValidate()) {
             $user = $model->getUser();
             $rememberMe = $request->post("rememberMe", true);
             $jwtCookie = $request->post("jwtCookie", true);
-            $authJwtData = $this->generateAuthOutput($user, $rememberMe, $jwtCookie);
-            return ["success" => $authJwtData];
+            return ["success" => $this->generateAuthOutput($user, $rememberMe, $jwtCookie)];
         }
         return ["errors" => $model->errors];
     }
@@ -225,10 +223,7 @@ class AuthController extends PublicController
     {
         $loginEmailForm = new LoginEmailForm();
         if ($loginEmailForm->loadPost() && $loginEmailForm->sendEmail()) {
-            return [
-                "success" => true,
-                "user" => $loginEmailForm->getUser(),
-            ];
+            return ["success" => $loginEmailForm->getUser()];
         }
 
         return ["errors" => $loginEmailForm->errors];
