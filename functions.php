@@ -5,7 +5,7 @@ use yii\helpers\Url;
 
 
 // set environment
-$env = require_once("env.php");
+$env = require_once(__DIR__ . "/env.php");
 setEnv($env);
 
 /**
