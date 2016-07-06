@@ -31,3 +31,6 @@ env.php
 
 # node
 node_modules
+
+# index cache file
+/web/index.html
