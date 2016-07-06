@@ -145,7 +145,7 @@
             $location.path(url).replace();
 
             // clear get params and loginUrl
-            // @link http://stackoverflow.com/a/26336011
+            // @link http://stackoverflow.com/questions/17376416/angularjs-how-to-clear-query-parameters-in-the-url/26336011#26336011
             $location.search({});
             if (!keepLoginUrl) {
                 factory.clearLoginUrl();

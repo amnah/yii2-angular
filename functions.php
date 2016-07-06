@@ -1,12 +1,10 @@
 <?php
 
-use yii\helpers\Url;
-
-
 
 // set environment
 $env = require_once(__DIR__ . "/env.php");
 setEnv($env);
+
 
 /**
  * Set env
@@ -96,7 +94,7 @@ function isForceDebug()
  */
 function url($url = '', $scheme = false)
 {
-    return Url::to($url, $scheme);
+    return \yii\helpers\Url::to($url, $scheme);
 }
 
 /**

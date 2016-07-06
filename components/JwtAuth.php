@@ -337,7 +337,7 @@ class JwtAuth extends HttpBearerAuth
      */
     public function renewToken($payload)
     {
-        // update exp, and csrf
+        // update exp and csrf
         // iat will be handled in [[getTokenDefaults()]]
         if (!empty($payload->exp)) {
             $duration = $payload->exp - $payload->iat;
