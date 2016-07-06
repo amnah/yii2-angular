@@ -7,17 +7,9 @@
 $appName = "Yii 2 Angular";
 $assetManager = Yii::$app->assetManager;
 $min = !YII_ENV_DEV ? ".min" : "";  // use min version unless in dev
-
-// set specific configuration for mobile app mode
-$mobileAppMode = !empty($mobileAppMode);
-$html5Mode = !$mobileAppMode;
+$html5Mode = isset($html5Mode) ? $html5Mode : true; // default to true unless explicitly disabled
 $linkPrefix = $html5Mode ? "/" : "#/";
-if ($mobileAppMode) {
-    $min = ".min";
-    if (substr($assetManager->webDir, 0, 1) == "/") {
-        $assetManager->webDir = substr($assetManager->webDir, 1);
-    }
-}
+
 ?>
 <!DOCTYPE html>
 <html lang="<?= Yii::$app->language ?>">
@@ -83,7 +75,7 @@ if ($mobileAppMode) {
 
 <script type="text/javascript">
     var AppConfig = {
-        apiUrl: '<?= $mobileAppMode ? env("MOBILE_APP_API_URL") : env("API_URL") ?>',
+        apiUrl: '<?= env("API_URL") ?>',
         jwtCookie: <?= (int) env("JWT_COOKIE") ?>,
         jwtIntervalTime: 60*1000*25, // 25 minutes. make sure this is less than JwtAuth::$ttl (30 min by default)
         recaptchaSitekey: '<?= env("RECAPTCHA_SITEKEY") ?>',
@@ -92,12 +84,9 @@ if ($mobileAppMode) {
 </script>
 
 <script src="<?= $assetManager->getFile("vendor.compiled{$min}.js") ?>"></script>
-<?php if ($mobileAppMode): ?>
-    <script src="cordova.js"></script>
-<?php endif; ?>
 <script src="<?= $assetManager->getFile("app.compiled{$min}.js") ?>"></script>
 
-<?php if (env("RECAPTCHA_SITEKEY")): ?>
+<?php if (getenv("RECAPTCHA_SITEKEY")): ?>
     <script src="https://www.google.com/recaptcha/api.js?onload=recaptchaLoaded&render=explicit" async defer></script>
 <?php endif; ?>
 
