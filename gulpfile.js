@@ -5,8 +5,6 @@ var uglify = require('gulp-uglify');
 var ngAnnotate = require('gulp-ng-annotate');
 var cssnano = require('gulp-cssnano');
 var flatten = require('gulp-flatten');
-var rev = require('gulp-rev');
-var merge = require('merge-stream');
 var del = require('del');
 
 // -------------------------------------------------------------
@@ -24,27 +22,11 @@ gulp.task('default', ['watch', 'build']);
 
 // -------------------------------------------------------------
 // Build task
-// Make sure revision happens after assets are built
-// https://github.com/gulpjs/gulp/blob/master/docs/recipes/running-tasks-in-series.md
 // -------------------------------------------------------------
-gulp.task('build', ['buildAssets', 'buildVendor'], function() {
+gulp.task('build', ['clean'], function() {
 
-    // make revision
-    gulp.src([`${dest}/*.+(css|js)`])
-        .pipe(rev())
-        .pipe(gulp.dest(dest))
-        .pipe(rev.manifest())
-        .pipe(gulp.dest(dest));
-
-    // copy map files
-    gulp.src(`${vendorDir}/**/*.map`)
-        .pipe(flatten())
-        .pipe(gulp.dest(dest));
-});
-
-gulp.task('buildAssets', ['clean'], function() {
-
-    var css = gulp.src(cssDir)
+    // build asset files
+    gulp.src(cssDir)
         // compiled
         .pipe(concat(`site.compiled.css`))
         .pipe(gulp.dest(dest))
@@ -53,7 +35,7 @@ gulp.task('buildAssets', ['clean'], function() {
         .pipe(cssnano())
         .pipe(gulp.dest(dest));
 
-    var js = gulp.src(jsDir)
+    gulp.src(jsDir)
         // compiled
         .pipe(concat(`app.compiled.js`))
         .pipe(ngAnnotate())
@@ -63,24 +45,24 @@ gulp.task('buildAssets', ['clean'], function() {
         .pipe(uglify())
         .pipe(gulp.dest(dest));
 
-    return merge(css, js);
-});
-
-gulp.task('buildVendor', ['clean'], function() {
-    var cssVendor = gulp.src([`${vendorDir}/**/*.css`, `!${vendorDir}/**/*.min.css`])
+    // build vendor files
+    gulp.src([`${vendorDir}/**/*.css`, `!${vendorDir}/**/*.min.css`])
         .pipe(concat(`vendor.compiled.css`))
         .pipe(gulp.dest(dest));
-    var cssVendorMin = gulp.src([`${vendorDir}/**/*.min.css`])
+    gulp.src([`${vendorDir}/**/*.min.css`])
         .pipe(concat(`vendor.compiled.min.css`))
         .pipe(gulp.dest(dest));
-    var jsVendor = gulp.src([`${vendorDir}/**/angular.js`, `${vendorDir}/**/*.js`, `!${vendorDir}/**/*.min.js`])
+    gulp.src([`${vendorDir}/**/angular.js`, `${vendorDir}/**/*.js`, `!${vendorDir}/**/*.min.js`])
         .pipe(concat(`vendor.compiled.js`))
         .pipe(gulp.dest(dest));
-    var jsVendorMin = gulp.src([`${vendorDir}/**/angular.min.js`, `${vendorDir}/**/*.min.js`])
+    gulp.src([`${vendorDir}/**/angular.min.js`, `${vendorDir}/**/*.min.js`])
         .pipe(concat(`vendor.compiled.min.js`))
         .pipe(gulp.dest(dest));
 
-    return merge(cssVendor, cssVendorMin, jsVendor, jsVendorMin);
+    // copy map files
+    gulp.src(`${vendorDir}/**/*.map`)
+        .pipe(flatten())
+        .pipe(gulp.dest(dest));
 });
 
 gulp.task('clean', function() {

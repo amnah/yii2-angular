@@ -4,7 +4,8 @@
 // Main config
 // ------------------------------------------------------------------------
 $config = [
-    'id' => 'basic',
+    'id' => 'yii2angular',
+    'name' => 'Yii 2 Angular',
     'basePath' => dirname(__DIR__),
     'timeZone' => 'UTC',
     'language' => 'en-US',
@@ -69,10 +70,6 @@ $config = [
             'enablePrettyUrl' => true,
             'showScriptName' => false,
             'rules'          => [],
-        ],
-        'assetManager' => [
-            'class' => 'app\components\AssetManager',
-            'useManifest' => !YII_ENV_DEV,
         ],
     ],
     'modules' => [

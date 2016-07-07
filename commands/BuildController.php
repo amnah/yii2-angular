@@ -13,7 +13,7 @@ class BuildController extends Controller
 {
     public $layout = false;
 
-    public function actionIndex()
+    public function actionIndex($date = "")
     {
         // get web path and set aliases (need to do this for console commands)
         // we have to use @app/web because console commands don't have access to @webroot by default
@@ -23,22 +23,31 @@ class BuildController extends Controller
             Yii::setAlias('@webroot', $webPath);
         }
 
-        // disable debug module from view
+        // disable debug module from view and render template
         // @link http://stackoverflow.com/questions/23560278/how-can-i-disable-yii-debug-toolbar-on-a-specific-view/28903986#28903986
         $debugModule = Yii::$app->getModule("debug");
         if ($debugModule) {
             $view = $this->view;
             $view->off($view::EVENT_END_BODY, [$debugModule, 'renderToolbar']);
         }
+        $html = $this->render("//site/index", compact("date"));
+
+        // update compiled revision dirs
+        if ($date) {
+            $cmd = "rm -rf $webPath/compiled-*";
+            $this->stdout("Removing old dirs [ $cmd ]\n", Console::FG_YELLOW);
+            shell_exec($cmd);
+
+            $cmd = "cp -rf $webPath/compiled $webPath/compiled-$date";
+            $this->stdout("Copying new dir   [ $cmd ]\n", Console::FG_YELLOW);
+            shell_exec($cmd);
+        }
 
         // write view file
         $filePath = "$webPath/index.html";
-        $html = $this->render("//site/index");
         @file_put_contents($filePath, $html);
         if (Yii::$app->request->isConsoleRequest) {
-            $this->stdout("----------------------------------------------\n", Console::FG_YELLOW);
-            $this->stdout("Success - [ $filePath ]\n", Console::FG_YELLOW);
-            $this->stdout("----------------------------------------------\n", Console::FG_YELLOW);
+            $this->stdout("Writing index     [ $filePath ]\n", Console::FG_YELLOW);
         }
     }
 }

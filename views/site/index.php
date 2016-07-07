@@ -2,11 +2,13 @@
 
 /* @var $this \yii\web\View */
 /* @var $content string */
-/* @var $assetManager \app\components\AssetManager */
 
-$appName = "Yii 2 Angular";
-$assetManager = Yii::$app->assetManager;
-$min = !YII_ENV_DEV ? ".min" : "";  // use min version unless in dev
+$appName = Yii::$app->name;
+
+$date = !empty($date) ? $date : null;
+$assetPath = $date ? "/compiled-$date" : "/compiled";
+$min = $date ? ".min" : "";
+
 $html5Mode = isset($html5Mode) ? $html5Mode : true; // default to true unless explicitly disabled
 $linkPrefix = $html5Mode ? "/" : "#/";
 
@@ -19,8 +21,8 @@ $linkPrefix = $html5Mode ? "/" : "#/";
     <title><?= $appName ?></title>
     <?php $this->head() ?>
 
-    <link rel="stylesheet" type="text/css" href="<?= $assetManager->getFile("vendor.compiled{$min}.css") ?>">
-    <link rel="stylesheet" type="text/css" href="<?= $assetManager->getFile("site.compiled{$min}.css") ?>">
+    <link rel="stylesheet" type="text/css" href="<?= "$assetPath/vendor.compiled{$min}.css" ?>">
+    <link rel="stylesheet" type="text/css" href="<?= "$assetPath/site.compiled{$min}.css" ?>">
 
     <?php if ($html5Mode): ?>
     <base href="/">
@@ -83,8 +85,8 @@ $linkPrefix = $html5Mode ? "/" : "#/";
     };
 </script>
 
-<script src="<?= $assetManager->getFile("vendor.compiled{$min}.js") ?>"></script>
-<script src="<?= $assetManager->getFile("app.compiled{$min}.js") ?>"></script>
+<script src="<?= "$assetPath/vendor.compiled{$min}.js" ?>"></script>
+<script src="<?= "$assetPath/app.compiled{$min}.js" ?>"></script>
 
 <?php if (getenv("RECAPTCHA_SITEKEY")): ?>
     <script src="https://www.google.com/recaptcha/api.js?onload=recaptchaLoaded&render=explicit" async defer></script>
