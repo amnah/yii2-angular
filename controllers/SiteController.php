@@ -14,13 +14,18 @@ class SiteController extends Controller
         // use versioned assets for non-dev environments
         $date = null;
         if (!YII_ENV_DEV) {
-            $prefix = Yii::getAlias("@webroot") . "/compiled-";
-            $dirs = glob("$prefix*");
+            $prefix = Yii::getAlias("@webroot") . "/compiled/";
+            $dirs = glob("$prefix*", GLOB_ONLYDIR);
             if ($dirs) {
                 $date = str_replace($prefix, "", end($dirs));
             }
         }
 
         return $this->render("index", compact("date"));
+    }
+    
+    public function actionTest()
+    {
+    return "hello world";
     }
 }
