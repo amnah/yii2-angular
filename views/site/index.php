@@ -6,7 +6,7 @@
 $appName = Yii::$app->name;
 
 $date = !empty($date) ? $date : null;
-$assetPath = $date ? "/compiled-$date" : "/compiled";
+$assetPath = $date ? "/compiled/$date" : "/compiled";
 $min = $date ? ".min" : "";
 
 $html5Mode = isset($html5Mode) ? $html5Mode : true; // default to true unless explicitly disabled

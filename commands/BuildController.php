@@ -34,11 +34,15 @@ class BuildController extends Controller
 
         // update compiled revision dirs
         if ($date) {
-            $cmd = "rm -rf $webPath/compiled-*";
+            $cmd = "rm -rf $webPath/compiled/20*";
             $this->stdout("Removing old dirs [ $cmd ]\n", Console::FG_YELLOW);
             shell_exec($cmd);
 
-            $cmd = "cp -rf $webPath/compiled $webPath/compiled-$date";
+            $cmd = "mkdir $webPath/compiled/$date";
+            $this->stdout("Making new dir    [ $cmd ]\n", Console::FG_YELLOW);
+            shell_exec($cmd);
+
+            $cmd = "cp $webPath/compiled/*.* $webPath/compiled/$date";
             $this->stdout("Copying new dir   [ $cmd ]\n", Console::FG_YELLOW);
             shell_exec($cmd);
         }
