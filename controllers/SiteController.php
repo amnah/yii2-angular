@@ -23,9 +23,4 @@ class SiteController extends Controller
 
         return $this->render("index", compact("date"));
     }
-    
-    public function actionTest()
-    {
-    return "hello world";
-    }
 }
