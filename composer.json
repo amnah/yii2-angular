@@ -16,6 +16,7 @@
     "require": {
         "php": ">=5.4.0",
         "yiisoft/yii2": "*",
+        "yiisoft/yii2-bootstrap": "*",
         "yiisoft/yii2-swiftmailer": "*",
         "yiisoft/yii2-redis": "*",
         "himiklab/yii2-recaptcha-widget": "*",
