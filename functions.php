@@ -17,7 +17,7 @@ function setEnv($env, $overwrite = false) {
             continue;
         }
 
-        // set bool/null
+        // set bool/null explicitly, otherwise they get computed as 0 or 1
         if ($value === true) {
             $value = "true";
         } elseif ($value === false) {

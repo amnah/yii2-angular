@@ -3,11 +3,7 @@
 namespace app\controllers;
 
 use Yii;
-use yii\filters\Cors;
-use yii\filters\ContentNegotiator;
-use yii\filters\RateLimiter;
 use yii\rest\Controller;
-use yii\web\Response;
 
 class BaseApiController extends Controller
 {
@@ -21,9 +17,14 @@ class BaseApiController extends Controller
      */
     public function init()
     {
-        if (!$this->jwtAuth) {
-            $this->jwtAuth = Yii::$app->jwtAuth;
-        }
+        $this->jwtAuth = Yii::$app->get("jwtAuth");
+
+        // set json output and use "pretty" output in debug mode
+        Yii::$app->response->format = 'json';
+        Yii::$app->response->formatters['json'] = [
+            'class' => 'yii\web\JsonResponseFormatter',
+            'prettyPrint' => YII_DEBUG, // use "pretty" output in debug mode
+        ];
     }
 
     /**
@@ -52,6 +53,9 @@ class BaseApiController extends Controller
     public function behaviors()
     {
         return [
+
+            // cors filter - should be before authentication
+            /*
             'corsFilter' => [
                 "class" => Cors::className(),
                 "cors" => [
@@ -63,17 +67,16 @@ class BaseApiController extends Controller
                     'Access-Control-Expose-Headers' => [],
                 ],
             ],
+            */
+
             'jwtAuth' => $this->jwtAuth,
-            'contentNegotiator' => [
-                'class' => ContentNegotiator::className(),
-                'formats' => [
-                    'application/json' => Response::FORMAT_JSON,
-                    'application/xml' => Response::FORMAT_XML, // easier to view if you visit page in browser
-                ],
-            ],
+
+            // rate limiter - should be after authentication
+            /*
             'rateLimiter' => [
                 'class' => RateLimiter::className(),
             ],
+            */
         ];
     }
 }
