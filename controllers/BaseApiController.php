@@ -13,15 +13,21 @@ class BaseApiController extends Controller
     public $jwtAuth;
 
     /**
+     * @var \yii\web\Response
+     */
+    public $response;
+
+    /**
      * @inheritdoc
      */
     public function init()
     {
         $this->jwtAuth = Yii::$app->get("jwtAuth");
+        $this->response = Yii::$app->get("response");
 
         // set json output and use "pretty" output in debug mode
-        Yii::$app->response->format = 'json';
-        Yii::$app->response->formatters['json'] = [
+        $this->response->format = 'json';
+        $this->response->formatters['json'] = [
             'class' => 'yii\web\JsonResponseFormatter',
             'prettyPrint' => YII_DEBUG, // use "pretty" output in debug mode
         ];
