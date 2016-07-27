@@ -2,6 +2,7 @@
 
 require(__DIR__ . '/../vendor/autoload.php');
 require(__DIR__ . '/../functions.php');
+setEnv(require_once __DIR__ . "/../env.php");
 
 defined('YII_ENV') or define('YII_ENV', env('YII_ENV'));
 defined('YII_DEBUG') or define('YII_DEBUG', env('YII_DEBUG'));

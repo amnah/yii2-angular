@@ -1,11 +1,5 @@
 <?php
 
-
-// set environment
-$env = require_once(__DIR__ . "/env.php");
-setEnv($env);
-
-
 /**
  * Set env
  * @param array $env
