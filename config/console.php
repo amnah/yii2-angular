@@ -1,7 +1,5 @@
 <?php
 
-Yii::setAlias('@tests', dirname(__DIR__) . '/tests/codeception');
-
 $config = require_once __DIR__ . '/web.php';
 
 $config['id'] .= '-console';
