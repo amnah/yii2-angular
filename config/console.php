@@ -6,6 +6,7 @@ $config['id'] .= '-console';
 $config['controllerNamespace'] = 'app\commands';
 
 /*
+Yii::setAlias('@tests', dirname(__DIR__) . '/tests');
 $config['controllerMap'] = [
     'fixture' => [ // Fixture generation command line.
         'class' => 'yii\faker\FixtureController',
