@@ -21,12 +21,11 @@
         "yiisoft/yii2-redis": "*",
         "himiklab/yii2-recaptcha-widget": "*",
         "firebase/php-jwt": "*",
-        "amnah/yii2-user": "*"
+        "amnah/yii2-user": "*",
+        "amnah/yii2-debug": "*"
     },
     "require-dev": {
-        "amnah/yii2-debug": "*",
         "yiisoft/yii2-gii": "*",
-        "yiisoft/yii2-faker": "*",
         "codeception/base": "^2.2.3",
         "codeception/verify": "~0.3.1",
         "codeception/specify": "~0.4.3"

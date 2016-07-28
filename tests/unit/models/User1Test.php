@@ -42,8 +42,10 @@ class User1Test extends \Codeception\Test\Unit
 
     public function testChangeUserName()
     {
-        //$user->username="neozzzz";$user->save();
-        //expect($user->username)->equals('neozzzz');
+        $user = User::find()->where(['username' => 'neo'])->one();
+        $user->username="neozzz";
+        $user->save();
+        expect($user->username)->equals('neozzz');
     }
 
 }
