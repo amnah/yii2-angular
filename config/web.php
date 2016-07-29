@@ -37,6 +37,7 @@ $config = [
         ],
         'mailer' => [
             'class' => 'yii\swiftmailer\Mailer',
+            'viewPath' => '@app/views/_mail',
             'useFileTransport' => env('MAIL_FILE_TRANSPORT'),
             'transport' => [
                 'class' => 'Swift_SmtpTransport',
@@ -75,7 +76,7 @@ $config = [
     'modules' => [
         'user' => [
             'class' => 'amnah\yii2\user\Module',
-            'emailViewPath' => '@app/mail/user', // example: @app/mail/user/confirmEmail.php
+            'emailViewPath' => '@app/views/_mail/user', // eg, @app/views/_mail/user/confirmEmail.php
         ],
     ],
 ];
