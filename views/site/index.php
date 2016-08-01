@@ -21,14 +21,13 @@ $linkPrefix = $html5Mode ? "/" : "#/";
     <title><?= $appName ?></title>
     <?php $this->head() ?>
 
-    <link rel="stylesheet" type="text/css" href="<?= "$assetPath/vendor.compiled{$min}.css" ?>">
-    <link rel="stylesheet" type="text/css" href="<?= "$assetPath/site.compiled{$min}.css" ?>">
-
+    <link rel="stylesheet" type="text/css" href="<?= "$assetPath/vendor{$min}.css" ?>">
+    <link rel="stylesheet" type="text/css" href="<?= "$assetPath/app{$min}.css" ?>">
     <?php if ($html5Mode): ?>
     <base href="/">
     <?php endif; ?>
 </head>
-<body ng-app="app" ng-strict-di>
+<body>
 <?php $this->beginBody() ?>
 
 <div class="wrap">
@@ -44,7 +43,7 @@ $linkPrefix = $html5Mode ? "/" : "#/";
                 <a class="navbar-brand" href="<?= $linkPrefix ?>" ng-click="vm.isCollapsed=true"><?= $appName ?></a>
             </div>
             <div class="collapse navbar-collapse" collapse="vm.isCollapsed">
-                <ul id="w1" class="navbar-nav navbar-right ng-cloak nav">
+                <ul id="w1" class="navbar-nav navbar-right nav">
                     <li><a href="<?= $linkPrefix ?>about" ng-click="vm.isCollapsed=true">About</a></li>
                     <li><a href="<?= $linkPrefix ?>contact" ng-click="vm.isCollapsed=true">Contact</a></li>
                     <li><a href="<?= $linkPrefix ?>account" ng-click="vm.isCollapsed=true">Account</a></li>
@@ -63,7 +62,7 @@ $linkPrefix = $html5Mode ? "/" : "#/";
     </nav>
 
     <div class="container">
-        <div ng-view></div>
+        <div id="app"></div>
     </div>
 </div>
 
@@ -75,18 +74,8 @@ $linkPrefix = $html5Mode ? "/" : "#/";
     </div>
 </footer>
 
-<script type="text/javascript">
-    var AppConfig = {
-        apiUrl: '<?= env("API_URL") ?>',
-        jwtCookie: <?= (int) env("JWT_COOKIE") ?>,
-        jwtIntervalTime: 60*1000*25, // 25 minutes. make sure this is less than JwtAuth::$ttl (30 min by default)
-        recaptchaSitekey: '<?= env("RECAPTCHA_SITEKEY") ?>',
-        html5Mode: <?= $html5Mode ? 1 : 0 ?>
-    };
-</script>
-
-<script src="<?= "$assetPath/vendor.compiled{$min}.js" ?>"></script>
-<script src="<?= "$assetPath/app.compiled{$min}.js" ?>"></script>
+<script src="<?= "$assetPath/vendor{$min}.js" ?>"></script>
+<script src="<?= "$assetPath/app{$min}.js" ?>"></script>
 
 <?php if (getenv("RECAPTCHA_SITEKEY")): ?>
     <script src="https://www.google.com/recaptcha/api.js?onload=recaptchaLoaded&render=explicit" async defer></script>
