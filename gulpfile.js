@@ -69,13 +69,13 @@ function updateBundle(files) {
 
 // File change notification
 var theFiles;
-b.on('log', function(a) {
+b.on('log', function(msg) {
     if (!theFiles) {
         theFiles = 'First run';
     } else {
         theFiles = `${theFiles} changed`;
     }
-    gutil.log(`${theFiles} - ${a}`);
+    gutil.log(gutil.colors.cyan(theFiles), msg);
 });
 
 
@@ -93,7 +93,10 @@ function buildAll(bundle) {
 
        // build app js files
         var stream = bundle
-            .on('error', gutil.log.bind(gutil, 'Browserify Error'))
+            //.on('error', gutil.log.bind(gutil, 'Browserify Error'))
+            .on('error', function(err) {
+                gutil.log(gutil.colors.red("Browserify error:"), err.message);
+            })
             .pipe(source('app.js'))
             .pipe(buffer());
         stream
