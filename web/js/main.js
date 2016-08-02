@@ -1,9 +1,13 @@
 
 import store from './store.js'
-import navbarLinks from './navbarLinks.vue'
+import router from './router.js'
+
+import NavbarLinks from './navbarLinks.vue'
 
 new Vue({
     el: '#app',
     store,
-    components: { navbarLinks }
+    router,
+    components: { NavbarLinks }
 })
+

@@ -9,9 +9,6 @@ $date = !empty($date) ? $date : null;
 $assetPath = $date ? "/compiled/$date" : "/compiled";
 $min = $date ? ".min" : "";
 
-$html5Mode = isset($html5Mode) ? $html5Mode : true; // default to true unless explicitly disabled
-$linkPrefix = $html5Mode ? "/" : "#/";
-
 ?>
 <!DOCTYPE html>
 <html lang="<?= Yii::$app->language ?>">
@@ -23,9 +20,6 @@ $linkPrefix = $html5Mode ? "/" : "#/";
 
     <link rel="stylesheet" type="text/css" href="<?= "$assetPath/vendor{$min}.css" ?>">
     <link rel="stylesheet" type="text/css" href="<?= "$assetPath/app{$min}.css" ?>">
-    <?php if ($html5Mode): ?>
-    <base href="/">
-    <?php endif; ?>
 </head>
 <body>
 <?php $this->beginBody() ?>
@@ -41,7 +35,7 @@ $linkPrefix = $html5Mode ? "/" : "#/";
                         <span class="icon-bar"></span>
                         <span class="icon-bar"></span>
                     </button>
-                    <a class="navbar-brand" href="/"><?= $appName ?></a>
+                    <router-link to="/" class="navbar-brand"><?= $appName ?></router-link>
                 </div>
                 <div id="navbar-collapse" class="collapse navbar-collapse">
                     <navbar-links></navbar-links>
@@ -50,7 +44,7 @@ $linkPrefix = $html5Mode ? "/" : "#/";
         </nav>
 
         <div class="container">
-            <h3>Hello world</h3>
+            <router-view></router-view>
         </div>
     </div>
 
