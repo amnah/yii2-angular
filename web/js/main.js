@@ -1,8 +1,9 @@
 
-import app from './app.vue'
-import navbar from './navbar.vue'
+import store from './store.js'
+import navbarLinks from './navbarLinks.vue'
 
 new Vue({
-  el: '#app',
-  render: h => h(app)
+    el: '#app',
+    store,
+    components: { navbarLinks }
 })

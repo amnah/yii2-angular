@@ -30,49 +30,37 @@ $linkPrefix = $html5Mode ? "/" : "#/";
 <body>
 <?php $this->beginBody() ?>
 
-<div class="wrap">
-    <nav id="w0" class="navbar-inverse navbar-fixed-top navbar" role="navigation" ng-controller="NavCtrl as vm">
+<div id="app">
+    <div class="wrap">
+        <nav class="navbar-inverse navbar-fixed-top navbar">
+            <div class="container">
+                <div class="navbar-header">
+                    <button type="button" class="navbar-toggle" data-toggle="collapse" data-target="#navbar-collapse">
+                        <span class="sr-only">Toggle navigation</span>
+                        <span class="icon-bar"></span>
+                        <span class="icon-bar"></span>
+                        <span class="icon-bar"></span>
+                    </button>
+                    <a class="navbar-brand" href="/"><?= $appName ?></a>
+                </div>
+                <div id="navbar-collapse" class="collapse navbar-collapse">
+                    <navbar-links></navbar-links>
+                </div>
+            </div>
+        </nav>
+
         <div class="container">
-            <div class="navbar-header">
-                <button type="button" class="navbar-toggle" ng-click="vm.isCollapsed=!vm.isCollapsed">
-                    <span class="sr-only">Toggle navigation</span>
-                    <span class="icon-bar"></span>
-                    <span class="icon-bar"></span>
-                    <span class="icon-bar"></span>
-                </button>
-                <a class="navbar-brand" href="<?= $linkPrefix ?>" ng-click="vm.isCollapsed=true"><?= $appName ?></a>
-            </div>
-            <div class="collapse navbar-collapse" collapse="vm.isCollapsed">
-                <ul id="w1" class="navbar-nav navbar-right nav">
-                    <li><a href="<?= $linkPrefix ?>about" ng-click="vm.isCollapsed=true">About</a></li>
-                    <li><a href="<?= $linkPrefix ?>contact" ng-click="vm.isCollapsed=true">Contact</a></li>
-                    <li><a href="<?= $linkPrefix ?>account" ng-click="vm.isCollapsed=true">Account</a></li>
-                    <li><a href="<?= $linkPrefix ?>profile" ng-click="vm.isCollapsed=true">Profile</a></li>
-                    <li ng-show="!vm.Auth.isLoggedIn()"><a href="<?= $linkPrefix ?>login" ng-click="vm.isCollapsed=true">Login</a></li>
-                    <li ng-show="!vm.Auth.isLoggedIn()"><a href="<?= $linkPrefix ?>login-email" ng-click="vm.isCollapsed=true">Login via Email</a></li>
-                    <li ng-show="!vm.Auth.isLoggedIn()"><a href="<?= $linkPrefix ?>register" ng-click="vm.isCollapsed=true">Register</a></li>
-                    <li ng-show="vm.Auth.isLoggedIn()">
-                        <a ng-click="vm.Auth.logout()">
-                            Logout ({{ vm.Auth.getAttribute('email') }})
-                        </a>
-                    </li>
-                </ul>
-            </div>
+            <h3>Hello world</h3>
         </div>
-    </nav>
-
-    <div class="container">
-        <div id="app"></div>
     </div>
+
+    <footer class="footer">
+        <div class="container">
+            <p class="pull-left">&copy; <?= $appName ?> <?= date('Y') ?></p>
+            <p class="pull-right"><?= Yii::powered() ?></p>
+        </div>
+    </footer>
 </div>
-
-<footer class="footer">
-    <div class="container">
-        <p class="pull-left">&copy; <?= $appName ?> <?= date('Y') ?></p>
-
-        <p class="pull-right"><?= Yii::powered() ?></p>
-    </div>
-</footer>
 
 <script src="<?= "$assetPath/vendor{$min}.js" ?>"></script>
 <script src="<?= "$assetPath/app{$min}.js" ?>"></script>

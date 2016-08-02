@@ -4,8 +4,8 @@
 // Main config
 // ------------------------------------------------------------------------
 $config = [
-    'id' => 'yii2angular',
-    'name' => 'Yii 2 Angular',
+    'id' => 'yii2vue',
+    'name' => 'Yii 2 Vue',
     'basePath' => dirname(__DIR__),
     'timeZone' => 'UTC',
     'language' => 'en-US',
