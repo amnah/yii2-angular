@@ -1,27 +1,90 @@
 
 <template>
     <div>
-        <h3>Contact</h3>
+        <h1>Contact</h1>
+
+        <!--
+        <div ng-if="vm.success">
+            <div class="alert alert-success">
+                Thank you for contacting us [ {{ vm.ContactForm.name }} ]. We will respond to you as soon as possible.
+            </div>
+
+            <p>
+                Note that if you turn on the Yii debugger, you should be able
+                to view the mail message on the mail panel of the debugger.
+            </p>
+
+            <p>
+                If the application is in development mode, the email is not sent but saved as
+                a file under <code>Yii::$app->mailer->fileTransportPath</code>.
+                Please configure the <code>useFileTransport</code> property of the <code>mail</code>
+                application component to be false to enable email sending.
+            </p>
+
+            <hr/>
+        </div>
+        -->
+
         <p>If you have business inquiries or other questions, please fill out the following form to contact us. Thank you.</p>
+
+        <!--
+        <div class="row">
+            <div class="col-lg-5">
+                <form id="contact-form" role="form" ng-submit="vm.submit()">
+
+                    <div class="form-group" ng-class="{'has-error': vm.errors.name}">
+                        <label class="control-label" for="contactform-name">Name</label>
+                        <input type="text" id="contactform-name" class="form-control" ng-model="vm.ContactForm.name">
+                        <p class="help-block help-block-error">{{ vm.errors.name[0] }}</p>
+                    </div>
+                    <div class="form-group" ng-class="{'has-error': vm.errors.email}">
+                        <label class="control-label" for="contactform-email">Email</label>
+                        <input type="text" id="contactform-email" class="form-control" ng-model="vm.ContactForm.email">
+                        <p class="help-block help-block-error">{{ vm.errors.email[0] }}</p>
+                    </div>
+                    <div class="form-group" ng-class="{'has-error': vm.errors.subject}">
+                        <label class="control-label" for="contactform-subject">Subject</label>
+                        <input type="text" id="contactform-subject" class="form-control" ng-model="vm.ContactForm.subject">
+                        <p class="help-block help-block-error">{{ vm.errors.subject[0] }}</p>
+                    </div>
+                    <div class="form-group" ng-class="{'has-error': vm.errors.body}">
+                        <label class="control-label" for="contactform-body">Body</label>
+                        <textarea id="contactform-body" class="form-control" rows="6" ng-model="vm.ContactForm.body"></textarea>
+                        <p class="help-block help-block-error">{{ vm.errors.body[0] }}</p>
+                    </div>
+                    <div class="form-group" ng-class="{'has-error': vm.errors.captcha}" ng-if="vm.sitekey">
+                        <label class="control-label">Captcha</label>
+                        <div id="contact-captcha"></div>
+                        <p class="help-block help-block-error">{{ vm.errors.captcha[0] }}</p>
+                    </div>
+                    <div class="form-group">
+                        <button type="submit" class="btn btn-primary" ng-disabled="vm.submitting">Submit</button>
+                    </div>
+
+                </form>
+            </div>
+        </div>
+        -->
     </div>
 </template>
 
 <script>
-    import store from './store.js'
-    export default {
-        data () {
-            return {
-                //hello: 'world',
-            }
-        },
-        computed: Vuex.mapGetters([
-            'user',
-            'isGuest',
-            'isLoggedIn'
-        ]),
-        methods: {
-            login: (event) => store.dispatch('login', {username:'bob2'}),
-            logout: (event) => store.dispatch('logout')
+import store from './store.js'
+import {setPageTitle} from './functions.js'
+export default {
+    name: 'contact',
+    mounted: function() {
+        setPageTitle('Contact')
+    },
+    data () {
+        return {
+            //hello: 'world',
         }
-    }
+    },
+    computed: Vuex.mapGetters([
+        'user',
+        'isGuest',
+        'isLoggedIn'
+    ])
+}
 </script>

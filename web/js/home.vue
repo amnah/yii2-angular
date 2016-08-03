@@ -34,3 +34,13 @@
 
     </div>
 </template>
+
+<script>
+import {setPageTitle} from './functions.js'
+export default {
+    name: 'home',
+    mounted: function() {
+        setPageTitle()
+    }
+}
+</script>
