@@ -14,11 +14,6 @@
 
 <script>
 export default {
-    data () {
-        return {
-            //hello: 'world',
-        }
-    },
     computed: Vuex.mapGetters([
         'user',
         'isGuest',

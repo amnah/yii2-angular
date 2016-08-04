@@ -5,9 +5,9 @@ export default new VueRouter({
     mode: 'history',
     scrollBehavior: scrollBehavior,
     routes: [
-        { path: '/', component: require('./home.vue') },
-        { path: '/about', component: require('./about.vue') },
-        { path: '/contact', component: require('./contact.vue') },
+        { path: '/', component: require('./components/home.vue') },
+        { path: '/about', component: require('./components/about.vue') },
+        { path: '/contact', component: require('./components/contact.vue') },
     ]
 })
 

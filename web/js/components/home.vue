@@ -36,7 +36,7 @@
 </template>
 
 <script>
-import {setPageTitle} from './functions.js'
+import {setPageTitle} from '../functions.js'
 export default {
     name: 'home',
     mounted: function() {
