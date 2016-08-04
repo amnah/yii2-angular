@@ -3,10 +3,9 @@
     <div>
         <h1>Contact</h1>
 
-        <!--
-        <div ng-if="vm.success">
+        <div v-if="success">
             <div class="alert alert-success">
-                Thank you for contacting us [ {{ vm.ContactForm.name }} ]. We will respond to you as soon as possible.
+                Thank you for contacting us [ {{ form.name }} ]. We will respond to you as soon as possible.
             </div>
 
             <p>
@@ -23,39 +22,37 @@
 
             <hr/>
         </div>
-        -->
 
         <p>If you have business inquiries or other questions, please fill out the following form to contact us. Thank you.</p>
 
-        <!--
         <div class="row">
             <div class="col-lg-5">
-                <form id="contact-form" role="form" ng-submit="vm.submit()">
+                <form id="contact-form" role="form" @submit.prevent="submit">
 
-                    <div class="form-group" ng-class="{'has-error': vm.errors.name}">
+                    <div class="form-group" v-bind:class="{'has-error': errors.name}">
                         <label class="control-label" for="contactform-name">Name</label>
-                        <input type="text" id="contactform-name" class="form-control" ng-model="vm.ContactForm.name">
-                        <p class="help-block help-block-error">{{ vm.errors.name[0] }}</p>
+                        <input type="text" id="contactform-name" class="form-control" v-model.trim="form.name">
+                        <p class="help-block help-block-error" v-if="errors.name">{{ errors.name[0] }}</p>
                     </div>
-                    <div class="form-group" ng-class="{'has-error': vm.errors.email}">
+                    <div class="form-group" v-bind:class="{'has-error': errors.email}">
                         <label class="control-label" for="contactform-email">Email</label>
-                        <input type="text" id="contactform-email" class="form-control" ng-model="vm.ContactForm.email">
-                        <p class="help-block help-block-error">{{ vm.errors.email[0] }}</p>
+                        <input type="text" id="contactform-email" class="form-control" v-model.trim="form.email">
+                        <p class="help-block help-block-error" v-if="errors.email">{{ errors.email[0] }}</p>
                     </div>
-                    <div class="form-group" ng-class="{'has-error': vm.errors.subject}">
+                    <div class="form-group" v-bind:class="{'has-error': errors.subject}">
                         <label class="control-label" for="contactform-subject">Subject</label>
-                        <input type="text" id="contactform-subject" class="form-control" ng-model="vm.ContactForm.subject">
-                        <p class="help-block help-block-error">{{ vm.errors.subject[0] }}</p>
+                        <input type="text" id="contactform-subject" class="form-control" v-model.trim="form.subject">
+                        <p class="help-block help-block-error" v-if="errors.subject">{{ errors.subject[0] }}</p>
                     </div>
-                    <div class="form-group" ng-class="{'has-error': vm.errors.body}">
+                    <div class="form-group" v-bind:class="{'has-error': errors.body}">
                         <label class="control-label" for="contactform-body">Body</label>
-                        <textarea id="contactform-body" class="form-control" rows="6" ng-model="vm.ContactForm.body"></textarea>
-                        <p class="help-block help-block-error">{{ vm.errors.body[0] }}</p>
+                        <textarea id="contactform-body" class="form-control" rows="6" v-model.trim="form.body"></textarea>
+                        <p class="help-block help-block-error" v-if="errors.body">{{ errors.body[0] }}</p>
                     </div>
-                    <div class="form-group" ng-class="{'has-error': vm.errors.captcha}" ng-if="vm.sitekey">
+                    <div class="form-group" v-bind:class="{'has-error': errors.captcha}" ng-if="vm.sitekey">
                         <label class="control-label">Captcha</label>
                         <div id="contact-captcha"></div>
-                        <p class="help-block help-block-error">{{ vm.errors.captcha[0] }}</p>
+                        <p class="help-block help-block-error" v-if="errors.captcha">{{ errors.captcha[0] }}</p>
                     </div>
                     <div class="form-group">
                         <button type="submit" class="btn btn-primary" ng-disabled="vm.submitting">Submit</button>
@@ -64,12 +61,10 @@
                 </form>
             </div>
         </div>
-        -->
     </div>
 </template>
 
 <script>
-import store from './store.js'
 import {setPageTitle} from './functions.js'
 export default {
     name: 'contact',
@@ -77,14 +72,37 @@ export default {
         setPageTitle('Contact')
     },
     data () {
+        const user = this.$store.getters.user;
         return {
-            //hello: 'world',
+            success: false,
+            form: {
+                name: user ? user.username : '',
+                email: user ? user.email : '',
+                subject: '',
+                body: ''
+            },
+            errors: {}
         }
     },
-    computed: Vuex.mapGetters([
-        'user',
-        'isGuest',
-        'isLoggedIn'
-    ])
+    methods: {
+        submit (e) {
+            let thisInstance = this
+            thisInstance.success = false
+            thisInstance.errors = {}
+            $.ajax({
+                url: '/v1/public/contact',
+                method: 'POST',
+                data: this.form
+            }).then(function(data) {
+                if (data.success) {
+                    thisInstance.success = true
+                    thisInstance.errors = {}
+                } else if (data.errors) {
+                    thisInstance.success = false
+                    thisInstance.errors = data.errors
+                }
+            });
+        }
+    }
 }
 </script>
