@@ -13,7 +13,6 @@
 </template>
 
 <script>
-import store from './store.js'
 export default {
     data () {
         return {
@@ -26,8 +25,12 @@ export default {
         'isLoggedIn'
     ]),
     methods: {
-        login: (event) => store.dispatch('login', {username:'bob2'}),
-        logout: (event) => store.dispatch('logout')
+        login (e) {
+            this.$store.dispatch('login', {username:'bob2', email:'bob2@bob.com'})
+        },
+        logout (e) {
+            this.$store.dispatch('logout')
+        }
     }
 }
 </script>
