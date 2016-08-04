@@ -56,6 +56,15 @@ $min = $date ? ".min" : "";
     </footer>
 </div>
 
+<script type="text/javascript">
+    var AppConfig = {
+        apiUrl: '<?= env("API_URL") ?>',
+        jwtCookie: <?= (int) env("JWT_COOKIE") ?>,
+        jwtIntervalTime: 60*1000*25, // 25 minutes. make sure this is less than JwtAuth::$ttl (30 min by default)
+        recaptchaSitekey: '<?= env("RECAPTCHA_SITEKEY") ?>',
+    };
+</script>
+
 <script src="<?= "$assetPath/vendor{$min}.js" ?>"></script>
 <script src="<?= "$assetPath/app{$min}.js" ?>"></script>
 

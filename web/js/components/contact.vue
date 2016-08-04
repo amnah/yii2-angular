@@ -65,7 +65,7 @@
 </template>
 
 <script>
-import {setPageTitle} from '../functions.js'
+import {setPageTitle, getConfig} from '../functions.js'
 export default {
     name: 'contact',
     mounted: function() {
@@ -86,20 +86,21 @@ export default {
     },
     methods: {
         submit (e) {
-            let thisInstance = this
-            thisInstance.success = false
-            thisInstance.errors = {}
+
+            let vm = this
+            vm.success = false
+            vm.errors = {}
             $.ajax({
-                url: '/v1/public/contact',
+                url: getConfig('apiUrl') + 'public/contact',
                 method: 'POST',
                 data: this.form
             }).then(function(data) {
                 if (data.success) {
-                    thisInstance.success = true
-                    thisInstance.errors = {}
+                    vm.success = true
+                    vm.errors = {}
                 } else if (data.errors) {
-                    thisInstance.success = false
-                    thisInstance.errors = data.errors
+                    vm.success = false
+                    vm.errors = data.errors
                 }
             });
         }
