@@ -66,6 +66,7 @@
 
 <script>
 import {setPageTitle, getConfig} from '../functions.js'
+import {post, reset, process} from '../ajax.js'
 export default {
     name: 'contact',
     mounted: function() {
@@ -86,22 +87,10 @@ export default {
     },
     methods: {
         submit (e) {
-
             let vm = this
-            vm.success = false
-            vm.errors = {}
-            $.ajax({
-                url: getConfig('apiUrl') + 'public/contact',
-                method: 'POST',
-                data: this.form
-            }).then(function(data) {
-                if (data.success) {
-                    vm.success = true
-                    vm.errors = {}
-                } else if (data.errors) {
-                    vm.success = false
-                    vm.errors = data.errors
-                }
+            reset(vm)
+            post('public/contact', this.form).then(function(data) {
+                process(vm, data)
             });
         }
     }
