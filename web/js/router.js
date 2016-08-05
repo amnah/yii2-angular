@@ -8,6 +8,7 @@ export default new VueRouter({
         { path: '/', component: require('./components/home.vue') },
         { path: '/about', component: require('./components/about.vue') },
         { path: '/contact', component: require('./components/contact.vue') },
+        { path: '/login', component: require('./components/login.vue') },
     ]
 })
 

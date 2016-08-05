@@ -6,6 +6,9 @@ import {setConfig} from './functions.js'
 import NavbarLinks from './components/navbarLinks.vue'
 
 setConfig(AppConfig)
+if (!AppConfig.jwtCookie) {
+    store.dispatch('restoreLogin')
+}
 
 new Vue({
     el: '#app',
