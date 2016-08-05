@@ -30,32 +30,32 @@
                 <form id="contact-form" role="form" @submit.prevent="submit">
 
                     <div class="form-group" v-bind:class="{'has-error': errors.name}">
-                        <label class="control-label" for="contactform-name">Name</label>
-                        <input type="text" id="contactform-name" class="form-control" v-model.trim="form.name">
+                        <label class="control-label" for="contact-form-name">Name</label>
+                        <input type="text" id="contact-form-name" class="form-control" v-model.trim="form.name">
                         <p class="help-block help-block-error" v-if="errors.name">{{ errors.name[0] }}</p>
                     </div>
                     <div class="form-group" v-bind:class="{'has-error': errors.email}">
-                        <label class="control-label" for="contactform-email">Email</label>
-                        <input type="text" id="contactform-email" class="form-control" v-model.trim="form.email">
+                        <label class="control-label" for="contact-form-email">Email</label>
+                        <input type="text" id="contact-form-email" class="form-control" v-model.trim="form.email">
                         <p class="help-block help-block-error" v-if="errors.email">{{ errors.email[0] }}</p>
                     </div>
                     <div class="form-group" v-bind:class="{'has-error': errors.subject}">
-                        <label class="control-label" for="contactform-subject">Subject</label>
-                        <input type="text" id="contactform-subject" class="form-control" v-model.trim="form.subject">
+                        <label class="control-label" for="contact-form-subject">Subject</label>
+                        <input type="text" id="contact-form-subject" class="form-control" v-model.trim="form.subject">
                         <p class="help-block help-block-error" v-if="errors.subject">{{ errors.subject[0] }}</p>
                     </div>
                     <div class="form-group" v-bind:class="{'has-error': errors.body}">
-                        <label class="control-label" for="contactform-body">Body</label>
-                        <textarea id="contactform-body" class="form-control" rows="6" v-model.trim="form.body"></textarea>
+                        <label class="control-label" for="contact-form-body">Body</label>
+                        <textarea id="contact-form-body" class="form-control" rows="6" v-model.trim="form.body"></textarea>
                         <p class="help-block help-block-error" v-if="errors.body">{{ errors.body[0] }}</p>
                     </div>
-                    <div class="form-group" v-bind:class="{'has-error': errors.captcha}" ng-if="vm.sitekey">
+                    <div class="form-group" v-bind:class="{'has-error': errors.captcha}" v-if="recaptchaSitekey">
                         <label class="control-label">Captcha</label>
                         <div id="contact-captcha"></div>
                         <p class="help-block help-block-error" v-if="errors.captcha">{{ errors.captcha[0] }}</p>
                     </div>
                     <div class="form-group">
-                        <button type="submit" class="btn btn-primary" ng-disabled="vm.submitting">Submit</button>
+                        <button type="submit" class="btn btn-primary" :disabled="submitting">Submit</button>
                     </div>
 
                 </form>
@@ -73,16 +73,18 @@ export default {
         setPageTitle('Contact')
     },
     data () {
-        const user = this.$store.getters.user;
+        const user = this.$store.getters.user
         return {
             success: false,
+            submitting: false,
+            errors: {},
             form: {
                 name: user ? user.username : '',
                 email: user ? user.email : '',
                 subject: '',
                 body: ''
             },
-            errors: {}
+            recaptchaSitekey: getConfig('recaptchaSitekey')
         }
     },
     methods: {
