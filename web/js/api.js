@@ -71,7 +71,7 @@ function failureCallback(data) {
 
     // check for non-401 -> alert the error and reject
     if (data.status != 401) {
-        alert(`${data.status} - ${data.statusText}\n\nURL - ${origAjax.url}`)
+        alert(`[ ${data.status} ] ${data.statusText}\n\n@ ${origAjax.url}`)
         return reject
     }
 

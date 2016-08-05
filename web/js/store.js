@@ -1,5 +1,5 @@
 
-import {get} from './ajax.js'
+import {get} from './api.js'
 import {getConfig} from './functions.js'
 
 // root state
@@ -42,8 +42,8 @@ const mutations = {
 
 // actions
 const actions = {
-    logout: doLogout,
     login: doLogin,
+    logout: doLogout,
     restoreLogin (state) {
         const data = {
             user: JSON.parse(localStorage.getItem('user')),
@@ -56,19 +56,12 @@ const actions = {
     renewLogin (state) {
         get('auth/renew-token').then(function(data) {
             if (data.success) {
-                data = data.success
-                doLogin(state, data)
+                doLogin(state, data.success)
             } else {
                 doLogout(state)
             }
         });
     }
-}
-
-function doLogout(state) {
-    state.commit('setUserAndToken', {user: null, token: null})
-    localStorage.removeItem('user')
-    localStorage.removeItem('token')
 }
 
 function doLogin(state, data) {
@@ -78,6 +71,13 @@ function doLogin(state, data) {
         localStorage.setItem('token', JSON.stringify(data.token))
     }
 }
+
+function doLogout(state) {
+    state.commit('setUserAndToken', {user: null, token: null})
+    localStorage.removeItem('user')
+    localStorage.removeItem('token')
+}
+
 
 // create the Vuex instance
 export default new Vuex.Store({

@@ -55,7 +55,7 @@
 
 <script>
 import {setPageTitle, getConfig} from '../functions.js'
-import {post, reset, process} from '../ajax.js'
+import {post, reset, process} from '../api.js'
 import router from '../router.js'
 export default {
     name: 'contact',
