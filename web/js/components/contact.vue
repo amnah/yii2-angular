@@ -89,7 +89,7 @@ export default {
     },
     methods: {
         submit (e) {
-            let vm = this
+            const vm = this
             reset(vm)
             post('public/contact', this.form).then(function(data) {
                 process(vm, data)

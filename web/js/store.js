@@ -1,4 +1,6 @@
 
+import {get} from './ajax.js'
+import {getConfig} from './functions.js'
 
 // root state
 const state = {
@@ -40,24 +42,40 @@ const mutations = {
 
 // actions
 const actions = {
-    login: ({ commit }, data) => {
-        commit('setUserAndToken', data)
-        localStorage.setItem('user', JSON.stringify(data.user))
-        localStorage.setItem('token', JSON.stringify(data.token))
-    },
-    restoreLogin: ({ commit }) => {
+    logout: doLogout,
+    login: doLogin,
+    restoreLogin (state) {
         const data = {
             user: JSON.parse(localStorage.getItem('user')),
             token: JSON.parse(localStorage.getItem('token'))
         }
         if (data.user) {
-            commit('setUserAndToken', data)
+            state.commit('setUserAndToken', data)
         }
     },
-    logout: ({ commit }) => {
-        commit('setUserAndToken', {user: null, token: null})
-        localStorage.removeItem('user')
-        localStorage.removeItem('token')
+    renewLogin (state) {
+        get('auth/renew-token').then(function(data) {
+            if (data.success) {
+                data = data.success
+                doLogin(state, data)
+            } else {
+                doLogout(state)
+            }
+        });
+    }
+}
+
+function doLogout(state) {
+    state.commit('setUserAndToken', {user: null, token: null})
+    localStorage.removeItem('user')
+    localStorage.removeItem('token')
+}
+
+function doLogin(state, data) {
+    state.commit('setUserAndToken', data)
+    localStorage.setItem('user', JSON.stringify(data.user))
+    if (!getConfig('jwtCookie')) {
+        localStorage.setItem('token', JSON.stringify(data.token))
     }
 }
 

@@ -1,4 +1,16 @@
 
+// --------------------------------------------------------
+// Configuration
+// --------------------------------------------------------
+let config = {}
+
+export function setConfig (newConfig) {
+    config = newConfig
+}
+
+export function getConfig (name, def = null) {
+    return (name in config) ? config[name] : def
+}
 
 // --------------------------------------------------------
 // Page title
@@ -21,17 +33,4 @@ export function setPageTitle (newTitle, delimiter = ' - ') {
         theTitle = pageTitleRoot
     }
     document.title = theTitle
-}
-
-// --------------------------------------------------------
-// Configuration
-// --------------------------------------------------------
-let config = {}
-
-export function setConfig (newConfig) {
-    config = newConfig
-}
-
-export function getConfig (name, def = null) {
-    return (name in config) ? config[name] : def
 }

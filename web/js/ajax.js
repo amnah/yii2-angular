@@ -4,13 +4,6 @@ import store from './store.js'
 import router from './router.js'
 
 // --------------------------------------------------------
-// Setup
-// --------------------------------------------------------
-$.ajaxSetup({
-    xhrFields: { withCredentials: true } // needed for cross domain cookies
-});
-
-// --------------------------------------------------------
 // VM helpers (for use in .vue components)
 // --------------------------------------------------------
 export function reset (vm) {
@@ -37,24 +30,34 @@ export function process (vm, data) {
 // Ajax shortcuts
 // --------------------------------------------------------
 export function get (url, data) {
-    return $.ajax({
+    const params = $.extend(defaultConfig(), {
         url: getConfig('apiUrl') + url,
         method: 'GET',
         data: data
-    }).then(successCallback, failureCallback);
+    })
+    return $.ajax(params).then(successCallback, failureCallback);
 }
 
 export function post (url, data) {
-    return $.ajax({
+    const params = $.extend(defaultConfig(), {
         url: getConfig('apiUrl') + url,
         method: 'POST',
         data: data
-    }).then(successCallback, failureCallback);
+    })
+    return $.ajax(params).then(successCallback, failureCallback);
 }
 
 // --------------------------------------------------------
 // Ajax callback helper functions
 // --------------------------------------------------------
+function defaultConfig() {
+    if (getConfig('jwtCookie')) {
+        // needed for cross domain cookies
+        return { xhrFields: { withCredentials: true } }
+    } else if (store.getters.token) {
+        return { headers: { Authorization: 'Bearer ' + store.getters.token } }
+    }
+}
 function successCallback(data) {
     return data;
 }

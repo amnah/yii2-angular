@@ -78,18 +78,12 @@ export default {
     },
     methods: {
         submit (e) {
-            let vm = this
+            const vm = this
             reset(vm)
             post('auth/login', vm.form).then(function(data) {
                 process(vm, data)
                 if (data.success) {
-                    // update store if we're using cookies
-                    // otherwise store data into localStorage
-                    if (getConfig('jwtCookie')) {
-                        vm.$store.commit('setUserAndToken', data.success)
-                    } else {
-                        vm.$store.dispatch('login', data.success)
-                    }
+                    vm.$store.dispatch('login', data.success)
                     router.push(vm.loginUrl || '/')
                 }
             });
