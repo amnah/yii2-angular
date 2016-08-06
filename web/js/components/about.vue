@@ -10,7 +10,7 @@
 import {setPageTitle} from '../functions.js'
 export default {
     name: 'about',
-    mounted: function() {
+    beforeCreate: function() {
         setPageTitle('About')
     }
 }

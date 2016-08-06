@@ -69,7 +69,7 @@ import {setPageTitle, getConfig} from '../functions.js'
 import {post, reset, process} from '../api.js'
 export default {
     name: 'contact',
-    mounted: function() {
+    beforeCreate: function() {
         setPageTitle('Contact')
     },
     data () {

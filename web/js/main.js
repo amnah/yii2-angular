@@ -1,9 +1,7 @@
 
 import store from './store.js'
 import router from './router.js'
-import {setConfig,renewToken} from './functions.js'
-
-import NavbarLinks from './components/navbarLinks.vue'
+import {setConfig} from './functions.js'
 
 setConfig(AppConfig)
 store.dispatch('restoreLogin')
@@ -15,6 +13,7 @@ new Vue({
     el: '#app',
     store,
     router,
-    components: { NavbarLinks }
+    components: {
+        navbarLinks: require('./components/navbarLinks.vue')
+    }
 })
-

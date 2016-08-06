@@ -39,7 +39,7 @@
 import {setPageTitle} from '../functions.js'
 export default {
     name: 'home',
-    mounted: function() {
+    beforeCreate: function() {
         setPageTitle()
     }
 }

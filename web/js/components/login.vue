@@ -59,7 +59,7 @@ import {post, reset, process} from '../api.js'
 import router from '../router.js'
 export default {
     name: 'contact',
-    mounted: function() {
+    beforeCreate: function() {
         setPageTitle('Login')
     },
     data () {
