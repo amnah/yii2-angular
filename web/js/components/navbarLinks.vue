@@ -13,6 +13,7 @@
 </template>
 
 <script>
+import router from '../router.js'
 export default {
     computed: Vuex.mapGetters([
         'user',
@@ -22,6 +23,7 @@ export default {
     methods: {
         logout (e) {
             this.$store.dispatch('logout')
+            router.push('/')
         }
     }
 }
