@@ -29,7 +29,8 @@ export function process (vm, data) {
 // --------------------------------------------------------
 // Ajax shortcuts
 // --------------------------------------------------------
-export function get (url, data) {
+export {get}
+function get (url, data) {
     const params = $.extend(defaultConfig(), {
         url: getConfig('apiUrl') + url,
         method: 'GET',
@@ -75,21 +76,28 @@ function failureCallback(data) {
         return reject
     }
 
-    // attempt to use refresh token
+    // check for refresh token in local storage
+    const refreshTokenData = store.getters.refreshToken ? {_refreshToken: store.getters.refreshToken} : null
+    if (!getConfig('jwtCookie') && !refreshTokenData) {
+        prepRedirect()
+        return reject
+    }
+
+    // attempt to refresh token, which was in local storage or maybe in cookies
     // if successful, return the original ajax request
     // otherwise, reject
-    const refreshTokenData = store.getters.refreshToken ? {_refreshToken: store.getters.refreshToken} : {}
-    return $.ajax({
-        url: getConfig('apiUrl') + 'auth/use-refresh-token',
-        data: refreshTokenData
-    }).then(function(data) {
+    return get('auth/use-refresh-token', refreshTokenData).then(function(data) {
         if (data.success) {
             return $.ajax(origAjax)
         }
 
         // set login url and redirect to login page
-        store.commit('setLoginUrl', router.history.getLocation())
-        router.push('/login')
+        prepRedirect()
         return reject
-    });
+    })
+}
+
+function prepRedirect() {
+    store.commit('setLoginUrl', router.history.getLocation())
+    router.push('/login')
 }
