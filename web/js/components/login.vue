@@ -84,6 +84,7 @@ export default {
                 process(vm, data)
                 if (data.success) {
                     vm.$store.dispatch('login', data.success)
+                    vm.$store.commit('setLoginUrl', null)
                     router.push(vm.loginUrl || '/')
                 }
             });
