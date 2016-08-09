@@ -11,6 +11,7 @@ export default new VueRouter({
         { path: '/login', component: require('./components/login.vue') },
         { path: '/profile', component: require('./components/profile.vue') },
         { path: '/account', component: require('./components/account.vue') },
+        { path: '/confirm', component: require('./components/confirm.vue') },
     ]
 })
 

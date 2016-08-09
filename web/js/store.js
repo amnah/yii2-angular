@@ -22,18 +22,12 @@ const getters = {
 
 // mutations
 const mutations = {
-    setUser (state, newUser) {
-        state.user = newUser
-    },
-    setToken (state, newToken) {
-        state.token = newToken
-    },
     setUserAndToken (state, data) {
         state.user = data.user
         state.token = data.token
     },
-    setrefreshToken (state, newrefreshToken) {
-        state.refreshToken = newrefreshToken
+    setRefreshToken (state, newRefreshToken) {
+        state.refreshToken = newRefreshToken
     },
     setLoginUrl (state, newLoginUrl) {
         state.loginUrl = newLoginUrl

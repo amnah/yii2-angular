@@ -41,9 +41,8 @@
 </template>
 
 <script>
-import {setPageTitle, getConfig} from '../functions.js'
+import {setPageTitle} from '../functions.js'
 import {get, post, reset, process} from '../api.js'
-import router from '../router.js'
 export default {
     name: 'profile',
     beforeCreate: function() {

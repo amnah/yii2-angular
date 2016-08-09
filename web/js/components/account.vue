@@ -8,7 +8,7 @@
 
             <div class="success" v-if="success">
                 <div class="alert alert-success">
-                    <p>{{ successMsg }}</p>
+                    <p>{{ success }}</p>
                 </div>
             </div>
 
@@ -72,9 +72,8 @@
 </template>
 
 <script>
-import {setPageTitle, getConfig} from '../functions.js'
+import {setPageTitle} from '../functions.js'
 import {get, post, reset, process} from '../api.js'
-import router from '../router.js'
 export default {
     name: 'account',
     beforeCreate: function() {
@@ -92,7 +91,6 @@ export default {
     data () {
         return {
             success: false,
-            successMsg: null,
             submitting: false,
             errors: {},
             loaded: false,
@@ -108,7 +106,8 @@ export default {
             post('user', vm.form).then(function(data) {
                 process(vm, data)
                 if (data.success) {
-                    vm.successMsg = 'Account saved';
+                    vm.success = 'Account saved';
+                    vm.userToken = data.success.userToken
                     vm.$store.dispatch('renewLogin', true)
                 }
             });
@@ -119,7 +118,7 @@ export default {
             post('user/change-resend').then(function(data) {
                 process(vm, data)
                 if (data.success) {
-                    vm.successMsg = 'Email resent';
+                    vm.success = 'Email resent';
                 }
             });
         },
@@ -130,7 +129,7 @@ export default {
                 process(vm, data)
                 if (data.success) {
                     vm.userToken = null
-                    vm.successMsg = 'Email change cancelled';
+                    vm.success = 'Email change cancelled';
                 }
             });
         }
