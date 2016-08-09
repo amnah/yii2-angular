@@ -33,7 +33,7 @@ export default {
             vm.$store.dispatch('renewLogin', true)
         });
     },
-    data () {
+    data: function() {
         return {
             success: false,
             error: false,

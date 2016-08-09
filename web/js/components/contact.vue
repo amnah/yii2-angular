@@ -72,7 +72,7 @@ export default {
     beforeCreate: function() {
         setPageTitle('Contact')
     },
-    data () {
+    data: function() {
         const user = this.$store.getters.user
         return {
             success: false,

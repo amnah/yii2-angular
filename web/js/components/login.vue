@@ -62,7 +62,7 @@ export default {
     beforeCreate: function() {
         setPageTitle('Login')
     },
-    data () {
+    data: function() {
         return {
             success: false,
             submitting: false,

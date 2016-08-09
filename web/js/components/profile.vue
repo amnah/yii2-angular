@@ -55,7 +55,7 @@ export default {
             }
         });
     },
-    data () {
+    data: function() {
         return {
             success: false,
             submitting: false,
