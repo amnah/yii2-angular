@@ -14,6 +14,6 @@ new Vue({
     store,
     router,
     components: {
-        navbarLinks: require('./components/navbarLinks.vue')
+        navbar: require('./components/navbar.vue')
     }
 })

@@ -28,18 +28,7 @@ $min = $date ? ".min" : "";
     <div class="wrap">
         <nav class="navbar-inverse navbar-fixed-top navbar">
             <div class="container">
-                <div class="navbar-header">
-                    <button type="button" class="navbar-toggle" data-toggle="collapse" data-target="#navbar-collapse">
-                        <span class="sr-only">Toggle navigation</span>
-                        <span class="icon-bar"></span>
-                        <span class="icon-bar"></span>
-                        <span class="icon-bar"></span>
-                    </button>
-                    <router-link to="/" class="navbar-brand"><?= $appName ?></router-link>
-                </div>
-                <div id="navbar-collapse" class="collapse navbar-collapse">
-                    <navbar-links></navbar-links>
-                </div>
+                <navbar></navbar>
             </div>
         </nav>
 
