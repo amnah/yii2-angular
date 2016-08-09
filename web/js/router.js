@@ -10,6 +10,7 @@ export default new VueRouter({
         { path: '/contact', component: require('./components/contact.vue') },
         { path: '/login', component: require('./components/login.vue') },
         { path: '/profile', component: require('./components/profile.vue') },
+        { path: '/account', component: require('./components/account.vue') },
     ]
 })
 

@@ -60,7 +60,8 @@ const actions = {
         }
     },
     startRenewLoginInterval,
-    clearLoginInterval
+    clearLoginInterval,
+    renewLogin
 }
 
 function doLogin(state, data) {
@@ -89,8 +90,9 @@ function startRenewLoginInterval(state, runAtStart) {
     }
 }
 
-function renewLogin(state) {
-    get('auth/renew-token').then(function(data) {
+function renewLogin(state, refresh) {
+    const data = refresh ? { refreshDb: 1 } : null
+    get('auth/renew-token', data).then(function(data) {
         if (data.success) {
             doLogin(state, data.success)
         } else {
