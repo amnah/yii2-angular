@@ -1,6 +1,6 @@
 
 <template>
-    <div class="site-index">
+    <div>
 
         <div class="jumbotron">
             <h2>Yii 2 Vue Boilerplate</h2>

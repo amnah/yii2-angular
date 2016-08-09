@@ -1,40 +1,36 @@
 
 <template>
 
-    <div>
+    <div v-if="loaded">
 
-        <div v-if="loaded">
+        <h1>Profile</h1>
 
-            <h1>Profile</h1>
+        <div class="success" v-if="success">
+            <div class="alert alert-success">
+                <p>Profile saved</p>
+            </div>
+        </div>
 
-            <div class="success" v-if="success">
-                <div class="alert alert-success">
-                    <p>Profile saved</p>
+        <p>This is the Profile page. Note that you need to be logged in to view this.</p>
+
+        <form id="profile-form" class="form-horizontal" role="form" @submit.prevent="submit">
+
+            <div class="form-group" v-bind:class="{'has-error': errors.full_name}">
+                <label class="col-lg-1 control-label" for="profile-form-full_name">Full name</label>
+                <div class="col-lg-3">
+                    <input type="text" id="profile-form-full_name" class="form-control" v-model.trim="form.full_name">
+                </div>
+                <div class="col-lg-8">
+                    <p class="help-block help-block-error" v-if="errors.full_name">{{ errors.full_name[0] }}</p>
+                </div>
+            </div>
+            <div class="form-group">
+                <div class="col-lg-offset-1 col-lg-11">
+                    <button type="submit" class="btn btn-primary" :disabled="submitting">Save</button>
                 </div>
             </div>
 
-            <p>This is the Profile page. Note that you need to be logged in to view this.</p>
-
-            <form id="profile-form" class="form-horizontal" role="form" @submit.prevent="submit">
-
-                <div class="form-group" v-bind:class="{'has-error': errors.full_name}">
-                    <label class="col-lg-1 control-label" for="profileform-full_name">Full name</label>
-                    <div class="col-lg-3">
-                        <input type="text" id="profileform-full_name" class="form-control" v-model.trim="form.full_name">
-                    </div>
-                    <div class="col-lg-8">
-                        <p class="help-block help-block-error" v-if="errors.full_name">{{ errors.full_name[0] }}</p>
-                    </div>
-                </div>
-                <div class="form-group">
-                    <div class="col-lg-offset-1 col-lg-11">
-                        <button type="submit" class="btn btn-primary" :disabled="submitting">Save</button>
-                    </div>
-                </div>
-
-            </form>
-
-        </div>
+        </form>
 
     </div>
 
