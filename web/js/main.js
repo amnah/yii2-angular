@@ -6,7 +6,7 @@ import {setConfig} from './functions.js'
 setConfig(AppConfig)
 store.dispatch('restoreLogin')
 if (store.getters.user) {
-    store.dispatch('renewLogin')
+    store.dispatch('startRenewLoginInterval', true)
 }
 
 new Vue({

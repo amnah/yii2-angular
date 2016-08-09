@@ -42,8 +42,14 @@ const mutations = {
 
 // actions
 const actions = {
-    login: doLogin,
-    logout: doLogout,
+    login (state, data) {
+        doLogin(state, data)
+        startRenewLoginInterval(state)
+    },
+    logout (state) {
+        doLogout(state)
+        clearLoginInterval()
+    },
     restoreLogin (state) {
         const data = {
             user: JSON.parse(localStorage.getItem('user')),
@@ -53,15 +59,8 @@ const actions = {
             state.commit('setUserAndToken', data)
         }
     },
-    renewLogin (state) {
-        get('auth/renew-token').then(function(data) {
-            if (data.success) {
-                doLogin(state, data.success)
-            } else {
-                doLogout(state)
-            }
-        });
-    }
+    startRenewLoginInterval,
+    clearLoginInterval
 }
 
 function doLogin(state, data) {
@@ -77,6 +76,32 @@ function doLogout(state) {
     localStorage.removeItem('user')
     localStorage.removeItem('token')
 }
+
+let jwtInterval = null
+function startRenewLoginInterval(state, runAtStart) {
+    clearLoginInterval()
+    jwtInterval = setInterval(function() {
+        renewLogin(state)
+    }, getConfig('jwtIntervalTime'));
+    if (runAtStart) {
+        renewLogin(state)
+    }
+}
+
+function renewLogin(state) {
+    get('auth/renew-token').then(function(data) {
+        if (data.success) {
+            doLogin(state, data.success)
+        } else {
+            doLogout(state)
+        }
+    });
+}
+
+function clearLoginInterval() {
+    clearInterval(jwtInterval);
+}
+
 
 
 // create the Vuex instance
