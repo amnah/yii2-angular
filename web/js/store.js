@@ -1,5 +1,5 @@
 
-import {get} from './api.js'
+import {get, post} from './api.js'
 import {getConfig} from './functions.js'
 
 // root state
@@ -72,6 +72,7 @@ function doLogin(state, data) {
 }
 
 function doLogout(state) {
+    post('auth/logout')
     state.commit('setUserAndToken', {user: null, token: null})
     localStorage.removeItem('user')
     localStorage.removeItem('token')
