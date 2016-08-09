@@ -6,7 +6,7 @@
 $appName = Yii::$app->name;
 
 $date = !empty($date) ? $date : null;
-$assetPath = $date ? "/compiled/$date" : "/compiled";
+$assetPath = $date ? "/compiled-$date" : "/compiled";
 $min = $date ? ".min" : "";
 
 ?>
