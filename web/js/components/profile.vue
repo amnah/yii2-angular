@@ -45,7 +45,7 @@ import {setPageTitle, getConfig} from '../functions.js'
 import {get, post, reset, process} from '../api.js'
 import router from '../router.js'
 export default {
-    name: 'contact',
+    name: 'profile',
     beforeCreate: function() {
         const vm = this
         setPageTitle('Profile')
