@@ -77,18 +77,23 @@ function failureCallback(data) {
     }
 
     // check for refresh token in local storage
-    const refreshTokenData = store.getters.refreshToken ? {_refreshToken: store.getters.refreshToken} : null
-    if (!getConfig('jwtCookie') && !refreshTokenData) {
-        prepRedirect()
-        return reject
+    let refreshTokenData = null
+    if (!getConfig('jwtCookie')) {
+        refreshTokenData = store.getters.refreshToken ? { _refreshToken: store.getters.refreshToken } : null
+        if (!refreshTokenData) {
+            prepRedirect()
+            return reject
+        }
     }
 
     // attempt to refresh token, which was in local storage or maybe in cookies
-    // if successful, return the original ajax request
+    // if successful, send updated ajax request
     // otherwise, reject
     return get('auth/use-refresh-token', refreshTokenData).then(function(data) {
         if (data.success) {
-            return $.ajax(origAjax)
+            store.dispatch('login', data.success)
+            const updatedAjax = $.extend(origAjax, defaultConfig())
+            return $.ajax(updatedAjax)
         }
 
         // set login url and redirect to login page
