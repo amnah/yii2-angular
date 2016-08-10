@@ -2,7 +2,9 @@
 import {get, post} from './api.js'
 import {getConfig} from './functions.js'
 
-// root state
+// --------------------------------------------------------
+// Root state
+// --------------------------------------------------------
 const state = {
     user: null,
     token: null,
@@ -10,7 +12,9 @@ const state = {
     loginUrl: null,
 }
 
-// getters
+// --------------------------------------------------------
+// Getters
+// --------------------------------------------------------
 const getters = {
     user: state => state.user,
     isGuest: state => state.user ? false : true,
@@ -20,44 +24,65 @@ const getters = {
     loginUrl: state => state.loginUrl
 }
 
-// mutations
+// --------------------------------------------------------
+// Mutations
+// --------------------------------------------------------
 const mutations = {
     setUserAndToken (state, data) {
         state.user = data.user
         state.token = data.token
     },
-    setRefreshToken (state, newRefreshToken) {
-        state.refreshToken = newRefreshToken
+    setRefreshToken (state, refreshToken) {
+        state.refreshToken = refreshToken
     },
-    setLoginUrl (state, newLoginUrl) {
-        state.loginUrl = newLoginUrl
+    setLoginUrl (state, loginUrl) {
+        state.loginUrl = loginUrl
     }
 }
 
-// actions
+// --------------------------------------------------------
+// Actions
+// --------------------------------------------------------
 const actions = {
     login (state, data) {
         doLogin(state, data)
-        startRenewLoginInterval(state)
+        startRenewInterval(state)
     },
     logout (state) {
         doLogout(state)
-        clearLoginInterval()
+        clearRenewInterval()
     },
-    restoreLogin (state) {
+    restoreFromStorage (state) {
         const data = {
             user: JSON.parse(localStorage.getItem('user')),
-            token: JSON.parse(localStorage.getItem('token'))
+            token: JSON.parse(localStorage.getItem('token')),
+            refreshToken: localStorage.getItem('refreshToken')
         }
         if (data.user) {
             state.commit('setUserAndToken', data)
         }
+        if (data.refreshToken) {
+            state.commit('setRefreshToken', data.refreshToken)
+        }
     },
-    startRenewLoginInterval,
-    clearLoginInterval,
-    renewLogin
+    renewLogin,
+    startRenewInterval,
+    clearRenewInterval,
+    storeRefreshToken (state, refreshToken) {
+        state.commit('setRefreshToken', refreshToken)
+        if (!getConfig('jwtCookie')) {
+            localStorage.setItem('refreshToken', refreshToken)
+        }
+    },
+    clearRefreshToken (state) {
+        state.commit('setRefreshToken', null)
+        localStorage.removeItem('refreshToken')
+    }
 }
 
+// --------------------------------------------------------
+// Helper functions for actions
+// --------------------------------------------------------
 function doLogin(state, data) {
     state.commit('setUserAndToken', data)
     localStorage.setItem('user', JSON.stringify(data.user))
@@ -71,11 +96,12 @@ function doLogout(state) {
     state.commit('setUserAndToken', {user: null, token: null})
     localStorage.removeItem('user')
     localStorage.removeItem('token')
+    localStorage.removeItem('refreshToken')
 }
 
 let jwtInterval = null
-function startRenewLoginInterval(state, runAtStart) {
-    clearLoginInterval()
+function startRenewInterval(state, runAtStart) {
+    clearRenewInterval()
     jwtInterval = setInterval(function() {
         renewLogin(state)
     }, getConfig('jwtIntervalTime'));
@@ -95,13 +121,14 @@ function renewLogin(state, refresh) {
     });
 }
 
-function clearLoginInterval() {
+function clearRenewInterval() {
     clearInterval(jwtInterval);
 }
 
 
-
-// create the Vuex instance
+// --------------------------------------------------------
+// Vuex instance
+// --------------------------------------------------------
 export default new Vuex.Store({
     state,
     getters,

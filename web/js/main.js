@@ -4,9 +4,9 @@ import router from './router.js'
 import {setConfig} from './functions.js'
 
 setConfig(AppConfig)
-store.dispatch('restoreLogin')
+store.dispatch('restoreFromStorage')
 if (store.getters.user) {
-    store.dispatch('startRenewLoginInterval', true)
+    store.dispatch('startRenewInterval', true)
 }
 
 new Vue({
