@@ -37,3 +37,6 @@ node_modules
 
 # index cache file
 /web/index.html
+
+# compiled gulp assets
+/web/compiled*
