@@ -103,6 +103,7 @@ function failureCallback(data) {
 }
 
 function prepRedirect() {
+    store.commit('setUserAndToken', {user: null, token: null})
     store.commit('setLoginUrl', router.history.getLocation())
     router.push('/login')
 }
