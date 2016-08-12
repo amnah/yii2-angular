@@ -40,8 +40,8 @@
                 </div>
                 <div class="col-lg-offset-1 col-lg-11">
                     <br/>
-                    <a href="/register">Register</a> /
-                    <a href="/reset">Forgot password?</a>
+                    <p><router-link to="/register">Register</router-link></p>
+                    <p><router-link to="/reset">Forgot password?</router-link></p>
                 </div>
             </div>
 
