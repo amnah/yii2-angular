@@ -1,6 +1,5 @@
 
 <template>
-
     <div>
         <h1>Register</h1>
 
@@ -13,6 +12,7 @@
         </div>
 
         <div v-if="!success">
+
             <p>Please fill out the following fields to register:</p>
 
             <form id="register-form" class="form-horizontal" role="form" @submit.prevent="submit">

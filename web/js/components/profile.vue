@@ -1,6 +1,5 @@
 
 <template>
-
     <div>
         <!-- put this v-if here because we cant put vue expressions on the above root div -->
         <div v-if="loaded">
@@ -37,7 +36,6 @@
         </div>
 
     </div>
-
 </template>
 
 <script>
@@ -46,8 +44,8 @@ import {get, post, reset, process} from '../api.js'
 export default {
     name: 'profile',
     beforeCreate: function() {
-        const vm = this
         setPageTitle('Profile')
+        const vm = this
         get('user/profile').then(function(data) {
             vm.loaded = true
             if (data.success) {

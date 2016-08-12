@@ -1,8 +1,6 @@
 
 <template>
-
     <div>
-
         <div class="alert alert-success" v-if="success">
             <p>Email [ {{ success }} ] confirmed</p>
 
@@ -14,9 +12,7 @@
         <div class="alert alert-danger" v-if="error">
             {{ error }}
         </div>
-
     </div>
-
 </template>
 
 <script>
@@ -25,9 +21,8 @@ import {get, reset, process} from '../api.js'
 export default {
     name: 'confirm',
     beforeCreate: function() {
-        const vm = this
         setPageTitle('Confirm')
-        reset(vm)
+        const vm = this
         get('auth/confirm', vm.$route.query).then(function(data) {
             process(vm, data)
             vm.$store.dispatch('renewLogin', true)

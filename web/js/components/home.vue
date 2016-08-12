@@ -1,7 +1,6 @@
 
 <template>
     <div>
-
         <div class="jumbotron">
             <h2>Yii 2 Vue Boilerplate</h2>
 
@@ -11,7 +10,6 @@
         </div>
 
         <div v-if="isLoggedIn" class="row">
-
             <div class="col-lg-5 col-lg-offset-2">
 
                 <h3>Refresh tokens</h3>
@@ -26,9 +24,7 @@
                 <p><a class="btn btn-danger" @click="removeRefreshToken">Remove refresh token</a></p>
                 <p><a class="btn btn-success" @click="useRefreshToken">Use refresh token to get regular token</a></p>
             </div>
-
         </div>
-
     </div>
 </template>
 

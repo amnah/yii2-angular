@@ -1,6 +1,5 @@
 
 <template>
-
     <div>
         <div v-if="loaded">
 
@@ -77,8 +76,8 @@ import {get, post, reset, process} from '../api.js'
 export default {
     name: 'account',
     beforeCreate: function() {
-        const vm = this
         setPageTitle('Account')
+        const vm = this
         get('user').then(function(data) {
             vm.loaded = true
             if (data.success) {
