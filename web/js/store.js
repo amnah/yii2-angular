@@ -92,7 +92,9 @@ function doLogin(state, data) {
 }
 
 function doLogout(state) {
-    post('auth/logout')
+    if (getConfig('jwtCookie')) {
+        post('auth/logout')
+    }
     state.commit('setUserAndToken', {user: null, token: null})
     localStorage.removeItem('user')
     localStorage.removeItem('token')

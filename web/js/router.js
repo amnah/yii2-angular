@@ -9,6 +9,8 @@ export default new VueRouter({
         { path: '/about', component: require('./components/about.vue') },
         { path: '/contact', component: require('./components/contact.vue') },
         { path: '/login', component: require('./components/login.vue') },
+        { path: '/login-email', component: require('./components/loginEmail.vue') },
+        { path: '/login-callback', component: require('./components/loginCallback.vue') },
         { path: '/profile', component: require('./components/profile.vue') },
         { path: '/account', component: require('./components/account.vue') },
         { path: '/confirm', component: require('./components/confirm.vue') },

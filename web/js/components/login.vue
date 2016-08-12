@@ -55,7 +55,6 @@
 <script>
 import {setPageTitle, getConfig} from '../functions.js'
 import {post, reset, process} from '../api.js'
-import router from '../router.js'
 export default {
     name: 'login',
     beforeCreate: function() {
@@ -84,7 +83,7 @@ export default {
                 if (data.success) {
                     vm.$store.dispatch('login', data.success)
                     vm.$store.commit('setLoginUrl', null)
-                    router.push(vm.loginUrl || '/')
+                    vm.$router.push(vm.loginUrl || '/')
                 }
             });
         }
