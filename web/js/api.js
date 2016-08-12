@@ -72,7 +72,8 @@ function failureCallback(data) {
 
     // check for non-401 -> alert the error and reject
     if (data.status != 401) {
-        alert(`[ ${data.status} ] ${data.statusText}\n\n@ ${origAjax.url}`)
+        const msg = data.status ? `[ ${data.status} ] ${data.statusText}` : `[ Network error ] Please check your connection`
+        alert(`${msg}\n\n@ ${origAjax.url}`)
         return reject
     }
 
