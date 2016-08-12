@@ -89,6 +89,7 @@ function failureCallback(data) {
     // attempt to refresh token, which was in local storage or maybe in cookies
     // if successful, send updated ajax request
     // otherwise, reject
+    NProgress.inc()
     return get('auth/use-refresh-token', refreshTokenData).then(function(data) {
         if (data.success) {
             store.dispatch('login', data.success)
@@ -107,3 +108,12 @@ function prepRedirect() {
     store.commit('setLoginUrl', router.history.getLocation())
     router.push('/login')
 }
+
+// --------------------------------------------------------
+// Global ajax - NProgress
+// --------------------------------------------------------
+$(document).ajaxStart(function() {
+    NProgress.start()
+});$(document).ajaxStop(function() {
+    NProgress.done()
+});

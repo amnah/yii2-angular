@@ -97,3 +97,20 @@ a.desc:after {
 a {
     cursor: pointer;
 }
+
+/* --------------------------------------------------------------------- */
+/* NProgress
+/* --------------------------------------------------------------------- */
+#nprogress .bar {
+    background: #00aaff;
+}
+#nprogress .peg {
+    box-shadow: 0 0 10px #00aaff, 0 0 5px #00aaff;
+}
+#nprogress .spinner {
+    right: 10px;
+}
+#nprogress .spinner-icon {
+    border-top-color: #00aaff;
+    border-left-color: #00aaff;
+}
