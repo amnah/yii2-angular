@@ -208,7 +208,7 @@ class AuthController extends PublicController
     {
         $loginEmailForm = new LoginEmailForm();
         if ($loginEmailForm->loadPost() && $loginEmailForm->sendEmail()) {
-            return ["success" => $loginEmailForm->getUser()];
+            return ["success" => ["user" => $loginEmailForm->getUser()]];
         }
 
         return ["errors" => $loginEmailForm->errors];
