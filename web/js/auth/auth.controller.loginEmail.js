@@ -19,7 +19,7 @@
                 AjaxHelper.process(vm, data);
                 if (data.success) {
                     vm.errors = false;
-                    vm.user = data.success;
+                    vm.user = data.success.user;
                 }
             });
         };
