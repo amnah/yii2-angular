@@ -1,5 +1,5 @@
 /**
- * vue-router v2.0.0-rc.1
+ * vue-router v2.0.0-rc.3
  * (c) 2016 Evan You
  * @license MIT
  */
@@ -346,8 +346,8 @@
 	    var classes = {}
 	    var activeClass = this.activeClass || router.options.linkActiveClass || 'router-link-active'
 	    classes[activeClass] = this.exact
-	      ? isSameRoute(current, resolved)
-	      : isIncludedRoute(current, resolved)
+	      ? isSameRoute(current, to)
+	      : isIncludedRoute(current, to)
 
 	    var data = {
 	      class: classes,
@@ -1061,7 +1061,8 @@
 	  redirectedFrom           
 	)        {
 	  var route        = {
-	    name: location.name,
+	    name: location.name || (record && record.name),
+	    meta: (record && record.meta) || {},
 	    path: location.path || '/',
 	    hash: location.hash || '',
 	    query: location.query || {},
@@ -1179,8 +1180,6 @@
 	}
 
 	var History = function History (router         , base       ) {
-	  var this$1 = this;
-
 	  this.router = router
 	  this.base = normalizeBase(base)
 	  // start with a route object that stands for "nowhere"
@@ -1188,9 +1187,6 @@
 	    path: '__vue_router_init__'
 	  })
 	  this.pending = null
-	  this.transitionTo(this.getLocation(), function (route) {
-	    this$1.onInit(route)
-	  })
 	};
 
 	History.prototype.listen = function listen (cb        ) {
@@ -1378,11 +1374,20 @@
 
 	    History.call(this, router, base)
 
+	    var initialLocation = getLocation(this.base)
+	    this.transitionTo(initialLocation, function (route) {
+	      // possible redirect on start
+	      var url = cleanPath(this$1.base + this$1.current.fullPath)
+	      if (initialLocation !== url) {
+	        replaceState(url)
+	      }
+	    })
+
 	    var expectScroll = router.options.scrollBehavior
 	    window.addEventListener('popstate', function (e) {
 	      _key = e.state && e.state.key
 	      var current = this$1.current
-	      this$1.transitionTo(this$1.getLocation(), function (next) {
+	      this$1.transitionTo(getLocation(this$1.base), function (next) {
 	        if (expectScroll) {
 	          this$1.handleScroll(next, current, true)
 	        }
@@ -1399,14 +1404,6 @@
 	  if ( History ) HTML5History.__proto__ = History;
 	  HTML5History.prototype = Object.create( History && History.prototype );
 	  HTML5History.prototype.constructor = HTML5History;
-
-	  HTML5History.prototype.onInit = function onInit () {
-	    // possible redirect on start
-	    var url = cleanPath(this.base + this.current.fullPath)
-	    if (this.getLocation() !== url) {
-	      replaceState(url)
-	    }
-	  };
 
 	  HTML5History.prototype.go = function go (n        ) {
 	    window.history.go(n)
@@ -1430,10 +1427,6 @@
 	      replaceState(cleanPath(this$1.base + route.fullPath))
 	      this$1.handleScroll(route, current, false)
 	    })
-	  };
-
-	  HTML5History.prototype.getLocation = function getLocation$1 ()         {
-	    return getLocation(this.base)
 	  };
 
 	  HTML5History.prototype.handleScroll = function handleScroll (to       , from       , isPop         ) {
@@ -1510,11 +1503,20 @@
 	    var this$1 = this;
 
 	    History.call(this, router, base)
+
 	    // check history fallback deeplinking
 	    if (fallback && this.checkFallback()) {
 	      return
 	    }
+
 	    ensureSlash()
+	    this.transitionTo(getHash(), function (route) {
+	      // possible redirect on start
+	      if (getHash() !== route.fullPath) {
+	        replaceHash(route.fullPath)
+	      }
+	    })
+
 	    window.addEventListener('hashchange', function () {
 	      this$1.onHashChange()
 	    })
@@ -1523,13 +1525,6 @@
 	  if ( History ) HashHistory.__proto__ = History;
 	  HashHistory.prototype = Object.create( History && History.prototype );
 	  HashHistory.prototype.constructor = HashHistory;
-
-	  HashHistory.prototype.onInit = function onInit () {
-	    // possible redirect on start
-	    if (getHash() !== this.current.fullPath) {
-	      replaceHash(this.current.fullPath)
-	    }
-	  };
 
 	  HashHistory.prototype.checkFallback = function checkFallback () {
 	    var location = getLocation(this.base)
@@ -1545,7 +1540,7 @@
 	    if (!ensureSlash()) {
 	      return
 	    }
-	    this.transitionTo(this.getLocation(), function (route) {
+	    this.transitionTo(getHash(), function (route) {
 	      replaceHash(route.fullPath)
 	    })
 	  };
@@ -1564,10 +1559,6 @@
 
 	  HashHistory.prototype.go = function go (n        ) {
 	    window.history.go(n)
-	  };
-
-	  HashHistory.prototype.getLocation = function getLocation$1 () {
-	    return getHash()
 	  };
 
 	  return HashHistory;
@@ -1612,10 +1603,6 @@
 	  AbstractHistory.prototype = Object.create( History && History.prototype );
 	  AbstractHistory.prototype.constructor = AbstractHistory;
 
-	  AbstractHistory.prototype.onInit = function onInit () {
-	    this.stack = [this.current]
-	  };
-
 	  AbstractHistory.prototype.push = function push (location             ) {
 	    var this$1 = this;
 
@@ -1648,16 +1635,6 @@
 	    })
 	  };
 
-	  AbstractHistory.prototype.setInitialRoute = function setInitialRoute (route       ) {
-	    this.current = route
-	    this.stack = [this.current]
-	    this.index = 0
-	  };
-
-	  AbstractHistory.prototype.getLocation = function getLocation () {
-	    return '/'
-	  };
-
 	  return AbstractHistory;
 	}(History));
 
@@ -1679,6 +1656,12 @@
 	    mode = 'abstract'
 	  }
 	  this.mode = mode
+	};
+
+	var prototypeAccessors = { currentRoute: {} };
+
+	prototypeAccessors.currentRoute.get = function ()       {
+	  return this.history && this.history.current
 	};
 
 	VueRouter.prototype.init = function init (app    /* Vue component instance */) {
@@ -1742,15 +1725,18 @@
 	  this.go(1)
 	};
 
-	VueRouter.prototype.setInitialLocation = function setInitialLocation (location           ) {
-	  var route = this.match(location)
-	  if (this.history instanceof AbstractHistory) {
-	    this.history.setInitialRoute(route)
+	VueRouter.prototype.getMatchedComponents = function getMatchedComponents ()           {
+	  if (!this.currentRoute) {
+	    return []
 	  }
-	  if (this.app) {
-	    this.app._route = route
-	  }
+	  return [].concat.apply([], this.currentRoute.matched.map(function (m) {
+	    return Object.keys(m.components).map(function (key) {
+	      return m.components[key]
+	    })
+	  }))
 	};
+
+	Object.defineProperties( VueRouter.prototype, prototypeAccessors );
 
 	VueRouter.install = install
 
