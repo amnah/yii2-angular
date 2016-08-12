@@ -1,6 +1,5 @@
 
 <template>
-
     <div>
         <h1>Login</h1>
 
@@ -41,7 +40,7 @@
                 <div class="col-lg-offset-1 col-lg-11">
                     <br/>
                     <p><router-link to="/register">Register</router-link></p>
-                    <p><router-link to="/reset">Forgot password?</router-link></p>
+                    <p><router-link to="/forgot">Forgot password?</router-link></p>
                 </div>
             </div>
 
