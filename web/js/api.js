@@ -105,7 +105,7 @@ function failureCallback(data) {
 
 function prepRedirect() {
     store.dispatch('logout')
-    store.commit('setLoginUrl', router.history.getLocation())
+    store.commit('setLoginUrl', router.currentRoute.fullPath)
     router.push('/login')
 }
 
