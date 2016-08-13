@@ -22,7 +22,7 @@ var assign = require('lodash.assign');
 // https://github.com/gulpjs/gulp/blob/master/docs/recipes/fast-browserify-builds-with-watchify.md
 // https://github.com/substack/watchify
 // -------------------------------------------------------------
-var pollInterval = 250;
+var pollInterval = 350;
 var customOpts = {
     entries: ['./web/js/main.js'],
     debug: true
@@ -33,7 +33,8 @@ var b = watchify(browserify(browserifyOpts), watchifyOpts);
 b.transform("babelify", {presets: ["es2015"]});
 b.transform("vueify");
 
-// "Make sure to have the NODE_ENV environment variable set to "production" when building for production! This strips away unnecessary code (e.g. hot-reload) for smaller bundle size"
+// "Make sure to have the NODE_ENV environment variable set to "production" when building for production!
+// This strips away unnecessary code (e.g. hot-reload) for smaller bundle size"
 // @link https://github.com/vuejs/vueify#building-for-production
 process.env.NODE_ENV = 'production';
 
@@ -53,29 +54,33 @@ gulp.task('build', function() {
 });
 
 // Watch task and file updates
+var theFiles;
 gulp.task('default', ['watch']);
-gulp.task('watch', updateBundle);
+gulp.task('watch', function() {
+    gulp.watch('web/css/**/*.css', function(e) {
+        theFiles = [e.path];
+        buildAll(b.bundle())
+    });
+    updateBundle();
+});
 b.on('update', updateBundle);
 function updateBundle(files) {
-    // get basename of files
-    if (files && files.join) {
-        for (var i=0; i<files.length; i++) {
-            files[i] = path.basename(files[i]);
-        }
-        theFiles = files.join();
-    }
+    theFiles = files;
     buildAll(b.bundle());
 }
 
 // File change notification
-var theFiles;
 b.on('log', function(msg) {
-    if (!theFiles) {
-        theFiles = 'First run';
-    } else {
-        theFiles = `${theFiles} changed`;
+    // get basename of files
+    var filesChanged = null;
+    if (theFiles && theFiles.join) {
+        for (var i=0; i<theFiles.length; i++) {
+            theFiles[i] = path.basename(theFiles[i]);
+        }
+        filesChanged = theFiles.join(' / ');
     }
-    gutil.log(gutil.colors.cyan(theFiles), msg);
+    filesChanged = filesChanged ? `${filesChanged}` : `First run`;
+    gutil.log(gutil.colors.cyan(filesChanged), msg);
 });
 
 
@@ -91,9 +96,8 @@ function buildAll(bundle) {
     // clean files first
     del([`${dest}/*`]).then(function() {
 
-       // build app js files
+        // build app js files
         var stream = bundle
-            //.on('error', gutil.log.bind(gutil, 'Browserify Error'))
             .on('error', function(err) {
                 gutil.log(gutil.colors.red("Browserify error:"), err.message);
             })
