@@ -54,8 +54,9 @@ export default {
         const vm = this
         const token = vm.$route.query.token || ''
         get(`auth/reset?token=${token}`).then(function(data) {
-            process(vm, data)
-            if (data.success) {
+            if (data.error) {
+                vm.error = data.error
+            } else if (data.success) {
                 vm.token = token
                 vm.form.email = data.success
             }

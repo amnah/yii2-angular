@@ -1,7 +1,14 @@
 
 <template>
     <div>
-
+        <div class="alert alert-success" v-if="successLogin">
+            <p>Login successful for [ {{ successLogin }} ]</p>
+            <p><router-link to="/">Go home</router-link></p>
+        </div>
+        <div class="alert alert-success" v-if="successRegister">
+            <p>Registration successful for [ {{ successRegister }} ]</p>
+            <p><router-link to="/">Go home</router-link></p>
+        </div>
         <div class="alert alert-danger" v-if="error">{{ error }}</div>
 
         <div v-if="showForm">
@@ -60,14 +67,15 @@ export default {
         const token = vm.$route.query.token || ''
         const jwtCookie = getConfig('jwtCookie') ? 1 : 0
         get(`auth/login-callback?token=${token}&jwtCookie=${jwtCookie}`).then(function(data) {
-            process(vm, data)
-            if (data.success && data.email) {
+            if (data.error) {
+                vm.error = data.error
+            } else if (data.success && data.success.user) {
+                vm.$store.dispatch('login', data.success)
+                vm.successLogin = data.success.user.email
+            } else if (data.success && data.email) {
                 vm.token = token
                 vm.jwtCookie = jwtCookie
                 vm.form.email = data.email
-            } else if (data.success && data.success.user) {
-                vm.$store.dispatch('login', data.success)
-                vm.$router.push('/')
             }
         });
     },
@@ -79,6 +87,7 @@ export default {
             error: null,
             token: null,
             jwtCookie : 0,
+            successLogin: false,
             successRegister: false,
             form: {
                 email: '',
@@ -89,7 +98,7 @@ export default {
     },
     computed: {
         showForm: function() {
-            return this.token && !this.successRegister
+            return this.token && !this.successLogin && !this.successRegister
         }
     },
     methods: {
@@ -100,7 +109,7 @@ export default {
                 process(vm, data)
                 if (data.success) {
                     vm.$store.dispatch('login', data.success)
-                    vm.$router.push('/')
+                    vm.successRegister = vm.form.email
                 }
             });
         }

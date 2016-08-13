@@ -24,8 +24,10 @@ export default {
         setPageTitle('Confirm')
         const vm = this
         get('auth/confirm', vm.$route.query).then(function(data) {
-            process(vm, data)
-            vm.$store.dispatch('renewLogin', true)
+            if (data.success) {
+                vm.success = data.success
+                vm.$store.dispatch('renewLogin', true)
+            }
         });
     },
     data: function() {
