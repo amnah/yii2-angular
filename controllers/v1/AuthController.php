@@ -242,8 +242,9 @@ class AuthController extends PublicController
             return ["success" => true, "email" => $userToken->data];
         }
 
-        // ensure that email is taken from the $userToken (and not from user input)
+        // ensure that email is taken from the $userToken (NOT from user input)
         $user->email = $userToken->data;
+        $rememberMe = 1;
 
         // load profile, validate, and register
         $userValidate = $user->validate();

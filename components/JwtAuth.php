@@ -135,7 +135,7 @@ class JwtAuth extends HttpBearerAuth
      */
     public function checkUserAuthHash($user, $hash)
     {
-        return $this->calculateAuthHash($user) == $hash;
+        return $user && $this->calculateAuthHash($user) == $hash;
     }
 
     /**
