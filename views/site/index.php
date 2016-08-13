@@ -46,7 +46,7 @@ $min = $date ? ".min" : "";
 </div>
 
 <script type="text/javascript">
-    var AppConfig = {
+    window.AppConfig = {
         apiUrl: '<?= env("API_URL") ?>',
         jwtCookie: <?= (int) env("JWT_COOKIE") ?>,
         jwtIntervalTime: 60*1000*28, // 28 minutes. make sure this is less than JwtAuth::$ttl (30 min by default)
@@ -54,6 +54,11 @@ $min = $date ? ".min" : "";
     };
 </script>
 
+<script type="text/javascript">
+if (/MSIE \d|Trident.*rv:/.test(navigator.userAgent)) {
+    document.write('<script src="/include/es6-promise<?= $min ?>.js"><\/script>');
+}
+</script>
 <script src="<?= "$assetPath/vendor{$min}.js" ?>"></script>
 <script src="<?= "$assetPath/app{$min}.js" ?>"></script>
 

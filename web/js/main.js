@@ -3,7 +3,9 @@ import store from './store.js'
 import router from './router.js'
 import {setConfig} from './functions.js'
 
-setConfig(AppConfig)
+setConfig(window.AppConfig)
+delete window.AppConfig
+
 store.dispatch('restoreFromStorage')
 if (store.getters.user) {
     store.dispatch('startRenewInterval', true)
