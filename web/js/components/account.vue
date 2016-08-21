@@ -99,7 +99,7 @@ export default {
         }
     },
     methods: {
-        submit (e) {
+        submit: function(e) {
             const vm = this
             reset(vm)
             post('user', vm.form).then(function(data) {
@@ -111,7 +111,7 @@ export default {
                 }
             });
         },
-        resend (e) {
+        resend: function(e) {
             const vm = this
             reset(vm)
             post('user/change-resend').then(function(data) {
@@ -121,7 +121,7 @@ export default {
                 }
             });
         },
-        cancel (e) {
+        cancel: function(e) {
             const vm = this
             reset(vm)
             post('user/change-cancel').then(function(data) {

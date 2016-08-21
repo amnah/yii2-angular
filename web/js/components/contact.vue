@@ -91,7 +91,7 @@ export default {
         }
     },
     methods: {
-        submit (e) {
+        submit: function(e) {
             const vm = this
             reset(vm)
             if (!recaptcha.check(vm)) {

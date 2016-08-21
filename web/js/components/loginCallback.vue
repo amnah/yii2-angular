@@ -102,7 +102,7 @@ export default {
         }
     },
     methods: {
-        submit (e) {
+        submit: function(e) {
             const vm = this
             reset(vm)
             post(`auth/login-callback?token=${vm.token}&jwtCookie=${vm.jwtCookie}`, vm.form).then(function(data) {

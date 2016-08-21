@@ -63,7 +63,7 @@ export default {
         }
     },
     methods: {
-        submit (e) {
+        submit: function(e) {
             const vm = this
             reset(vm)
             post('user/profile', vm.form).then(function(data) {

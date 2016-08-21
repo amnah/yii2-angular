@@ -83,7 +83,7 @@ export default {
         }
     },
     methods: {
-        submit (e) {
+        submit: function(e) {
             const vm = this
             reset(vm)
             post(`auth/reset?token=${vm.token}`, vm.form).then(function(data) {

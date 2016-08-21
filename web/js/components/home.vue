@@ -47,7 +47,7 @@ export default {
         'isLoggedIn'
     ]),
     methods: {
-        requestRefreshToken (e) {
+        requestRefreshToken: function(e) {
             const vm = this
             get('auth/request-refresh-token').then(function(data) {
                 vm.message = `${getMsgTime()} - Got new refresh token`
@@ -55,7 +55,7 @@ export default {
                 vm.$store.dispatch('storeRefreshToken', data.success)
             });
         },
-        removeRefreshToken (e) {
+        removeRefreshToken: function(e) {
             const vm = this
             get('auth/remove-refresh-token').then(function(data) {
                 vm.message = `${getMsgTime()} - Removed refresh token`
@@ -63,7 +63,7 @@ export default {
                 vm.$store.dispatch('clearRefreshToken')
             })
         },
-        useRefreshToken (e) {
+        useRefreshToken: function(e) {
             const vm = this
             if (!vm.refreshToken) {
                 const storage = getConfig('jwtCookie') ? 'cookies' : 'local storage'

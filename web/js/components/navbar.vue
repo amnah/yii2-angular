@@ -34,11 +34,11 @@ export default {
         'isLoggedIn'
     ]),
     methods: {
-        logout (e) {
+        logout: function(e) {
             this.$store.dispatch('logout')
             this.$router.push('/')
         },
-        collapse (e) {
+        collapse: function(e) {
             const $navbar = $('#navbar-collapse');
             if ($navbar.hasClass('in')) {
                 $navbar.collapse('hide')

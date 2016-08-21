@@ -47,7 +47,7 @@ export default {
         }
     },
     methods: {
-        submit (e) {
+        submit: function(e) {
             const vm = this
             reset(vm)
             post('auth/forgot', vm.form).then(function(data) {
