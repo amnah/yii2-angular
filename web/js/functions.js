@@ -4,11 +4,11 @@
 // --------------------------------------------------------
 let config = {}
 
-export function setConfig (newConfig) {
+export function setConfig(newConfig) {
     config = newConfig
 }
 
-export function getConfig (name, def = null) {
+export function getConfig(name, def = null) {
     return (name in config) ? config[name] : def
 }
 
@@ -17,11 +17,11 @@ export function getConfig (name, def = null) {
 // --------------------------------------------------------
 let pageTitleRoot = `${document.title}`
 
-export function setPageTitleRoot (newRoot) {
+export function setPageTitleRoot(newRoot) {
     pageTitleRoot = newRoot
 }
 
-export function setPageTitle (newTitle, delimiter = ' - ') {
+export function setPageTitle(newTitle, delimiter = ' - ') {
 
     // set document.title based on root and newTitle
     let theTitle = ''

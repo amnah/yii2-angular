@@ -6,14 +6,14 @@ import router from './router.js'
 // --------------------------------------------------------
 // VM helpers (for use in .vue components)
 // --------------------------------------------------------
-export function reset (vm) {
+export function reset(vm) {
     vm.submitting = true;
     vm.success = null;
     vm.error = null;
     vm.errors = {};
 }
 
-export function process (vm, data) {
+export function process(vm, data) {
     vm.submitting = false;
     if (data.success) {
         vm.success = data.success;
@@ -30,7 +30,7 @@ export function process (vm, data) {
 // Ajax shortcuts
 // --------------------------------------------------------
 export {get}
-function get (url, data) {
+function get(url, data) {
     const params = $.extend(defaultConfig(), {
         url: getConfig('apiUrl') + url,
         method: 'GET',
@@ -39,7 +39,7 @@ function get (url, data) {
     return $.ajax(params).then(successCallback, failureCallback);
 }
 
-export function post (url, data) {
+export function post(url, data) {
     const params = $.extend(defaultConfig(), {
         url: getConfig('apiUrl') + url,
         method: 'POST',
