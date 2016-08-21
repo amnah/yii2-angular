@@ -61,9 +61,8 @@ if (/MSIE \d|Trident.*rv:/.test(navigator.userAgent)) {
 </script>
 <script src="<?= "$assetPath/vendor{$min}.js" ?>"></script>
 <script src="<?= "$assetPath/app{$min}.js" ?>"></script>
-
 <?php if (getenv("RECAPTCHA_SITEKEY")): ?>
-    <script src="https://www.google.com/recaptcha/api.js?onload=recaptchaLoaded&render=explicit" async defer></script>
+<script src="https://www.google.com/recaptcha/api.js?onload=recaptchaLoaded&render=explicit" async defer></script>
 <?php endif; ?>
 
 <?php $this->endBody() ?>

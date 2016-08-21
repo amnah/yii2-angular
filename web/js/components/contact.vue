@@ -49,7 +49,7 @@
                         <textarea id="contact-form-body" class="form-control" rows="6" v-model.trim="form.body"></textarea>
                         <p class="help-block help-block-error" v-if="errors.body">{{ errors.body[0] }}</p>
                     </div>
-                    <div class="form-group" v-bind:class="{'has-error': errors.captcha}" v-if="recaptchaSitekey">
+                    <div class="form-group" v-bind:class="{'has-error': errors.captcha}" v-if="recaptchaShow">
                         <label class="control-label">Captcha</label>
                         <div id="contact-captcha"></div>
                         <p class="help-block help-block-error" v-if="errors.captcha">{{ errors.captcha[0] }}</p>
@@ -65,12 +65,14 @@
 </template>
 
 <script>
-import {setPageTitle, getConfig} from '../functions.js'
+import {setPageTitle} from '../functions.js'
 import {post, reset, process} from '../api.js'
+import recaptcha from '../recaptcha.js'
 export default {
     name: 'contact',
     beforeCreate: function() {
         setPageTitle('Contact')
+        recaptcha.render('contact-captcha')
     },
     data: function() {
         const user = this.$store.getters.user
@@ -82,17 +84,26 @@ export default {
                 name: user ? user.username : '',
                 email: user ? user.email : '',
                 subject: '',
-                body: ''
+                body: '',
+                captcha: '',
             },
-            recaptchaSitekey: getConfig('recaptchaSitekey')
+            recaptchaShow: recaptcha.show()
         }
     },
     methods: {
         submit (e) {
             const vm = this
             reset(vm)
+
+            if (!recaptcha.check(vm)) {
+                return
+            }
+
             post('public/contact', this.form).then(function(data) {
                 process(vm, data)
+                if (data.success) {
+                    recaptcha.reset()
+                }
             });
         }
     }
