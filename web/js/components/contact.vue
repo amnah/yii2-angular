@@ -94,11 +94,9 @@ export default {
         submit (e) {
             const vm = this
             reset(vm)
-
             if (!recaptcha.check(vm)) {
                 return
             }
-
             post('public/contact', this.form).then(function(data) {
                 process(vm, data)
                 if (data.success) {

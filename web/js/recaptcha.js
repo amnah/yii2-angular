@@ -12,6 +12,7 @@ function getRecaptcha() {
     return recaptchaDefer
 }
 
+
 export default {
 
     getRecaptcha: getRecaptcha,
@@ -41,9 +42,8 @@ export default {
         if (!vm.form.captcha) {
             vm.errors.captcha = ['Invalid captcha']
             vm.submitting = false
-            return false
         }
-        return true
+        return vm.form.captcha
     },
 
     reset: function() {

@@ -35,6 +35,15 @@
                         <p class="help-block help-block-error" v-if="errors.newPassword">{{ errors.newPassword[0] }}</p>
                     </div>
                 </div>
+                <div class="form-group" v-bind:class="{'has-error': errors.captcha}" v-if="recaptchaShow">
+                    <label class="col-lg-1 control-label">Captcha</label>
+                    <div class="col-lg-4">
+                        <div id="register-captcha"></div>
+                    </div>
+                    <div class="col-lg-7">
+                        <p class="help-block help-block-error" v-if="errors.captcha">{{ errors.captcha[0] }}</p>
+                    </div>
+                </div>
                 <div class="form-group">
                     <div class="col-lg-offset-1 col-lg-11">
                         <button type="submit" class="btn btn-primary" :disabled="submitting">Register</button>
@@ -49,10 +58,12 @@
 <script>
 import {setPageTitle, getConfig} from '../functions.js'
 import {post, reset, process} from '../api.js'
+import recaptcha from '../recaptcha.js'
 export default {
     name: 'register',
     beforeCreate: function() {
         setPageTitle('Register')
+        recaptcha.render('register-captcha')
     },
     data: function() {
         return {
@@ -65,16 +76,21 @@ export default {
                 newPassword: '',
                 rememberMe: 1,
                 jwtCookie: getConfig('jwtCookie')
-            }
+            },
+            recaptchaShow: recaptcha.show()
         }
     },
     methods: {
         submit (e) {
             const vm = this
             reset(vm)
+            if (!recaptcha.check(vm)) {
+                return
+            }
             post('auth/register', vm.form).then(function(data) {
                 process(vm, data)
                 if (data.success) {
+                    recaptcha.reset()
                     vm.userToken = data.success.userToken
                     if (!vm.userToken) {
                         vm.$store.dispatch('login', data.success)
