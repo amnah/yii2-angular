@@ -112,6 +112,8 @@ function prepRedirect() {
 // --------------------------------------------------------
 // Global ajax - NProgress
 // --------------------------------------------------------
+let progressInterval;
+NProgress.configure({ trickleRate: 0.20, trickleSpeed: 100 });
 $(document).ajaxStart(function() {
     NProgress.start()
 });
