@@ -1,18 +1,18 @@
-Yii 2 Angular
+Yii 2 Vue
 ============================
 
-Yii 2 Angular is a boilerplate for Yii 2 + angular. It is based on 
+Yii 2 Vue is a boilerplate for Yii 2 + Vue.js. It is based on
 [Yii 2 Basic Application](https://github.com/yiisoft/yii2-app-basic)
 
 DEMO
 ------------
 
-* [Demo](http://yii2a.amnahdev.com)
+* [Demo](http://vue.amnahdev.com)
 
 INSTALLATION
 ------------
 
-* Download/clone this repo ```git clone https://github.com/amnah/yii2-angular.git```
+* [Download this branch](https://github.com/amnah/yii2-angular/archive/vue.zip)
 * Copy *env.php.example* file to *env.php* and modify as needed 
 * Install packages and run migration
 
