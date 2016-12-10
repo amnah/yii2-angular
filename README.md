@@ -45,4 +45,4 @@ instead
 DEMO
 ------------
 
-[Demo](http://yii2a.amnahdev.com)
+[Demo](http://vue.amnahdev.com)
