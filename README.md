@@ -31,3 +31,18 @@ gulp watch # for development
 ```
 
 * Set up apache/nginx vhost and visit site
+
+Yii 2 Vue
+============================
+
+The Vue version. This is currently on a separate
+[branch](https://github.com/amnah/yii2-angular/tree/vue).
+
+The instructions for setting it up are exactly the same - just download the
+[zip archive](https://github.com/amnah/yii2-angular/archive/vue.zip) and use that
+instead
+
+DEMO
+------------
+
+[Demo](http://vue.amnahdev.com)

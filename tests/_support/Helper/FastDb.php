@@ -23,7 +23,7 @@ class FastDb extends Module
      */
     public function _initialize()
     {
-        // compute datbase info
+        // compute database info
         $match = preg_match("/host=(.*);dbname=(.*)/", env("DB_DSN"), $matches);
         if (!$match) {
             return;
