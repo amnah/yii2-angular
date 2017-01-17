@@ -5,7 +5,7 @@ namespace app\components;
 class UrlManager extends \yii\web\UrlManager
 {
     /**
-     * @var array Routes that should be processed through Yii 2 instead of angular
+     * @var array Routes that should be processed through Yii 2 instead of the frontend js client
      *            These must appear at the beginning of the string
      */
     public $yiiRoutes = [
@@ -15,7 +15,7 @@ class UrlManager extends \yii\web\UrlManager
     ];
 
     /**
-     * @var string Default route to fall back on (will be processed by angular)
+     * @var string Default route to fall back on (will be processed by frontend)
      */
     public $defaultRoute = "site/index";
 
@@ -28,7 +28,7 @@ class UrlManager extends \yii\web\UrlManager
         $pathInfo = $request->getPathInfo();
         $params = $request->getQueryParams();
 
-        // check if we're calling a route that should be processed by yii (and not angular)
+        // check if we're calling a route that should be processed by yii (and not frontend)
         foreach ($this->yiiRoutes as $yiiRoute) {
             if (strpos($pathInfo, $yiiRoute) === 0) {
                 return [$pathInfo, $params];
