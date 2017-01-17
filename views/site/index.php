@@ -48,8 +48,6 @@ $min = $date ? ".min" : "";
 <script type="text/javascript">
     window.AppConfig = {
         apiUrl: '<?= env("API_URL") ?>',
-        jwtCookie: <?= (int) env("JWT_COOKIE") ?>,
-        jwtIntervalTime: 60*1000*28, // 28 minutes. make sure this is less than JwtAuth::$ttl (30 min by default)
         recaptchaSitekey: '<?= env("RECAPTCHA_SITEKEY") ?>',
     };
 </script>

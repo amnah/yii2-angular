@@ -18,7 +18,7 @@ class UserController extends BaseApiController
         /** @var User $user */
 
         // get user
-        $user = $this->jwtAuth->getAuthenticatedUser();
+        $user = $this->user->identity;
         $user->setScenario("account");
 
         // check for post input errors
@@ -53,7 +53,7 @@ class UserController extends BaseApiController
     {
         /** @var User $user */
 
-        $user = $this->jwtAuth->getAuthenticatedUser();
+        $user = $this->user->identity;
         $userToken = UserToken::findByUser($user->id, UserToken::TYPE_EMAIL_CHANGE);
         if ($userToken) {
             $user->sendEmailConfirmation($userToken);
@@ -69,7 +69,7 @@ class UserController extends BaseApiController
     {
         /** @var User $user */
 
-        $user = $this->jwtAuth->getAuthenticatedUser();
+        $user = $this->user->identity;
         $userToken = UserToken::findByUser($user->id, UserToken::TYPE_EMAIL_CHANGE);
         if ($userToken) {
             $userToken->delete();
@@ -87,7 +87,7 @@ class UserController extends BaseApiController
         /** @var Profile $profile */
 
         // get user and profile
-        $user = $this->jwtAuth->getAuthenticatedUser();
+        $user = $this->user->identity;
         $profile = Profile::findOne(["user_id" => $user->id]);
 
         // update profile

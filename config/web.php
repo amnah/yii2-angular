@@ -18,10 +18,6 @@ $config = [
                 'application/json' => 'yii\web\JsonParser', // required for POST input via `php://input`
             ]
         ],
-        'jwtAuth' => [
-            'class' => 'app\components\JwtAuth',
-            'key' => env('YII_KEY'),
-        ],
         'redis' => [
             'class' => 'yii\redis\Connection',
         ],
@@ -31,9 +27,6 @@ $config = [
         'user' => [
             'class' => 'amnah\yii2\user\components\User',
             'identityClass' => 'app\models\User',
-            'enableSession' => false,
-            'enableAutoLogin' => false,
-            'loginUrl' => null,
         ],
         'mailer' => [
             'class' => 'yii\swiftmailer\Mailer',

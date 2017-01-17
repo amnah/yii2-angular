@@ -20,7 +20,6 @@
         "yiisoft/yii2-swiftmailer": "*",
         "yiisoft/yii2-redis": "*",
         "himiklab/yii2-recaptcha-widget": "*",
-        "firebase/php-jwt": "*",
         "amnah/yii2-user": "*",
         "amnah/yii2-debug": "*"
     },

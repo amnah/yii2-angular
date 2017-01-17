@@ -53,7 +53,7 @@
 </template>
 
 <script>
-import {setPageTitle, getConfig} from '../functions.js'
+import {setPageTitle} from '../functions.js'
 import {post, reset, process} from '../api.js'
 export default {
     name: 'login',
@@ -69,8 +69,7 @@ export default {
             form: {
                 email: '',
                 password: '',
-                rememberMe: 1,
-                jwtCookie: getConfig('jwtCookie')
+                rememberMe: 1
             }
         }
     },

@@ -20,15 +20,36 @@ class AuthController extends PublicController
     {
         /** @var User $user */
 
-        $request = Yii::$app->request;
         $model = new LoginForm();
         if ($model->loadPostAndValidate()) {
             $user = $model->getUser();
-            $rememberMe = $request->post("rememberMe", true);
-            $jwtCookie = $request->post("jwtCookie", true);
-            return ["success" => $this->generateAuthSuccess($user, $rememberMe, $jwtCookie)];
+            return $this->performLogin($user);
         }
         return ["errors" => $model->errors];
+    }
+
+    /**
+     * Perform the actual login
+     * @param User $user
+     * @param bool $rememberMe
+     * @return array
+     */
+    protected function performLogin($user, $rememberMe = null)
+    {
+        if (!$user) {
+            return ["error" => "Invalid user"];
+        }
+
+        /** @var \amnah\yii2\user\Module $userModule */
+        $userModule = Yii::$app->getModule("user");
+
+        // check rememberMe from post request
+        if ($rememberMe === null) {
+            $rememberMe = $this->request->post("rememberMe");
+        }
+        $loginDuration = $rememberMe ? $userModule->loginDuration : 0;
+        $this->user->login($user, $loginDuration);
+        return ["success" => ["user" => $user]];
     }
 
     /**
@@ -36,7 +57,7 @@ class AuthController extends PublicController
      */
     public function actionLogout()
     {
-        $this->jwtAuth->removeCookieToken()->removeRefreshCookieToken();
+        $this->user->logout();
         return ["success" => true];
     }
 
@@ -67,16 +88,13 @@ class AuthController extends PublicController
             $userTokenType = UserToken::TYPE_EMAIL_CHANGE;
         }
 
-        // check if we have a userToken type to process, or just generate jwt data
+        // check if we have a userToken type to process, or just log in normally
         if ($userTokenType) {
             $userToken = UserToken::generate($user->id, $userTokenType);
             $user->sendEmailConfirmation($userToken);
             return ["success" => ["userToken" => 1]];
         } else {
-            $request = Yii::$app->request;
-            $rememberMe = $request->post("rememberMe", true);
-            $jwtCookie = $request->post("jwtCookie", true);
-            return ["success" => $this->generateAuthSuccess($user, $rememberMe, $jwtCookie)];
+            return $this->performLogin($user);
         }
     }
 
@@ -90,7 +108,7 @@ class AuthController extends PublicController
         // search for userToken
         $success = false;
         $email = "";
-        $token = Yii::$app->request->get("token");
+        $token = $this->request->get("token");
         $userToken = UserToken::findByToken($token, [UserToken::TYPE_EMAIL_ACTIVATE, UserToken::TYPE_EMAIL_CHANGE]);
         if ($userToken) {
 
@@ -117,88 +135,16 @@ class AuthController extends PublicController
     }
 
     /**
-     * Renew token
+     * Check auth status
      */
-    public function actionRenewToken($refreshDb = 0)
+    public function actionCheckAuth()
     {
         /** @var User $user */
-
-        $user = null;
-        $jwtAuth = $this->jwtAuth;
-        $payload = $jwtAuth->getTokenPayload();
-
-        // renew token directly or generate fresh from db
-        if ($payload && !$refreshDb) {
-            $token = $jwtAuth->renewToken($payload);
-            return ["success" => ["user" => $payload->user, "token" => $token]];
-        } elseif ($payload && $refreshDb) {
-            $user = Yii::$app->user->identityClass;
-            $user = $user::findIdentity($payload->user->id);
-            return ["success" => $this->generateAuthSuccess($user, $payload->rememberMe, $jwtAuth->fromJwtCookie)];
+        $user = $this->user->identity;
+        if ($user) {
+            return ["success" => ["user" => $user]];
         }
-
-        // attempt to renew token using refresh token
-        return $this->actionUseRefreshToken();
-    }
-
-    /**
-     * Get refresh token
-     * Note: PERMANENT. You should have some way to revoke these access tokens
-     */
-    public function actionRequestRefreshToken()
-    {
-        /** @var User $user */
-
-        $jwtAuth = $this->jwtAuth;
-        $payload = $jwtAuth->getTokenPayload();
-        if (!$payload) {
-            return ["error" => Yii::t("app", "Invalid token")];
-        }
-
-        // get user based off of id and get access token
-        $user = Yii::$app->user->identityClass;
-        $user = $user::findIdentity($payload->user->id);
-
-        // generate refresh token
-        // you can change this, eg, UserToken.token instead of User.access_token
-        $token = $user->access_token;
-        return ["success" => $jwtAuth->generateRefreshToken($user, $token, $jwtAuth->fromJwtCookie)];
-    }
-
-    /**
-     * Use refreshToken to refresh the regular token
-     */
-    public function actionUseRefreshToken()
-    {
-        /** @var User $user */
-
-        // get token/payload
-        $jwtAuth = $this->jwtAuth;
-        $payload = $jwtAuth->getRefreshTokenPayload();
-        $returnError = ["error" => Yii::t("app", "Invalid token")];
-        if (!$payload) {
-            return $returnError;
-        }
-
-        // find user and check data
-        $user = Yii::$app->user->identityClass;
-        $user = $user::findIdentityByAccessToken($payload->accessToken);
-        if (!$jwtAuth->checkUserAuthHash($user, $payload->auth)) {
-            return $returnError;
-        }
-
-        // use $rememberMe = false for refresh tokens. faster expiration = more security
-        $rememberMe = false;
-        return ["success" => $this->generateAuthSuccess($user, $rememberMe, $jwtAuth->fromJwtCookie)];
-    }
-
-    /**
-     * Remove refresh token
-     */
-    public function actionRemoveRefreshToken()
-    {
-        $this->jwtAuth->removeRefreshCookieToken();
-        return ["success" => true];
+        return ["error" => "Not logged in"];
     }
 
     /**
@@ -217,7 +163,7 @@ class AuthController extends PublicController
     /**
      * Login/register callback via email
      */
-    public function actionLoginCallback($token, $jwtCookie = true)
+    public function actionLoginCallback($token)
     {
         /** @var User $user */
 
@@ -232,7 +178,7 @@ class AuthController extends PublicController
         $user = $userToken->user;
         if ($user) {
             $userToken->delete();
-            return ["success" => $this->generateAuthSuccess($user, $rememberMe, $jwtCookie)];
+            return $this->performLogin($user, $rememberMe);
         }
 
         // check for post data (for registering)
@@ -253,7 +199,7 @@ class AuthController extends PublicController
             $user->setRegisterAttributes(Role::ROLE_USER, User::STATUS_ACTIVE)->save();
             $profile->setUser($user->id)->save();
             $userToken->delete();
-            return ["success" => $this->generateAuthSuccess($user, $rememberMe, $jwtCookie)];
+            return $this->performLogin($user, $rememberMe);
         } else {
             $errors = array_merge($user->errors, $profile->errors);
             return ["errors" => $errors];
@@ -300,21 +246,5 @@ class AuthController extends PublicController
             return ["success" => true];
         }
         return ["errors" => $user->errors];
-    }
-
-    /**
-     * Generate auth success (for sending back to client)
-     * @param User $user
-     * @param bool $rememberMe
-     * @param bool $jwtCookie
-     * @return array
-     */
-    protected function generateAuthSuccess($user, $rememberMe, $jwtCookie)
-    {
-        $token = $this->jwtAuth->generateUserToken($user, $rememberMe, $jwtCookie);
-        return [
-            "user" => $user->toArray(),
-            "token" => $token,
-        ];
     }
 }

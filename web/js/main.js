@@ -7,9 +7,7 @@ setConfig(window.AppConfig)
 delete window.AppConfig
 
 store.dispatch('restoreFromStorage')
-if (store.getters.user) {
-    store.dispatch('startRenewInterval', true)
-}
+store.dispatch('checkAuth')
 
 new Vue({
     el: '#app',

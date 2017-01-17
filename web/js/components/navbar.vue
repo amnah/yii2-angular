@@ -20,7 +20,7 @@
                 <router-link v-if="isGuest" tag="li" to="/register" active-class="active" @click.native="collapse"><a>Register</a></router-link>
                 <router-link v-if="isGuest" tag="li" to="/login" active-class="active" exact @click.native="collapse"><a>Login</a></router-link>
                 <router-link v-if="isGuest" tag="li" to="/login-email" active-class="active" @click.native="collapse"><a>Login via Email</a></router-link>
-                <li v-if="isLoggedIn"><a @click="logout">Logout ({{ user.email || user.username }})</a></li>
+                <li v-if="isLoggedIn"><a @click="logout">Logout ({{ user.username || user.email }})</a></li>
             </ul>
         </div>
     </div>

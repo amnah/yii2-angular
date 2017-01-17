@@ -35,7 +35,7 @@ function get(url, data) {
         url: getConfig('apiUrl') + url,
         method: 'GET',
         data: data
-    })
+    });
     return $.ajax(params).then(successCallback, failureCallback);
 }
 
@@ -44,7 +44,7 @@ export function post(url, data) {
         url: getConfig('apiUrl') + url,
         method: 'POST',
         data: data
-    })
+    });
     return $.ajax(params).then(successCallback, failureCallback);
 }
 
@@ -52,12 +52,8 @@ export function post(url, data) {
 // Ajax callback helper functions
 // --------------------------------------------------------
 function defaultConfig() {
-    if (getConfig('jwtCookie')) {
-        // needed for cross domain cookies
-        return { xhrFields: { withCredentials: true } }
-    } else if (store.getters.token) {
-        return { headers: { Authorization: 'Bearer ' + store.getters.token } }
-    }
+    // needed for cross domain cookies
+    return { xhrFields: { withCredentials: true } }
 }
 function successCallback(data) {
     return data;
@@ -65,63 +61,35 @@ function successCallback(data) {
 
 function failureCallback(data) {
 
-    // store original ajax request and build reject object
-    // @link http://stackoverflow.com/questions/21509278/jquery-deferred-reject-immediately
-    const origAjax = this
-    const reject = $.Deferred().reject()
-
-    // check for non-401 -> alert the error and reject
-    if (data.status != 401) {
-        const msg = data.status ? `[ ${data.status} ] ${data.statusText}` : `[ Network error ] Please check your connection`
-        alert(`${msg}\n\n@ ${origAjax.url}`)
-        return reject
+    // check for 401 -> set url for redirection
+    const origAjax = this;
+    const reject = $.Deferred().reject();
+    if (data.status == 401) {
+        store.commit('setUser', null);
+        store.commit('setLoginUrl', router.currentRoute.fullPath);
+        router.push('/login');
+        return reject;
     }
 
-    // check for refresh token in local storage
-    let refreshTokenData = null
-    if (!getConfig('jwtCookie')) {
-        refreshTokenData = store.getters.refreshToken ? { _refreshToken: store.getters.refreshToken } : null
-        if (!refreshTokenData) {
-            prepRedirect()
-            return reject
-        }
-    }
-
-    // attempt to refresh token, which was in local storage or maybe in cookies
-    // if successful, send updated ajax request
-    // otherwise, reject
-    return get('auth/use-refresh-token', refreshTokenData).then(function(data) {
-        if (data.success) {
-            store.dispatch('login', data.success)
-            const updatedAjax = $.extend(origAjax, defaultConfig())
-            return $.ajax(updatedAjax)
-        }
-
-        // set login url and redirect to login page
-        prepRedirect()
-        return reject
-    })
-}
-
-function prepRedirect() {
-    store.dispatch('logout')
-    store.commit('setLoginUrl', router.currentRoute.fullPath)
-    router.push('/login')
+    // otherwise display the error message
+    const msg = data.status ? `[ ${data.status} ] ${data.statusText}` : `[ Network error ] Please check your connection`;
+    console.log(`${msg}\n\n@ ${origAjax.url}`);
+    return reject;
 }
 
 // --------------------------------------------------------
 // Global ajax - NProgress
 // --------------------------------------------------------
-let progressTimeout
+let progressTimeout;
 NProgress.configure({ trickleRate: 0.05, trickleSpeed: 200 });
 $(document).ajaxStart(function() {
-    clearTimeout(progressTimeout)
+    clearTimeout(progressTimeout);
     progressTimeout = setTimeout(function() {
         NProgress.start()
     }, 500)
 
 });
 $(document).ajaxStop(function() {
-    clearTimeout(progressTimeout)
+    clearTimeout(progressTimeout);
     NProgress.done()
 });

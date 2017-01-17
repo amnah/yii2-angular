@@ -56,7 +56,7 @@
 </template>
 
 <script>
-import {setPageTitle, getConfig} from '../functions.js'
+import {setPageTitle} from '../functions.js'
 import {post, reset, process} from '../api.js'
 import recaptcha from '../recaptcha.js'
 export default {
@@ -74,8 +74,7 @@ export default {
             form: {
                 email: '',
                 newPassword: '',
-                rememberMe: 1,
-                jwtCookie: getConfig('jwtCookie')
+                rememberMe: 1
             },
             recaptchaShow: recaptcha.show()
         }

@@ -57,7 +57,7 @@
 </template>
 
 <script>
-import {setPageTitle, getConfig} from '../functions.js'
+import {setPageTitle} from '../functions.js'
 import {get, post, reset, process} from '../api.js'
 export default {
     name: 'loginCallback',
@@ -65,8 +65,7 @@ export default {
         setPageTitle('Register')
         const vm = this
         const token = vm.$route.query.token || ''
-        const jwtCookie = getConfig('jwtCookie') ? 1 : 0
-        get(`auth/login-callback?token=${token}&jwtCookie=${jwtCookie}`).then(function(data) {
+        get(`auth/login-callback?token=${token}`).then(function(data) {
             if (data.error) {
                 vm.error = data.error
             } else if (data.success && data.success.user) {
@@ -74,7 +73,6 @@ export default {
                 vm.successLogin = data.success.user.email
             } else if (data.success && data.email) {
                 vm.token = token
-                vm.jwtCookie = jwtCookie
                 vm.form.email = data.email
             }
         });
@@ -86,7 +84,6 @@ export default {
             errors: {},
             error: null,
             token: null,
-            jwtCookie : 0,
             successLogin: false,
             successRegister: false,
             form: {
@@ -105,7 +102,7 @@ export default {
         submit: function(e) {
             const vm = this
             reset(vm)
-            post(`auth/login-callback?token=${vm.token}&jwtCookie=${vm.jwtCookie}`, vm.form).then(function(data) {
+            post(`auth/login-callback?token=${vm.token}`, vm.form).then(function(data) {
                 process(vm, data)
                 if (data.success) {
                     vm.$store.dispatch('login', data.success)

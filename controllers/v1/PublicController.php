@@ -9,12 +9,16 @@ use app\models\forms\ContactForm;
 class PublicController extends BaseApiController
 {
     /**
+     * @var bool
+     */
+    protected $checkAuth = false;
+
+    /**
      * @inheritdoc
      */
     public function behaviors()
     {
         $behaviors = parent::behaviors();
-        unset($behaviors["jwtAuth"]);
         return $behaviors;
     }
 

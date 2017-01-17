@@ -26,7 +26,7 @@ export default {
         get('auth/confirm', vm.$route.query).then(function(data) {
             if (data.success) {
                 vm.success = data.success
-                vm.$store.dispatch('renewLogin', true)
+                vm.$store.dispatch('checkAuth')
             }
         });
     },

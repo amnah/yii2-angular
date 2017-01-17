@@ -107,7 +107,7 @@ export default {
                 if (data.success) {
                     vm.success = 'Account saved';
                     vm.userToken = data.success.userToken
-                    vm.$store.dispatch('renewLogin', true)
+                    vm.$store.dispatch('checkAuth')
                 }
             });
         },

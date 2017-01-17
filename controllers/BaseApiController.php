@@ -4,26 +4,38 @@ namespace app\controllers;
 
 use Yii;
 use yii\rest\Controller;
+use yii\web\UnauthorizedHttpException;
 
 class BaseApiController extends Controller
 {
     /**
-     * @var \app\components\JwtAuth
+     * @var bool
      */
-    public $jwtAuth;
+    protected $checkAuth = true;
+
+    /**
+     * @var \yii\web\Request
+     */
+    protected $request;
 
     /**
      * @var \yii\web\Response
      */
-    public $response;
+    protected $response;
+
+    /**
+     * @var \yii\web\User
+     */
+    protected $user;
 
     /**
      * @inheritdoc
      */
     public function init()
     {
-        $this->jwtAuth = Yii::$app->get("jwtAuth");
+        $this->request = Yii::$app->get("request");
         $this->response = Yii::$app->get("response");
+        $this->user = Yii::$app->get("user");
 
         // set json output and use "pretty" output in debug mode
         $this->response->format = 'json';
@@ -31,6 +43,11 @@ class BaseApiController extends Controller
             'class' => 'yii\web\JsonResponseFormatter',
             'prettyPrint' => YII_DEBUG, // use "pretty" output in debug mode
         ];
+
+        // check auth
+        if ($this->checkAuth && !$this->user->identity) {
+            throw new UnauthorizedHttpException;
+        }
     }
 
     /**
@@ -60,7 +77,7 @@ class BaseApiController extends Controller
     {
         return [
 
-            // cors filter - should be before authentication
+            // cors filter
             /*
             'corsFilter' => [
                 "class" => Cors::className(),
@@ -75,9 +92,7 @@ class BaseApiController extends Controller
             ],
             */
 
-            'jwtAuth' => $this->jwtAuth,
-
-            // rate limiter - should be after authentication
+            // rate limiter
             /*
             'rateLimiter' => [
                 'class' => RateLimiter::className(),
