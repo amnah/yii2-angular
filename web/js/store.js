@@ -62,6 +62,9 @@ function doLogout(state) {
 }
 
 function checkAuth(state) {
+    if (!state.getters.user) {
+        return
+    }
     get('auth/check-auth').then(function(data) {
         if (data.success) {
             doLogin(state, data.success)
