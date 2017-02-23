@@ -14,22 +14,13 @@ class PublicController extends BaseApiController
     protected $checkAuth = false;
 
     /**
-     * @inheritdoc
-     */
-    public function behaviors()
-    {
-        $behaviors = parent::behaviors();
-        return $behaviors;
-    }
-
-    /**
      * Contact
      */
     public function actionContact()
     {
         $model = new ContactForm();
         $toEmail = Yii::$app->params["adminEmail"];
-        $model->load(Yii::$app->request->post(), "");
+        $model->loadPost();
         if ($model->contact($toEmail)) {
             return ["success" => true];
         }

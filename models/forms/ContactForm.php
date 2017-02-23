@@ -4,6 +4,7 @@ namespace app\models\forms;
 
 use Yii;
 use yii\base\Model;
+use app\components\ModelTrait;
 use himiklab\yii2\recaptcha\ReCaptchaValidator;
 
 /**
@@ -11,6 +12,8 @@ use himiklab\yii2\recaptcha\ReCaptchaValidator;
  */
 class ContactForm extends Model
 {
+    use ModelTrait;
+
     public $name;
     public $email;
     public $subject;
