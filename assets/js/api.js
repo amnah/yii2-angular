@@ -52,8 +52,10 @@ export function post(url, data) {
 // Ajax callback helper functions
 // --------------------------------------------------------
 function defaultConfig() {
-    // needed for cross domain cookies
-    return { xhrFields: { withCredentials: true } }
+    return {
+        xhrFields: { withCredentials: true }, // needed for cross domain cookies
+        headers: {'X-CSRF-Token': store.getters.csrf }
+    }
 }
 function successCallback(data) {
     return data;
@@ -61,9 +63,11 @@ function successCallback(data) {
 
 function failureCallback(data) {
 
-    // check for 401 -> set url for redirection
+    // store original ajax request and build reject object
     const origAjax = this;
     const reject = $.Deferred().reject();
+
+    // check for 401 -> set url for redirection
     if (data.status == 401) {
         store.commit('setUser', null);
         store.commit('setLoginUrl', router.currentRoute.fullPath);
@@ -71,7 +75,16 @@ function failureCallback(data) {
         return reject;
     }
 
-    // otherwise display the error message
+    // check for 400 -> update csrf token
+    if (data.status == 400) {
+        return get('auth/get-csrf-token').then(function(data) {
+            store.commit('setCsrf', data.success);
+            const updatedAjax = $.extend(origAjax, defaultConfig());
+            return $.ajax(updatedAjax)
+        })
+    }
+
+    // display the error message
     const msg = data.status ? `[ ${data.status} ] ${data.statusText}` : `[ Network error ] Please check your connection`;
     console.log(`${msg}\n\n@ ${origAjax.url}`);
     return reject;

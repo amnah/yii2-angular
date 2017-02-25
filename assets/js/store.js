@@ -5,6 +5,7 @@ import {get, post} from './api.js'
 // Root state
 // --------------------------------------------------------
 const state = {
+    csrf: null,
     user: null,
     loginUrl: null,
 }
@@ -13,6 +14,7 @@ const state = {
 // Getters
 // --------------------------------------------------------
 const getters = {
+    csrf: state => state.csrf,
     user: state => state.user,
     isGuest: state => !state.user,
     isLoggedIn: state => !!state.user,
@@ -23,6 +25,9 @@ const getters = {
 // Mutations
 // --------------------------------------------------------
 const mutations = {
+    setCsrf (state, csrf) {
+        state.csrf = csrf
+    },
     setUser (state, user) {
         state.user = user
     },
