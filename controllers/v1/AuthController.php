@@ -148,14 +148,6 @@ class AuthController extends PublicController
     }
 
     /**
-     * Get csrf token
-     */
-    public function actionGetCsrfToken()
-    {
-        return ["success" => $this->request->csrfToken];
-    }
-
-    /**
      * Login via email
      */
     public function actionLoginEmail()

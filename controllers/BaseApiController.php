@@ -3,7 +3,7 @@
 namespace app\controllers;
 
 use Yii;
-use yii\web\Controller;
+use yii\rest\Controller;
 use yii\web\UnauthorizedHttpException;
 
 class BaseApiController extends Controller
